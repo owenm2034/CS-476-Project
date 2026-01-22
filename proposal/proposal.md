@@ -10,11 +10,14 @@ back and you cant carry a screen you bought here, instead of selling it at the f
 shop you find you can give it to the university and there would be a small shop for stuff 
 like that that ohter students have left to make the moving in easier
 
-Students moving to or from campus do not have an easy way to acquire or dispose of their
-items. Since they do not have cars, transporting furniture is difficult. This makes it
-hard to buy or sell the items students need. Our software aims to help users leaving
-campus get rid of items, and users coming to campus acquire items. This would be a student
-marketplace of sorts.
+In university housing, students living away from home struggle to buy and sell dorm 
+furnishings due to quick semester changeovers and a lack of transportation access. This 
+causes students to buy and sell items at pawn shops and online marketplaces where sellers 
+are trying to make money, not help students. This adds stress to students, who are already 
+financially burdened and are typically on a short timeline to move in or out before the
+next semester begins. The goal of this project is to create an online marketplace where 
+students can buy and sell housing furnishings to other students at the same campus, 
+eliminating transportation issues and allowing students to support other students. 
 
 ### Two User Roles
 1. Buyer
