@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "6C3Fk6D6fto=",
+  "dgSpecHash": "1gVw1JpnL8A=",
   "success": true,
   "projectFilePath": "/Users/owenm/src/CS-476-Project/Room2Room/Room2Room.csproj",
-  "expectedPackageFiles": [
-    "/Users/owenm/.nuget/packages/microsoft.netcore.app.ref/9.0.12/microsoft.netcore.app.ref.9.0.12.nupkg.sha512",
-    "/Users/owenm/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.12/microsoft.aspnetcore.app.ref.9.0.12.nupkg.sha512",
-    "/Users/owenm/.nuget/packages/microsoft.netcore.app.host.osx-arm64/9.0.12/microsoft.netcore.app.host.osx-arm64.9.0.12.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }
