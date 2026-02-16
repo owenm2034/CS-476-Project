@@ -19,20 +19,14 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Listings" asp-action="Index">Listings</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="LogIn">Log In</a>
-                        </li>
-                    </ul>
+                <ul class="navbar-nav flex-grow-1">
+                        @* Put lisd *@
+                </ul>
+                <div id='account-div' class="text-end"> 
+                    <a id="account-login-button" class="btn btn-outline-primary" asp-area="" asp-controller="Account" asp-action="LogIn">Log In</a>
+                    <a id="account-signup-button" class="btn btn-primary" asp-area="" asp-controller="Account" asp-action="SignUp">Sign Up</a>
+                    <a id="account-logout-button" class="btn btn-outline-secondary" asp-area="" asp-controller="Account" asp-action="LogOut">Log Out</a>
+                </div>
                 </div>
             </div>
         </nav>
