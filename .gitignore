@@ -58,3 +58,6 @@
 
 # dYSM folders
 **/*.dSYM
+
+Room2Room/obj/
+Room2Room/bin/
