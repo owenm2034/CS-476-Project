@@ -1,9 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
+@if (User?.Identity?.IsAuthenticated ?? false)
 {
     <li class="nav-item">
         <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
@@ -17,8 +15,8 @@
 else
 {
     <div id='account-div' class="text-end"> 
-        <a id="account-signup-button" class="btn btn-primary" asp-area="Identity" asp-page="/Account/Register">Sign Up</a>
-        <a id="account-login-button" class="btn btn-outline-primary" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        <a id="account-signup-button" class="btn btn-primary" asp-controller="Account" asp-action="Register">Sign Up</a>
+        <a id="account-login-button" class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
     </div>
 }
 </ul>

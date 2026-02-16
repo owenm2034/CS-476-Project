@@ -8,11 +8,16 @@ public class AccountController : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        return NotFound();
     }
-    
+
     public IActionResult LogIn()
     {
-        return View();
+        return View("LogIn");
+    }
+
+    public IActionResult Register()
+    {
+        return View("Register");
     }
 }
