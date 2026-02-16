@@ -3,3 +3,7 @@ Setup:
 - run `dotnet dev-certs https --trust`
 - In Visual Studio Code, press Ctrl+F5 to run the app without debugging.
 
+
+Run:
+- Ensure db is started by calling `docker compose -f compose.yaml --all-resources up` at
+the root of the project

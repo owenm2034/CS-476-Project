@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  room2room:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: room2room
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=aStrong!Passw0rd
+    ports:
+      - "1433:1433"
+    volumes:
+      - room2room_data:/var/opt/mssql
+    restart: unless-stopped
+
+volumes:
+  room2room_data:
