@@ -30,7 +30,5 @@ public class Account
     public bool IsEmailVerified { get; set; } = false;
     public bool IsAdmin { get; set; } = false;
     public string ProfilePictureUrl { get; set; }
-
-    [NotMapped]
-    public NotificationPreference? NotificationPreferences { get; set; }
+    public virtual NotificationPreference? NotificationPreferences { get; set; }
 }

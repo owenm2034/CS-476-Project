@@ -49,7 +49,7 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public IActionResult Register(RegisterModel model)
+    public async Task<IActionResult> Register(RegisterModel model)
     {
         var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(ConnectionString)
@@ -69,9 +69,18 @@ public class AccountController : Controller
         string saltString = Convert.ToBase64String(salt);
         string hashString = Convert.ToBase64String(hash);
 
-        
+        var account = new Account(
+            model.Email,
+            model.Username,
+            hashString,
+            saltString,
+            "" // todo, save profile picture
+        );
 
-        return Redirect("/Home/Privacy");
+        context.Accounts.Add(account);
+        await context.SaveChangesAsync();
+
+        return Redirect("/Account/LogIn");
     }
 
     private static string Hash(string input)
