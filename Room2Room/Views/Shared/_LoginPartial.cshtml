@@ -8,15 +8,15 @@
     </li>
     <li class="nav-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="btn btn-outline-secondary">Logout</button>
+            <button type="submit" class="btn btn-outline-secondary" asp-controller="Account" asp-action="LogOut">Logout</button>
         </form>
     </li>
 }
 else
 {
     <div id='account-div' class="text-end"> 
-        <a id="account-signup-button" class="btn btn-primary" asp-controller="Account" asp-action="Register">Sign Up</a>
         <a id="account-login-button" class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
+        <a id="account-signup-button" class="btn btn-primary" asp-controller="Account" asp-action="Register">Sign Up</a>
     </div>
 }
 </ul>

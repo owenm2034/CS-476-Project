@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Room2Room.Data;
 using Room2Room.Models.Accounts;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -31,13 +34,58 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public IActionResult LogIn(LogInModel model)
+    public async Task<IActionResult> LogIn(LogInModel model)
     {
         var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(ConnectionString)
             .Options;
 
         using var context = new ApplicationDbContext(contextOptions);
+
+        // get account
+        var account = context.Accounts.Where(a => a.Email == model.Email).FirstOrDefault();
+
+        if (account == null)
+        {
+            model.ErrorMessage = "Invalid credentials. Please try again.";
+            model.Password = "";
+            return View(model);
+        }
+
+        byte[] salt = Convert.FromBase64String(account.PasswordSalt);
+        byte[] expectedHash = Convert.FromBase64String(account.PasswordHash);
+
+        byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
+            model.Password,
+            salt,
+            iterations: 100_000,
+            hashAlgorithm: HashAlgorithmName.SHA256,
+            outputLength: expectedHash.Length
+        );
+
+        if (!CryptographicOperations.FixedTimeEquals(actualHash, expectedHash))
+        {
+            model.ErrorMessage = "Invalid credentials. Please try again.";
+            model.Password = "";
+            return View(model);
+        }
+
+        // set claims
+        var claims = new List<Claim> { new Claim(ClaimTypes.Name, account.Username), };
+
+        if (account.IsAdmin)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+        }
+
+        var identity = new ClaimsIdentity(
+            claims,
+            CookieAuthenticationDefaults.AuthenticationScheme
+        );
+
+        var principal = new ClaimsPrincipal(identity);
+
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
         return Redirect("/Home/Privacy");
     }
@@ -70,10 +118,10 @@ public class AccountController : Controller
         string hashString = Convert.ToBase64String(hash);
 
         var account = new Account(
-            model.Email,
-            model.Username,
+            email: model.Email,
             hashString,
             saltString,
+            model.Username,
             "" // todo, save profile picture
         );
 
@@ -83,14 +131,9 @@ public class AccountController : Controller
         return Redirect("/Account/LogIn");
     }
 
-    private static string Hash(string input)
+    public async Task<IActionResult> LogOut()
     {
-        using (var sha = SHA256.Create())
-        {
-            byte[] bytes = Encoding.UTF8.GetBytes(input);
-            byte[] hash = sha.ComputeHash(bytes);
-
-            return Convert.ToHexString(hash);
-        }
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return RedirectToAction("LogIn", "Account");
     }
 }
