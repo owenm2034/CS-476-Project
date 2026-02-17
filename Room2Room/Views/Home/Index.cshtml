@@ -5,4 +5,20 @@
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    @if (!User?.Identity?.IsAuthenticated ?? true)
+    {
+        // not logged in
+        <p>Not authed</p>
+    }
+    else if (User.IsInRole("Admin"))
+    {
+        // is administrator
+        <p>Is admin</p>
+    }
+    else
+    {
+        // is normal user
+        <p>Not admin</p>
+    }
 </div>
