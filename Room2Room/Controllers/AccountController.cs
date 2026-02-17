@@ -39,6 +39,24 @@ public class AccountController : Controller
 
         using var context = new ApplicationDbContext(contextOptions);
 
+        return Redirect("/Home/Privacy");
+    }
+
+    [HttpGet]
+    public IActionResult Register()
+    {
+        return View("Register");
+    }
+
+    [HttpPost]
+    public IActionResult Register(RegisterModel model)
+    {
+        var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer(ConnectionString)
+            .Options;
+
+        using var context = new ApplicationDbContext(contextOptions);
+
         byte[] salt = RandomNumberGenerator.GetBytes(16);
         byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
             model.Password,
@@ -48,12 +66,12 @@ public class AccountController : Controller
             outputLength: 32
         );
 
-        return Redirect("/Home/Privacy");
-    }
+        string saltString = Convert.ToBase64String(salt);
+        string hashString = Convert.ToBase64String(hash);
 
-    public IActionResult Register()
-    {
-        return View("Register");
+        
+
+        return Redirect("/Home/Privacy");
     }
 
     private static string Hash(string input)
