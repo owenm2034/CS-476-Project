@@ -12,7 +12,8 @@ public class Account
         string passwordHash,
         string passwordSalt,
         string username,
-        string profilePictureUrl
+        string profilePictureUrl,
+        int universityId
     )
     {
         Email = email;
@@ -20,6 +21,7 @@ public class Account
         PasswordSalt = passwordSalt;
         Username = username;
         ProfilePictureUrl = profilePictureUrl;
+        UniversityId = universityId;
     }
 
     public int Id { get; set; }
@@ -30,5 +32,6 @@ public class Account
     public bool IsEmailVerified { get; set; } = false;
     public bool IsAdmin { get; set; } = false;
     public string ProfilePictureUrl { get; set; }
+    public int UniversityId { get; set; }
     public virtual NotificationPreference? NotificationPreferences { get; set; }
 }

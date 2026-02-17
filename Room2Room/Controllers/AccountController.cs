@@ -122,7 +122,8 @@ public class AccountController : Controller
             hashString,
             saltString,
             model.Username,
-            "" // todo, save profile picture
+            "", // todo, save profile picture,
+            1 // todo, select university
         );
 
         context.Accounts.Add(account);

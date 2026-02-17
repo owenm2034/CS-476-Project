@@ -14,7 +14,8 @@ CREATE TABLE Accounts(
     Username NVARCHAR(100) NOT NULL,
     IsEmailVerified BIT NOT NULL DEFAULT 0,
     IsAdmin BIT NOT NULL DEFAULT 0,
-    ProfilePictureUrl NVARCHAR(200) NOT NULL
+    ProfilePictureUrl NVARCHAR(200) NOT NULL,
+    UniversityId INT NOT NULL
 );
 END
 ELSE
