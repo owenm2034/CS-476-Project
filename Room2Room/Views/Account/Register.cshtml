@@ -14,4 +14,5 @@
     <input type="password" class="form-control" id="exampleInputPassword1" asp-for="Password"/>
   </div>
   <button type="submit" class="btn btn-primary">Register</button>
+  <span class="text-danger">@(Model?.ErrorMessage ?? "")</span>
 </form>
