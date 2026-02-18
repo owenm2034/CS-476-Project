@@ -9,3 +9,17 @@
     - THIS WILL ERASE ALL DATA FROM YOUR LOCAL DATABASE
 - Start DB by calling `docker compose -f compose.yaml --all-resources up` at
 the root of the project
+    - This will run `Database/init.sql`
+    - This will run `Database/Migrations/AddUniversities.sql`
+    - To add a script see `compose.yml`
+
+
+## Accounts
+Db Setup generates these 5 accounts automatically
+| Email | Password | IsAdmin | University |
+| --- | --- | --- | --- |
+| 476user@uregina.ca | cs476password | false | University of Regina |
+| 476admin@uregina.ca | cs476password | true | University of Regina |
+| 476user@usask.ca | cs476password | false | University of Saskatchewan |
+| 476admin@usask.ca | cs476password | true | University of Saskatchewan |
+| 476other@nagasaki-u.ac.jp | cs476password | false | Nagasaki University |
