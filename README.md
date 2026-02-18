@@ -5,14 +5,7 @@
 
 
 ### DB Setup:
-- Ensure db is started by calling `docker compose -f compose.yaml --all-resources up` at
+- IF you previously had the room2room db running, run `docker compose down -v`
+    - THIS WILL ERASE ALL DATA FROM YOUR LOCAL DATABASE
+- Start DB by calling `docker compose -f compose.yaml --all-resources up` at
 the root of the project
-
-Create database if it does not exist:
-- run `docker exec -it room2room "bash"` in terminal
-    - allows you to access bash in container
-- run `/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'aStrong\!Passw0rd' -C` in the container
-- run `IF DB_ID('Room2Room') IS NULL CREATE DATABASE [Room2Room];`
-- create all tables from Database/Tables
-- run `exit` to leave MSSQL
-- run `exit` to leave the container
