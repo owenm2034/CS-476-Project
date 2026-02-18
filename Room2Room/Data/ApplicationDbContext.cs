@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Room2Room.Models;
 using Room2Room.Models.Accounts;
 using Room2Room.Models.NotificationPreferences;
 
@@ -8,4 +9,5 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
     public DbSet<Account> Accounts { get; set; }
     public DbSet<NotificationPreference> NotificationPreferences { get; set; }
+    public DbSet<University> Universities { get; set; }
 }
