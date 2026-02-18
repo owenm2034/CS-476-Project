@@ -1,5 +1,5 @@
 ## Setup:
-- Ensure .NET 9 is installed on your machine [here](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- Ensure .NET 10 is installed on your machine [here](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - run `dotnet dev-certs https --trust`
 - In Visual Studio Code, press Ctrl+F5 to run the app without debugging.
 
@@ -11,7 +11,7 @@
 the root of the project
     - This will run `Database/init.sql`
     - This will run `Database/Migrations/AddUniversities.sql`
-    - To add a script see `compose.yml`
+    - To add a migration script to setup see `compose.yml`
 
 
 ## Accounts
