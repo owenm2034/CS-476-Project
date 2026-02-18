@@ -105,6 +105,18 @@ public class AccountController : Controller
 
         using var context = new ApplicationDbContext(contextOptions);
 
+        var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
+
+        var university = context.Universities.Where(x => x.Domain == domain).FirstOrDefault();
+
+        if (university == null)
+        {
+            model.Password = "";
+            model.Email = "";
+            model.ErrorMessage = "Please use a university email.";
+            return View(model);
+        }
+
         byte[] salt = RandomNumberGenerator.GetBytes(16);
         byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
             model.Password,
@@ -123,7 +135,7 @@ public class AccountController : Controller
             saltString,
             model.Username,
             "", // todo, save profile picture,
-            1 // todo, select university
+            university.Id
         );
 
         context.Accounts.Add(account);
