@@ -1,3 +1,8 @@
+SET NOCOUNT ON;
+GO
+
+PRINT('Adding Universities...')
+
 Insert into Universities (Domain, Name) VALUES
 	('student.eit.edu.au','Engineering Institute of Technology'),
 	('nusaputra.ac.id','Universitas Nusa Putra'),
@@ -10210,4 +10215,9 @@ Insert into Universities (Domain, Name) VALUES
 	('untdallas.edu','University of North Texas at Dallas'),
 	('w-hs.de','Westphalian University of Applied Sciences'),
 	('cduestc.cn','Chengdu College of University of Electronic Science and Technology of China'),
-	('thu.de','Technische Hochschule Ulm')
+	('thu.de','Technische Hochschule Ulm');
+
+PRINT('Universities added.')
+
+SET NOCOUNT OFF;
+GO

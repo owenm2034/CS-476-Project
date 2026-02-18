@@ -20,13 +20,14 @@ services:
       image: mcr.microsoft.com/mssql/server:2022-latest
       volumes:
         # copy Database folder into docker container under new folder name docker-entrypoint-initdb 
-        - ./Database:/docker-entrypoint-initdb 
+        - ./Database:/docker-entrypoint-initdb
       depends_on:
         room2room:
           condition: service_healthy
       command: >
         bash -c '
         /opt/mssql-tools18/bin/sqlcmd -S room2room -U sa -P ${DB_PASSWORD} -d master -i docker-entrypoint-initdb/init.sql -C;
+        /opt/mssql-tools18/bin/sqlcmd -S room2room -U sa -P ${DB_PASSWORD} -d Room2Room -i docker-entrypoint-initdb/Migrations/AddUniversities.sql -C;
         echo "All done!";
         '
 
