@@ -1,18 +1,25 @@
 ## Setup:
-- Ensure .NET 9 is installed on your machine [here](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
+- Ensure .NET 10 is installed on your machine [here](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 - run `dotnet dev-certs https --trust`
 - In Visual Studio Code, press Ctrl+F5 to run the app without debugging.
 
 
 ### DB Setup:
-- Ensure db is started by calling `docker compose -f compose.yaml --all-resources up` at
+- IF you previously had the room2room db running, run `docker compose down -v`
+    - THIS WILL ERASE ALL DATA FROM YOUR LOCAL DATABASE
+- Start DB by calling `docker compose -f compose.yaml --all-resources up` at
 the root of the project
+    - This will run `Database/init.sql`
+    - This will run `Database/Migrations/AddUniversities.sql`
+    - To add a migration script to setup see `compose.yml`
 
-Create database if it does not exist:
-- run `docker exec -it room2room "bash"` in terminal
-    - allows you to access bash in container
-- run `/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'aStrong\!Passw0rd' -C` in the container
-- run `IF DB_ID('Room2Room') IS NULL CREATE DATABASE [Room2Room];`
-- create all tables from Database/Tables
-- run `exit` to leave MSSQL
-- run `exit` to leave the container
+
+## Accounts
+Db Setup generates these 5 accounts automatically
+| Email | Password | IsAdmin | University |
+| --- | --- | --- | --- |
+| 476user@uregina.ca | cs476password | false | University of Regina |
+| 476admin@uregina.ca | cs476password | true | University of Regina |
+| 476user@usask.ca | cs476password | false | University of Saskatchewan |
+| 476admin@usask.ca | cs476password | true | University of Saskatchewan |
+| 476other@nagasaki-u.ac.jp | cs476password | false | Nagasaki University |

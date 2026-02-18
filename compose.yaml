@@ -4,12 +4,34 @@ services:
     container_name: room2room
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=aStrong!Passw0rd
+      - SA_PASSWORD=${DB_PASSWORD}
     ports:
       - "1433:1433"
     volumes:
       - room2room_data:/var/opt/mssql
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S ${SERVER} -U sa -P '${DB_PASSWORD}' -C -Q 'SELECT 1' || exit 1"]
+      interval: 3s
+      retries: 10
+      start_period: 10s
+      timeout: 3s
+  sqlserver.configurator:
+      image: mcr.microsoft.com/mssql/server:2022-latest
+      volumes:
+        # copy Database folder into docker container under new folder name docker-entrypoint-initdb 
+        - ./Database:/docker-entrypoint-initdb
+      depends_on:
+        room2room:
+          condition: service_healthy
+      command: >
+        bash -c '
+        /opt/mssql-tools18/bin/sqlcmd -S room2room -U sa -P ${DB_PASSWORD} -d master -i docker-entrypoint-initdb/init.sql -C;
+        /opt/mssql-tools18/bin/sqlcmd -S room2room -U sa -P ${DB_PASSWORD} -d Room2Room -i docker-entrypoint-initdb/Migrations/AddUniversities.sql -C;
+        echo "All done!";
+        '
 
 volumes:
   room2room_data:
+
+
