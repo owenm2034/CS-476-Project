@@ -70,12 +70,20 @@ public class AccountController : Controller
             return View(model);
         }
 
+        var university = context.Universities.Where(u => u.Id == account.UniversityId).FirstOrDefault();
+
         // set claims
-        var claims = new List<Claim> { new Claim(ClaimTypes.Name, account.Username), };
+        var claims = new List<Claim> { 
+            new Claim(ClaimTypes.Name, account.Username), 
+            new Claim("UniversityId", account.UniversityId.ToString()),
+            new Claim("UniversityName", university?.Name ?? ""),
+        };
 
         if (account.IsAdmin)
         {
             claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+        } else {
+            claims.Add(new Claim(ClaimTypes.Role, "User"));
         }
 
         var identity = new ClaimsIdentity(
