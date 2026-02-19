@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Listings";
+}
+
+<h2>Listings</h2>
+
+<a asp-action="Create" class="btn btn-primary">Create New Listing</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Posted on</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Title</td>
+            <td>@item.ItemDescription</td>
+            <td>@item.Price</td>
+            <td>@item.CreatedAt</td>
+        </tr>
+    }
+    </tbody>
+</table>

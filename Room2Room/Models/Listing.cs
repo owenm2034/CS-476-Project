@@ -11,13 +11,13 @@ public class Listing
     public string Title { get; set; } = null!;
     [Required]
     [StringLength(500)]
-    public string Description { get; set; } = null!;
+    public string ItemDescription { get; set; } = null!;
     [Required]
     public string Category {get; set;} = null!;
     [Required]
     public string Condition {get; set;} = null!;
     [Required]
-    public string Status {get; set;} = "Available";
+    public string ItemStatus {get; set;} = "Available";
     [Required]
     [Range(1, 10000, ErrorMessage = "Please post for items worth at least CAD $1 and less than CAD $10000")]
     public decimal Price {get; set; }

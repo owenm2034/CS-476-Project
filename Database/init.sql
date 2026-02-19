@@ -80,3 +80,12 @@ INSERT INTO Accounts (Email, PasswordHash, PasswordSalt, Username, IsEmailVerifi
     ('476admin@usask.ca',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'usaskadmin',	1,	1,	'',	2196),
     ('476other@nagasaki-u.ac.jp',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'unagasakiuser',	1,	0,	'',	5117)
 
+PRINT('Inserting 5 Items...')
+INSERT INTO Listings (Title, ItemDescription, Category, Condition, ItemStatus, Price, CreatedAt, UpdatedAt, AccountId, UniversityId) VALUES
+    ('Dell Laptop', 'A lightly used Dell XPS 13, 8GB RAM, 256GB SSD.', 'Electronics', 'Used', 'Available', 750.00, GETDATE(), GETDATE(), 1, 2195),
+    ('Wooden Desk', 'Solid oak desk, perfect for study or work.', 'Furniture', 'New', 'Available', 200.00, GETDATE(), GETDATE(), 2, 2195),
+    ('Calculus Textbook', 'Calculus 10th Edition, good condition, minor notes inside.', 'Books', 'Used', 'Sold', 50.00, GETDATE(), GETDATE(), 3, 2196),
+    ('Mountain Bike', '26-inch mountain bike, lightly used, great for trails.', 'Sports', 'Used', 'Available', 300.00, GETDATE(), GETDATE(), 1, 2195),
+    ('iPhone 12', 'Apple iPhone 12, 64GB, black, works perfectly.', 'Electronics', 'Used', 'Available', 500.00, GETDATE(), GETDATE(), 4, 5117);
+
+
