@@ -30,7 +30,8 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult LogIn()
     {
-        return View("LogIn");
+        var model = new LogInModel();
+        return View(model);
     }
 
     [HttpPost]
@@ -70,11 +71,14 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var university = context.Universities.Where(u => u.Id == account.UniversityId).FirstOrDefault();
+        var university = context.Universities
+            .Where(u => u.Id == account.UniversityId)
+            .FirstOrDefault();
 
         // set claims
-        var claims = new List<Claim> { 
-            new Claim(ClaimTypes.Name, account.Username), // 
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, account.Username), //
             new Claim("AccountId", account.Id.ToString()), // use ((ClaimsIdentity)User.Identity).FindFirst("AccountId").Value
             new Claim("UniversityId", account.UniversityId.ToString()), //  use ((ClaimsIdentity)User.Identity).FindFirst("UniversityId").Value
             new Claim("UniversityName", university?.Name ?? ""), // use ((ClaimsIdentity)User.Identity).FindFirst("UniversityName").Value
@@ -83,7 +87,9 @@ public class AccountController : Controller
         if (account.IsAdmin)
         {
             claims.Add(new Claim(ClaimTypes.Role, "Admin")); // use User.IsInRole("Admin")
-        } else {
+        }
+        else
+        {
             claims.Add(new Claim(ClaimTypes.Role, "User")); // use User.IsInRole("User")
         }
 
@@ -102,7 +108,8 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Register()
     {
-        return View("Register");
+        var model = new RegisterModel();
+        return View(model);
     }
 
     [HttpPost]
@@ -114,18 +121,52 @@ public class AccountController : Controller
 
         using var context = new ApplicationDbContext(contextOptions);
 
-        var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
-
-        var university = context.Universities.Where(x => x.Domain == domain).FirstOrDefault();
-
-        if (university == null)
+        if (!ModelState.IsValid)
         {
-            model.Password = "";
-            model.Email = "";
-            model.ErrorMessage = "Please use a university email.";
             return View(model);
         }
 
+        var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
+
+        var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
+        var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToList();
+        var usernameExistsTask = context.Accounts
+            .Where(a => a.Username.ToLower() == model.Username.ToLower())
+            .ToList();
+
+        bool isError = false;
+        var errorMessage = "";
+
+        if (universityExistsTask.Count == 0)
+        {
+            isError = true;
+            errorMessage += "Please use a university email. ";
+        }
+        if (emailExistsTask.Count > 0)
+        {
+            isError = true;
+            errorMessage += "An account with this email already exists. ";
+        }
+        if (usernameExistsTask.Count > 0)
+        {
+            isError = true;
+            errorMessage += "An account with this username already exists. ";
+        }
+        if (model.Password.Length < 8)
+        {
+            isError = true;
+            errorMessage += "Your password must be at least 8 characters. ";
+        }
+
+        if (isError)
+        {
+            model.Password = "";
+            model.Email = "";
+            model.ErrorMessage = errorMessage;
+            return View(model);
+        }
+
+        // Validation passed, create account here
         byte[] salt = RandomNumberGenerator.GetBytes(16);
         byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
             model.Password,
@@ -144,7 +185,7 @@ public class AccountController : Controller
             saltString,
             model.Username,
             "", // todo, save profile picture,
-            university.Id
+            universityExistsTask.First().Id
         );
 
         context.Accounts.Add(account);
