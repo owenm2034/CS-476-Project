@@ -45,6 +45,22 @@ END
 ELSE
     print('Universities already created :)')
 
+-- Announcements
+IF NOT EXISTS (select * from sys.tables where name = 'Announcements')
+BEGIN
+CREATE TABLE Announcements(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Message NVARCHAR(1000) NOT NULL,
+    Color NVARCHAR(50) NOT NULL,
+    StartDate DATETIME2 NOT NULL,
+    EndDate DATETIME2 NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1
+);
+print ('Announcements created')
+END
+ELSE
+    print('Announcements already created :)')
+
 
 -- DATA SEEDING
 Print('*** BEGIN DATA SEEDING ***')
@@ -62,19 +78,22 @@ END
 ELSE
     PRINT('Accounts already seeded :)')
 
-
--- Announcements
-IF NOT EXISTS (select * from sys.tables where name = 'Announcements')
+-- Announcement seed
+PRINT('Seeding Announcements...')
+IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Announcements')
 BEGIN
-CREATE TABLE Announcements(
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Message NVARCHAR(1000) NOT NULL,
-    Color NVARCHAR(50) NOT NULL,
-    StartDate DATETIME2 NOT NULL,
-    EndDate DATETIME2 NOT NULL,
-    IsActive BIT NOT NULL DEFAULT 1
-);
-print ('Announcements created')
+    IF (SELECT COUNT(*) FROM Announcements) = 0
+    BEGIN
+        INSERT INTO Announcements (Message, Color, StartDate, EndDate, IsActive)
+        VALUES (
+            'Welcome to Room2Room!',
+            'warning',
+            DATEADD(day,-1, SYSUTCDATETIME()),
+            DATEADD(day,7, SYSUTCDATETIME()),
+            1
+        );
+        print('Announcement inserted')
+    END
+    ELSE
+        print('Announcements already seeded :)')
 END
-ELSE
-    print('Announcements already created :)')
