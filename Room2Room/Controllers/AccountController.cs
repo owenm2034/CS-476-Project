@@ -121,9 +121,13 @@ public class AccountController : Controller
 
         var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
 
-        var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToListAsync();
+        var universityExistsTask = context.Universities
+            .Where(x => x.Domain == domain)
+            .ToListAsync();
         var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToListAsync();
-        var usernameExistsTask = context.Accounts.Where(a => a.Username == model.Username).ToListAsync();
+        var usernameExistsTask = context.Accounts
+            .Where(a => a.Username.Equals(model.Username, StringComparison.OrdinalIgnoreCase))
+            .ToListAsync();
 
         await Task.WhenAll(universityExistsTask, emailExistsTask, usernameExistsTask);
         bool isError = false;
