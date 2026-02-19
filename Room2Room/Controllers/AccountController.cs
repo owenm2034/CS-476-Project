@@ -30,7 +30,8 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult LogIn()
     {
-        return View("LogIn");
+        var model = new LogInModel();
+        return View(model);
     }
 
     [HttpPost]
@@ -107,7 +108,8 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Register()
     {
-        return View("Register");
+        var model = new RegisterModel();
+        return View(model);
     }
 
     [HttpPost]
@@ -119,31 +121,33 @@ public class AccountController : Controller
 
         using var context = new ApplicationDbContext(contextOptions);
 
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
         var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
 
-        var universityExistsTask = context.Universities
-            .Where(x => x.Domain == domain)
-            .ToListAsync();
-        var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToListAsync();
+        var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
+        var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToList();
         var usernameExistsTask = context.Accounts
-            .Where(a => a.Username.Equals(model.Username, StringComparison.OrdinalIgnoreCase))
-            .ToListAsync();
+            .Where(a => a.Username.ToLower() == model.Username.ToLower())
+            .ToList();
 
-        await Task.WhenAll(universityExistsTask, emailExistsTask, usernameExistsTask);
         bool isError = false;
         var errorMessage = "";
 
-        if (universityExistsTask.Result.Count == 0)
+        if (universityExistsTask.Count == 0)
         {
             isError = true;
             errorMessage += "Please use a university email. ";
         }
-        if (emailExistsTask.Result.Count > 0)
+        if (emailExistsTask.Count > 0)
         {
             isError = true;
             errorMessage += "An account with this email already exists. ";
         }
-        if (usernameExistsTask.Result.Count > 0)
+        if (usernameExistsTask.Count > 0)
         {
             isError = true;
             errorMessage += "An account with this username already exists. ";
@@ -181,7 +185,7 @@ public class AccountController : Controller
             saltString,
             model.Username,
             "", // todo, save profile picture,
-            universityExistsTask.Result.First().Id
+            universityExistsTask.First().Id
         );
 
         context.Accounts.Add(account);
