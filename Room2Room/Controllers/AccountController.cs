@@ -74,16 +74,17 @@ public class AccountController : Controller
 
         // set claims
         var claims = new List<Claim> { 
-            new Claim(ClaimTypes.Name, account.Username), 
-            new Claim("UniversityId", account.UniversityId.ToString()),
-            new Claim("UniversityName", university?.Name ?? ""),
+            new Claim(ClaimTypes.Name, account.Username), // 
+            new Claim("AccountId", account.Id.ToString()), // use ((ClaimsIdentity)User.Identity).FindFirst("AccountId").Value
+            new Claim("UniversityId", account.UniversityId.ToString()), //  use ((ClaimsIdentity)User.Identity).FindFirst("UniversityId").Value
+            new Claim("UniversityName", university?.Name ?? ""), // use ((ClaimsIdentity)User.Identity).FindFirst("UniversityName").Value
         };
 
         if (account.IsAdmin)
         {
-            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+            claims.Add(new Claim(ClaimTypes.Role, "Admin")); // use User.IsInRole("Admin")
         } else {
-            claims.Add(new Claim(ClaimTypes.Role, "User"));
+            claims.Add(new Claim(ClaimTypes.Role, "User")); // use User.IsInRole("User")
         }
 
         var identity = new ClaimsIdentity(
