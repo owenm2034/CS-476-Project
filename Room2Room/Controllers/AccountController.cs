@@ -70,11 +70,14 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var university = context.Universities.Where(u => u.Id == account.UniversityId).FirstOrDefault();
+        var university = context.Universities
+            .Where(u => u.Id == account.UniversityId)
+            .FirstOrDefault();
 
         // set claims
-        var claims = new List<Claim> { 
-            new Claim(ClaimTypes.Name, account.Username), // 
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Name, account.Username), //
             new Claim("AccountId", account.Id.ToString()), // use ((ClaimsIdentity)User.Identity).FindFirst("AccountId").Value
             new Claim("UniversityId", account.UniversityId.ToString()), //  use ((ClaimsIdentity)User.Identity).FindFirst("UniversityId").Value
             new Claim("UniversityName", university?.Name ?? ""), // use ((ClaimsIdentity)User.Identity).FindFirst("UniversityName").Value
@@ -83,7 +86,9 @@ public class AccountController : Controller
         if (account.IsAdmin)
         {
             claims.Add(new Claim(ClaimTypes.Role, "Admin")); // use User.IsInRole("Admin")
-        } else {
+        }
+        else
+        {
             claims.Add(new Claim(ClaimTypes.Role, "User")); // use User.IsInRole("User")
         }
 
@@ -116,16 +121,44 @@ public class AccountController : Controller
 
         var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
 
-        var university = context.Universities.Where(x => x.Domain == domain).FirstOrDefault();
+        var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToListAsync();
+        var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToListAsync();
+        var usernameExistsTask = context.Accounts.Where(a => a.Username == model.Username).ToListAsync();
 
-        if (university == null)
+        await Task.WhenAll(universityExistsTask, emailExistsTask, usernameExistsTask);
+        bool isError = false;
+        var errorMessage = "";
+
+        if (universityExistsTask.Result.Count == 0)
+        {
+            isError = true;
+            errorMessage += "Please use a university email. ";
+        }
+        if (emailExistsTask.Result.Count > 0)
+        {
+            isError = true;
+            errorMessage += "An account with this email already exists. ";
+        }
+        if (usernameExistsTask.Result.Count > 0)
+        {
+            isError = true;
+            errorMessage += "An account with this username already exists. ";
+        }
+        if (model.Password.Length < 8)
+        {
+            isError = true;
+            errorMessage += "Your password must be at least 8 characters. ";
+        }
+
+        if (isError)
         {
             model.Password = "";
             model.Email = "";
-            model.ErrorMessage = "Please use a university email.";
+            model.ErrorMessage = errorMessage;
             return View(model);
         }
 
+        // Validation passed, create account here
         byte[] salt = RandomNumberGenerator.GetBytes(16);
         byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
             model.Password,
@@ -144,7 +177,7 @@ public class AccountController : Controller
             saltString,
             model.Username,
             "", // todo, save profile picture,
-            university.Id
+            universityExistsTask.Result.First().Id
         );
 
         context.Accounts.Add(account);
