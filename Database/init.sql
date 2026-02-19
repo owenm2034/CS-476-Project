@@ -57,3 +57,19 @@ INSERT INTO Accounts (Email, PasswordHash, PasswordSalt, Username, IsEmailVerifi
     ('476admin@usask.ca',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'usaskadmin',	1,	1,	'',	2196),
     ('476other@nagasaki-u.ac.jp',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'unagasakiuser',	1,	0,	'',	5117)
 
+
+-- Announcements
+IF NOT EXISTS (select * from sys.tables where name = 'Announcements')
+BEGIN
+CREATE TABLE Announcements(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Message NVARCHAR(1000) NOT NULL,
+    Color NVARCHAR(50) NOT NULL,
+    StartDate DATETIME2 NOT NULL,
+    EndDate DATETIME2 NOT NULL,
+    IsActive BIT NOT NULL DEFAULT 1
+);
+print ('Announcements created')
+END
+ELSE
+    print('Announcements already created :)')
