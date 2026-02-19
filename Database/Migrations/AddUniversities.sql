@@ -1,10 +1,8 @@
-SET NOCOUNT ON;
+SET NOCOUNT ON
 GO
-
+IF NOT EXISTS (SELECT TOP 1 * FROM Universities) BEGIN
 PRINT('Adding Universities...')
-
-Insert into Universities (Domain, Name) VALUES
-	('student.eit.edu.au','Engineering Institute of Technology'),
+INSERT INTO Universities SELECT * FROM (VALUES	('student.eit.edu.au','Engineering Institute of Technology'),
 	('nusaputra.ac.id','Universitas Nusa Putra'),
 	('regent.edu.gh','Regent University College of Science and Technology'),
 	('student.wab.edu.pl','Wroclaw Akademia Biznesu'),
@@ -1001,8 +999,7 @@ Insert into Universities (Domain, Name) VALUES
 	('ualr.edu','University of Arkansas - Little Rock'),
 	('uamont.edu','University of Arkansas - Monticello'),
 	('ubalt.edu','University of Baltimore'),
-	('bridgeport.edu','University of Bridgeport');
-Insert into Universities (Domain, Name) VALUES
+	('bridgeport.edu','University of Bridgeport'),
 	('berkeley.edu','University of California, Berkeley'),
 	('ucdavis.edu','University of California, Davis'),
 	('uci.edu','University of California, Irvine'),
@@ -2000,8 +1997,7 @@ Insert into Universities (Domain, Name) VALUES
 	('web.prover.com.br','Universidade de Itaúna'),
 	('itb.edu.bn','Institut Teknologi Brunei'),
 	('ubd.edu.bn','University of Brunei Darussalam'),
-	('unissa.edu.bn','Universiti Islam Sultan Sharif Ali');
-Insert into Universities (Domain, Name) VALUES
+	('unissa.edu.bn','Universiti Islam Sultan Sharif Ali'),
 	('amti.hit.bg','Academy of Music, Dance and Fine Arts'),
 	('aubg.bg','American University in Bulgaria'),
 	('au-plovdiv.bg','Agricultural University of Plovdiv'),
@@ -2999,8 +2995,7 @@ Insert into Universities (Domain, Name) VALUES
 	('utmachala.edu.ec','Universidad Técnica de Machala'),
 	('utm.edu.ec','Universidad Técnica de Manabí'),
 	('utn.edu.ec','Universidad Técnica del Norte'),
-	('utpl.edu.ec','Universidad Técnica Particular de Loja');
-Insert into Universities (Domain, Name) VALUES
+	('utpl.edu.ec','Universidad Técnica Particular de Loja'),
 	('utsam.edu.ec','Universidad Tecnológica San Antonio de Machala'),
 	('aast.edu','Arab Academy for Science & Technology'),
 	('akhbaracademy.edu.eg','Akhbar El Yom Academy'),
@@ -3998,8 +3993,7 @@ Insert into Universities (Domain, Name) VALUES
 	('squareit.edu.in','International Institute of Information Technology, Pune'),
 	('iiit-bh.ac.in','International Institute of Information Technology, Bhubaneswar'),
 	('iiitb.ac.in','International Institute of Information Technology, Bangalore'),
-	('iimtrichy.ac.in','Indian Institute of Management, Tiruchirappalli');
-Insert into Universities (Domain, Name) VALUES
+	('iimtrichy.ac.in','Indian Institute of Management, Tiruchirappalli'),
 	('iiitg.ac.in','Indian Institute of Information Technology, Guwahati'),
 	('iiitvadodara.ac.in','Indian Institute of Information Technology, Vadodara'),
 	('iiitkota.ac.in','Indian Institute of Information Technology, Kota'),
@@ -4997,8 +4991,7 @@ Insert into Universities (Domain, Name) VALUES
 	('kanagawa-u.ac.jp','Kanagawa University'),
 	('kanazawa-bidai.ac.jp','Kanazawa College of Art'),
 	('kanazawa-eco.ac.jp','Kanazawa College of Economics'),
-	('kanazawa-gu.ac.jp','Kanazawa Gakuin University');
-Insert into Universities (Domain, Name) VALUES
+	('kanazawa-gu.ac.jp','Kanazawa Gakuin University'),
 	('kanazawa-it.ac.jp','Kanazawa Institute of Technology'),
 	('kanazawa-med.ac.jp','Kanazawa Medical University'),
 	('kanazawa-u.ac.jp','Kanazawa University'),
@@ -5996,8 +5989,7 @@ Insert into Universities (Domain, Name) VALUES
 	('taj.edu.my','Taj International College'),
 	('tarc.edu.my','Tunku Abdul Rahman Chinese College'),
 	('taylors.edu.my','Taylor''s University College'),
-	('tpmcollege.edu.my','TPM College');
-Insert into Universities (Domain, Name) VALUES
+	('tpmcollege.edu.my','TPM College'),
 	('ucsi.edu.my','UCSI University'),
 	('ucti.edu.my','University College of Technology & Innovation (UCTI)'),
 	('udm.edu.my','Universiti Darul Iman'),
@@ -6995,8 +6987,7 @@ Insert into Universities (Domain, Name) VALUES
 	('wsz-pou.edu.pl','Polish Open University in Warsaw (WSZ/POU)'),
 	('zpsb.szczecin.pl','West Pomeranian Business School in Szczecin'),
 	('cocite.pt','Instituto Superior de Informática e Gestão'),
-	('enautica.pt','Escola Nautica Infante D. Henrique');
-Insert into Universities (Domain, Name) VALUES
+	('enautica.pt','Escola Nautica Infante D. Henrique'),
 	('esad.pt','Escola Superior de Artes e Design'),
 	('eshte.pt','Escola Superior de Hotelaria e Turismo do Estoril'),
 	('europeanuniversity.pt','European University Portugal'),
@@ -7994,8 +7985,7 @@ Insert into Universities (Domain, Name) VALUES
 	('ntntc.edu.tw','National Tainan Teachers College'),
 	('ntnu.edu.tw','National Taiwan Normal University'),
 	('ntou.edu.tw','National Taiwan Ocean University'),
-	('ntptc.edu.tw','National Taipei Teachers College');
-Insert into Universities (Domain, Name) VALUES
+	('ntptc.edu.tw','National Taipei Teachers College'),
 	('ntpu.edu.tw','National Taipei University'),
 	('ntttc.edu.tw','National Taitung Teachers College'),
 	('ntu.edu.tw','National Taiwan University'),
@@ -8993,8 +8983,7 @@ Insert into Universities (Domain, Name) VALUES
 	('gntc.edu','Georgia Northwestern Technical College'),
 	('gpc.edu','Georgia Perimeter College'),
 	('gptc.edu','Georgia Piedmont Technical College'),
-	('gwinnetttech.edu','Gwinnett Technical College');
-Insert into Universities (Domain, Name) VALUES
+	('gwinnetttech.edu','Gwinnett Technical College'),
 	('laniertech.edu','Lanier Technical College'),
 	('moultrietech.edu','Moultrie Technical College'),
 	('northgatech.edu','North Georgia Technical College'),
@@ -9992,8 +9981,7 @@ Insert into Universities (Domain, Name) VALUES
 	('asmildkloster.dk','Asmildkloster Agricultural School'),
 	('dkit.ie','Dundalk Institute of Technology'),
 	('videndjurs.dk','Kalø Økologisk Agricultural College'),
-	('snow.edu','Snow College');
-Insert into Universities (Domain, Name) VALUES
+	('snow.edu','Snow College'),
 	('scccd.edu','State Center Community College District'),
 	('davidsondavie.edu','Davidson-Davie Community College'),
 	('duytan.edu.vn','Duy Tan University'),
@@ -10215,9 +10203,6 @@ Insert into Universities (Domain, Name) VALUES
 	('untdallas.edu','University of North Texas at Dallas'),
 	('w-hs.de','Westphalian University of Applied Sciences'),
 	('cduestc.cn','Chengdu College of University of Electronic Science and Technology of China'),
-	('thu.de','Technische Hochschule Ulm');
-
-PRINT('Universities added.')
-
-SET NOCOUNT OFF;
-GO
+	('thu.de','Technische Hochschule Ulm')) v(Name,Domain);
+END
+ELSE PRINT('Universities already added')
