@@ -2,22 +2,34 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-
-    @if (!User?.Identity?.IsAuthenticated ?? true)
-    {
-        // not logged in
-        <p>Not authed</p>
-    }
-    else if (User.IsInRole("Admin"))
-    {
-        // is administrator
-        <p>Is admin</p>
-    }
-    else
-    {
-        // is normal user
-        <p>Not admin</p>
-    }
+<div class="w-100 d-flex flex-wrap justify-content-center">
+    @for (int i=1; i<=20; i++){
+        <div class="card mx-2 mb-4" style="width: 16rem;">
+            <img src="..." class="card-img-top" alt="...">
+            <div class="card-body">
+                <h5 class="card-title">Item Title</h5>
+                <p class="card-text">
+                    Item Description
+                    Price: $19.99
+                    Posted by: User123
+                    </p>
+                <a href="#" class="btn btn-primary">Add to cart</a>
+            </div>
+            </div>
+        }
 </div>
+        @if (!User?.Identity?.IsAuthenticated ?? true)
+        {
+            // not logged in
+            <p>Not authed</p>
+        }
+        else if (User.IsInRole("Admin"))
+        {
+            // is administrator
+            <p>Is admin</p>
+        }
+        else
+        {
+            // is normal user
+            <p>Not admin</p>
+        }
