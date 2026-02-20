@@ -8,5 +8,5 @@ public class OrderDetail
     
     public int ItemId { get; set; }
     public Order Order { get; set; }
-    public Items Items { get; set; }    
+    public Item Item { get; set; }    
 }

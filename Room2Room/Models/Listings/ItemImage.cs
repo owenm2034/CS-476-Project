@@ -7,5 +7,5 @@ public class ItemImage
     public string ImagePath { get; set; }
     [Required]
     public int ItemId { get; set; } // foreign key to Items
-    public Items Item { get; set; } // many to one relationship with Items
+    public Item Item { get; set; } // many to one relationship with Items
 }

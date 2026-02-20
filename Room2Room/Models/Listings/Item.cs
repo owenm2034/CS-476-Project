@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 namespace Room2Room.Models.Listings;
-public class Items
+public class Item
 {
     public int Id { get; set; }
     [Required]
@@ -17,5 +17,5 @@ public class Items
     public Category Category { get; set; }
     public List<OrderDetail> OrderDetail { get; set; }
     public List<CartDetail> CartDetail { get; set; }
-    public List<ItemImage> ItemImages { get; set; } // one to many relationship with ItemImage
+    public List<ItemImage> ItemImage { get; set; } // one to many relationship with ItemImage
 }

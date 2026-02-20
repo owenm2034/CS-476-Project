@@ -7,7 +7,7 @@ public class CartDetail
     public int ShoppingCartId { get; set; }
     [Required]
     public int ItemId { get; set; }
-    public Items Items { get; set; }
+    public Item Item { get; set; }
     public ShoppingCart ShoppingCart { get; set; }
 
 }
