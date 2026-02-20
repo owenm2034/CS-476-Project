@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace Room2Room.Models.Listings;
+
+[Table("ItemImage")]
 public class ItemImage
 {
     public int Id { get; set; }

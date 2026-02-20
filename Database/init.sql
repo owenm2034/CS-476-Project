@@ -46,6 +46,121 @@ ELSE
     print('Universities already created :)')
 
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Category')
+BEGIN
+CREATE TABLE Category(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    CategoryName NVARCHAR(40) NOT NULL
+);
+print ('Category created')
+END
+ELSE
+    PRINT('Category already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'OrderStatus')
+BEGIN
+CREATE TABLE OrderStatus(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    StatusId INT NOT NULL,
+    StatusName NVARCHAR(20) NOT NULL
+);
+print ('OrderStatus created')
+END
+ELSE
+    PRINT('OrderStatus already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ShoppingCart')
+BEGIN
+CREATE TABLE ShoppingCart(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId NVARCHAR(MAX) NOT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
+print ('ShoppingCart created')
+END
+ELSE
+    PRINT('ShoppingCart already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Item')
+BEGIN
+CREATE TABLE Item(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ItemName NVARCHAR(40) NOT NULL,
+    ItemDescription NVARCHAR(200) NOT NULL,
+    ItemPrice FLOAT NOT NULL,
+    Status NVARCHAR(MAX) NOT NULL,
+    CategoryId INT NOT NULL,
+    CONSTRAINT FK_Item_Category_CategoryId FOREIGN KEY (CategoryId) REFERENCES Category(Id) ON DELETE CASCADE
+);
+print ('Item created')
+END
+ELSE
+    PRINT('Item already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Order')
+BEGIN
+CREATE TABLE [Order](
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId NVARCHAR(MAX) NOT NULL,
+    OrderDate DATETIME2 NOT NULL,
+    OrderStatusId INT NOT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_Order_OrderStatus_OrderStatusId FOREIGN KEY (OrderStatusId) REFERENCES OrderStatus(Id) ON DELETE CASCADE
+);
+print ('Order created')
+END
+ELSE
+    PRINT('Order already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'CartDetail')
+BEGIN
+CREATE TABLE CartDetail(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ShoppingCartId INT NOT NULL,
+    ItemId INT NOT NULL,
+    CONSTRAINT FK_CartDetail_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_CartDetail_ShoppingCart_ShoppingCartId FOREIGN KEY (ShoppingCartId) REFERENCES ShoppingCart(Id) ON DELETE CASCADE
+);
+print ('CartDetail created')
+END
+ELSE
+    PRINT('CartDetail already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ItemImage')
+BEGIN
+CREATE TABLE ItemImage(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ImagePath NVARCHAR(MAX) NOT NULL,
+    ItemId INT NOT NULL,
+    CONSTRAINT FK_ItemImage_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE
+);
+print ('ItemImage created')
+END
+ELSE
+    PRINT('ItemImage already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'OrderDetail')
+BEGIN
+CREATE TABLE OrderDetail(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    OrderId INT NOT NULL,
+    ItemId INT NOT NULL,
+    CONSTRAINT FK_OrderDetail_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_OrderDetail_Order_OrderId FOREIGN KEY (OrderId) REFERENCES [Order](Id) ON DELETE CASCADE
+);
+print ('OrderDetail created')
+END
+ELSE
+    PRINT('OrderDetail already created :)');
+    
+
 -- DATA SEEDING
 Print('*** BEGIN DATA SEEDING ***')
 

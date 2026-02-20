@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace Room2Room.Models.Listings;
+
+[Table("Item")] // This attribute specifies the name of the table in the database that this class maps to
 public class Item
 {
     public int Id { get; set; }

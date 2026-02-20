@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; 
 namespace Room2Room.Models.Listings;
+
+[Table("ShoppingCart")]
 public class ShoppingCart
 {
     public int Id { get; set; }
