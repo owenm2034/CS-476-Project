@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IEnumerable<Item>
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -7,7 +8,7 @@
   
   <div class="col-12">
     <label class="visually-hidden" for="inlineFormSelectPref">Category</label>
-    <select class="form-select" id="category">
+    <select class="form-select" id="categoryId">
       <option selected>Filter by category</option>
       <option value="1">Academic Supplies</option>
       <option value="2">Electronics</option>
@@ -26,7 +27,7 @@
     <label class="visually-hidden" for="inlineFormInputGroupUsername">Search for items</label>
     <div class="input-group">
       <div class="input-group-text"></div>
-      <input type="text" class="form-control" id="" placeholder="Search for items...">
+      <input type="text" class="form-control" id="sterm" placeholder="Search for items...">
     </div>
   </div>
 
@@ -37,15 +38,16 @@
 </div>
 
 <div class="w-100 mt-4 d-flex flex-wrap justify-content-center">
-    @for (int i=1; i<=9; i++){
+    @foreach (var item in Model)
+        {
         <div class="card mx-2 mb-4" style="width: 16rem;">
-            <img src="https://picsum.photos/id/237/200/300" class="card-img-top" alt="...">
+            <img src="/images/comingSoon.jpg" class="card-img-top" alt="...">
             <div class="card-body">
-                <h5 class="card-title">Item Title</h5>
+                <h5 class="card-title">@item.ItemName</h5>
                 <p class="card-text">
-                    Item Description
-                    Price: $19.99
-                    Posted by: User123
+                    Category: @item.CategoryName
+                    Description: @item.ItemDescription
+                    Price: $@item.ItemPrice
                     </p>
                 <a href="#" class="btn btn-primary">Add to cart</a>
             </div>
