@@ -27,6 +27,7 @@ public class AccountController : Controller
         return NotFound();
     }
 
+    // Log In GET/POST functions
     [HttpGet]
     public IActionResult LogIn()
     {
@@ -105,6 +106,7 @@ public class AccountController : Controller
         return Redirect("/Home/Privacy");
     }
 
+    // Register GET/POST functions
     [HttpGet]
     public IActionResult Register()
     {
@@ -200,6 +202,8 @@ public class AccountController : Controller
         return RedirectToAction("LogIn", "Account");
     }
 
+    // Manage Account GET/POST functions
+    [HttpGet]
     public IActionResult Manage() // GET
     {
         var model = new ManageModel();
@@ -209,7 +213,89 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Manage(ManageModel model) // POST
     {
-        return View(model);
+        var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer(ConnectionString)
+            .Options;
+
+        using var context = new ApplicationDbContext(contextOptions);
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        // get account
+        var account = context.Accounts.Where(a => a.Email == User.Identity.Name).FirstOrDefault();
+        // var account = context.Accounts.Where(a => a.Email == model.Email).FirstOrDefault();
+        if (account == null)
+        {
+            model.ErrorMessage = "Account not found.";
+            return View(model);
+        }
+
+        bool isError = false;
+        var errorMessage = "";
+
+
+
+        if (!string.IsNullOrWhiteSpace(model.Email))
+        {
+            var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
+
+            var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
+            // var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToList();
+            var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email && a.Id != account.Id).ToList();
+
+            // Email validation
+            if (universityExistsTask.Count == 0)
+            {
+                isError = true;
+                errorMessage += "Please use a university email. ";
+            }
+            if (emailExistsTask.Count > 0)
+            {
+                isError = true;
+                errorMessage += "An account with this email already exists. ";
+            }
+
+            // If no error, update account email
+            if (!isError)
+            {
+                account.Email = model.Email;
+            }
+        }
+
+        
+
+        // Username validation
+        var usernameExistsTask = context.Accounts
+            .Where(a => a.Username.ToLower() == model.Username.ToLower())
+            .ToList();
+
+        if (usernameExistsTask.Count > 0)
+        {
+            isError = true;
+            errorMessage += "An account with this username already exists. ";
+        }
+
+        // Password validation
+        if (model.Password.Length < 8)
+        {
+            isError = true;
+            errorMessage += "Your password must be at least 8 characters. ";
+        }
+
+        if (isError)
+        {
+            model.Password = "";
+            // model.Email = "";
+            model.ErrorMessage = errorMessage;
+            return View(model);
+        }
+
+
+
+
 
         // TODO: update user data here
 
