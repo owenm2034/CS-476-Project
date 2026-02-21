@@ -179,3 +179,73 @@ END
 ELSE
     PRINT('Accounts already seeded :)')
 
+
+IF (SELECT COUNT(*) FROM Category) = 0
+BEGIN
+    PRINT('Inserting 5 Categories...')
+    INSERT INTO Category (CategoryName) VALUES
+        ('Electronics'),
+        ('Academic Supplies'),
+        ('Furniture'),
+        ('Clothing'),
+        ('Kitchen Appliances'),
+        ('Outdoor & Sports');
+END
+ELSE
+    PRINT('Category already seeded :)')
+
+IF (SELECT COUNT(*) FROM Item) = 0
+BEGIN
+    PRINT('Inserting 20 Items...')
+    INSERT INTO Item (ItemName, ItemDescription, ItemPrice, Status, CategoryId, AccountId) VALUES
+        ('Laptop', '15-inch laptop with 8GB RAM and 256GB SSD', 750, 'Available', 1, 1),
+        ('Smartphone', 'Android phone, 128GB storage, excellent condition', 400, 'Available', 1, 2),
+        ('Headphones', 'Noise-cancelling over-ear headphones', 120.5, 'Sold', 1, 3),
+        ('Textbook: CS101', 'Introduction to Computer Science textbook, used', 60, 'Available', 2, 1),
+        ('Textbook: Math201', 'Advanced calculus textbook, like new', 85, 'Available', 2, 2),
+        ('Desk Chair', 'Ergonomic chair, black color', 95, 'Available', 3, 3),
+        ('Dining Table', 'Wooden dining table for 4 people', 200, 'Sold', 3, 4),
+        ('Winter Jacket', 'Medium size, waterproof', 65, 'Available', 4, 5),
+        ('Sneakers', 'Size 10, lightly used', 50, 'Available', 4, 1),
+        ('Backpack', '25L laptop backpack, brand new', 45, 'Available', 4, 2),
+        ('Coffee Maker', 'Single-serve coffee machine', 35, 'Sold', 5, 3),
+        ('Toaster', 'Countertop toaster with 2 slots', 25, 'Available', 5, 4),
+        ('Bicycle', 'Mountain bike, 21-speed', 300, 'Available', 6, 5),
+        ('Monitor', '24-inch LED monitor', 150, 'Available', 1, 1),
+        ('USB Flash Drive', '64GB USB 3.0 drive', 15, 'Sold', 1, 2),
+        ('Notebook', 'Pack of 5 notebooks, college ruled', 10, 'Available', 2, 3),
+        ('Bookshelf', '4-tier wooden bookshelf', 80, 'Available', 3, 4),
+        ('Hoodie', 'Large size, cotton hoodie', 30, 'Sold', 4, 5),
+        ('Camera', 'Digital camera with 18-55mm lens', 220, 'Available', 1, 1),
+        ('Gaming Mouse', 'Wired RGB gaming mouse', 40, 'Available', 1, 2)
+END
+ELSE
+    PRINT('Items already seeded :)')
+
+IF (SELECT COUNT(*) FROM ItemImage) = 0
+BEGIN
+    PRINT('Inserting 20 ItemImages...')
+    INSERT INTO ItemImage (ImagePath, ItemId) VALUES
+        ('/images/laptop.jpg', 1),
+        ('/images/smartphone.jpg', 2),
+        ('/images/headphones.jpg', 3),
+        ('/images/textbook1.jpg', 4),
+        ('/images/textbook2.jpg', 5),
+        ('/images/desk-chair.jpg', 6),
+        ('/images/dining-table.jpg', 7),
+        ('/images/winter-jacket.jpg', 8),
+        ('/images/sneakers.jpg', 9),
+        ('/images/comingSoon.jpg', 10),
+        ('/images/comingSoon.jpg', 11),
+        ('/images/comingSoon.jpg', 12),
+        ('/images/comingSoon.jpg', 13),
+        ('/images/comingSoon.jpg', 14),
+        ('/images/comingSoon.jpg', 15),
+        ('/images/comingSoon.jpg', 16),
+        ('/images/comingSoon.jpg', 17),
+        ('/images/comingSoon.jpg', 18),
+        ('/images/comingSoon.jpg', 19),
+        ('/images/comingSoon.jpg', 20)
+END
+ELSE
+    PRINT('ItemImage already seeded :)')

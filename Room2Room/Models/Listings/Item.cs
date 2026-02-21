@@ -26,4 +26,5 @@ public class Item
 
     [NotMapped]
     public string CategoryName { get; set; }
+    
 }
