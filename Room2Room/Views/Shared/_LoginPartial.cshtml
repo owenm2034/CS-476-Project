@@ -6,7 +6,7 @@
     @* if user is logged in *@
     <li class="nav-item">
         @* TODO: add a modify account button *@
-        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Edit">Edit Account</a>
+        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Manage">Edit Account</a>
     </li>
     <li class="nav-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

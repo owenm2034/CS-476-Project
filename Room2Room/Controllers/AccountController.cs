@@ -199,4 +199,25 @@ public class AccountController : Controller
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("LogIn", "Account");
     }
+
+    public IActionResult Manage() // GET
+    {
+        var model = new ManageModel();
+        return View(model); // renders Manage.cshtml
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Manage(ManageModel model) // POST
+    {
+        // if (!ModelState.IsValid)
+        // {
+        //     return View(model); // redisplay form with validation messages
+        // }
+        return View(model);
+
+        // TODO: update user data here
+
+        TempData["Message"] = "Profile updated!";
+        return RedirectToAction("Manage"); // redirects to GET Manage after success
+    }
 }
