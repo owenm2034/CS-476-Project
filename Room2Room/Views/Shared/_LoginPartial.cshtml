@@ -14,8 +14,13 @@
 }
 else
 {
-    <div id='account-div' class="text-end"> 
-        <a id="account-login-button" class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
+    <div id='account-div' class="text-end">
+        
+        <a class="text-white p-3" href="#">
+            <span class="badge text-bg-info">(0)</span>
+            <i class="bi bi-cart"></i>
+        </a>
+        <a id="account-login-button" class="btn btn-primary" asp-controller="Account" asp-action="Login">Login</a>
         <a id="account-signup-button" class="btn btn-primary" asp-controller="Account" asp-action="Register">Sign Up</a>
     </div>
 }

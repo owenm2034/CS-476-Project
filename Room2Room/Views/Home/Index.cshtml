@@ -1,24 +1,74 @@
-﻿@{
+﻿@model ItemDisplayModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="my-4">
+    <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
+  
+  <div class="col-12">
+    <label class="visually-hidden" for="categoryId">Category</label>
+    <select class="form-select" id="categoryId" name="categoryId">
+      <option selected>Filter by category</option>
+      @foreach (var category in Model.Categories)
+      {
+          <option selected="@(category.Id == Model.CategoryId)" value="@category.Id">@category.CategoryName</option>
+      }
+    </select>
+  </div>
 
-    @if (!User?.Identity?.IsAuthenticated ?? true)
-    {
-        // not logged in
-        <p>Not authed</p>
-    }
-    else if (User.IsInRole("Admin"))
-    {
-        // is administrator
-        <p>Is admin</p>
-    }
-    else
-    {
-        // is normal user
-        <p>Not admin</p>
-    }
+  <div class="col-12">
+    <label class="visually-hidden" for="sterm">Search for items</label>
+    <div class="input-group">
+      <div class="input-group-text"></div>
+      <input type="text" class="form-control" value="@Model.STerm" id="sterm" name="sterm" placeholder="Search for items...">
+    </div>
+  </div>
+
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">Search</button>
+    <a href="/Home/Index" type="reset" class="btn btn-primary">Reset</a>
+  </div>
+</form>
 </div>
+
+<div class="w-100 mt-4 d-flex flex-wrap justify-content-center">
+    @foreach (var item in Model.Items)
+        {
+        <div class="card mx-2 mb-4" style="width: 16rem;">
+            @if (!string.IsNullOrEmpty(item.ImagePath))
+            {
+                <img style="width:100%; height:150px;" src="@item.ImagePath" class="card-img-top" alt="...">
+            }
+            else
+            {
+                <img style="width:100%; height:150px;" src="/images/comingSoon.jpg" class="card-img-top" alt="...">
+            }
+            
+            <div class="card-body">
+                <h5 class="card-title">@item.ItemName</h5>
+                <p class="card-text">
+                    Category: @item.CategoryName<br>
+                    Description: @item.ItemDescription<br>
+                    Price: $@item.ItemPrice
+                    </p>
+                <a href="#" class="btn btn-primary">Add to cart</a>
+            </div>
+            </div>
+        }
+</div>
+        @if (!User?.Identity?.IsAuthenticated ?? true)
+        {
+            // not logged in
+            <p>Not authed</p>
+        }
+        else if (User.IsInRole("Admin"))
+        {
+            // is administrator
+            <p>Is admin</p>
+        }
+        else
+        {
+            // is normal user
+            <p>Not admin</p>
+        }
