@@ -1,1 +1,29 @@
-<p>Hey, welcome to the admin page!</p>
+<ul class="nav nav-tabs" id="adminTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="announcement-tab" data-bs-toggle="tab" data-bs-target="#announcement-tab-pane" type="button" role="tab" aria-controls="announcement-tab-pane" aria-selected="true">Announcements</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="user-tab" data-bs-toggle="tab" data-bs-target="#user-tab-pane" type="button" role="tab" aria-controls="user-tab-pane" aria-selected="false">Users</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="listing-tab" data-bs-toggle="tab" data-bs-target="#listing-tab-pane" type="button" role="tab" aria-controls="listing-tab-pane" aria-selected="false">Listings</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="listing-categories-tab" data-bs-toggle="tab" data-bs-target="#listing-categories-tab-pane" type="button" role="tab" aria-controls="listing-categories-tab-pane" aria-selected="false">Listing Categories</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat-tab-pane" type="button" role="tab" aria-controls="chat-tab-pane" aria-selected="false">Chat</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="statistics-tab" data-bs-toggle="tab" data-bs-target="#statistics-tab-pane" type="button" role="tab" aria-controls="statistics-tab-pane" aria-selected="false">Statistics</button>
+  </li>
+</ul>
+<div class="tab-content" id="adminTabContent">
+  <div class="tab-pane fade show active" id="announcement-tab-pane" role="tabpanel" aria-labelledby="announcement-tab" tabindex="0"><partial name="_Announcements"></div>
+  <div class="tab-pane fade" id="user-tab-pane" role="tabpanel" aria-labelledby="user-tab" tabindex="0">...</div>
+  <div class="tab-pane fade" id="listing-tab-pane" role="tabpanel" aria-labelledby="listing-tab" tabindex="0">...</div>
+  <div class="tab-pane fade" id="chat-tab-pane" role="tabpanel" aria-labelledby="chat-tab" tabindex="0">...</div>
+  <div class="tab-pane fade" id="listing-categories-tab-pane" role="tabpanel" aria-labelledby="listing-categories-tab" tabindex="0">...</div>
+  <div class="tab-pane fade" id="statistics-tab-pane" role="tabpanel" aria-labelledby="statistics-tab" tabindex="0">...</div>
+</div>
+
