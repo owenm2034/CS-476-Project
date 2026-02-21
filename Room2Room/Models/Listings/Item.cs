@@ -9,6 +9,9 @@ public class Item
     [Required]
     [MaxLength(40)]
     public string? ItemName { get; set; }
+    [Required]
+    [MaxLength(40)]
+    public string? SellerName { get; set; }
     [MaxLength(200)]
     public string ItemDescription { get; set; }
     [Required]
