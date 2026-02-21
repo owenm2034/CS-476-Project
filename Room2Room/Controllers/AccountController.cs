@@ -209,10 +209,6 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Manage(ManageModel model) // POST
     {
-        // if (!ModelState.IsValid)
-        // {
-        //     return View(model); // redisplay form with validation messages
-        // }
         return View(model);
 
         // TODO: update user data here
