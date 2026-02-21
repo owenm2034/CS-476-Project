@@ -29,5 +29,5 @@ public class Item
     
     [NotMapped]
     public string ImagePath { get; set; }
-   
+
 }

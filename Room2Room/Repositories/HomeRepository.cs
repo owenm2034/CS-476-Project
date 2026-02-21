@@ -47,5 +47,24 @@ public class HomeRepository : IHomeRepository
         }
          return items;
     }
+
+
+    public async Task AddItemAsync(Item newItem) // This method adds a new item to the database. It takes an Item object as a parameter, adds it to the Items DbSet, and then calls SaveChangesAsync to persist the changes to the database.
+    {
+        if (newItem == null)
+        {
+            throw new ArgumentNullException(nameof(newItem));
+        }
+        _db.Items.Add(newItem);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task AddItemImageAsync(ItemImage image)
+{
+    if (image == null) throw new ArgumentNullException(nameof(image));
+
+    _db.ItemImages.Add(image);
+    await _db.SaveChangesAsync();
+}
 }
 

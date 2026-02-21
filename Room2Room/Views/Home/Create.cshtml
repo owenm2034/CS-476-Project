@@ -1,0 +1,40 @@
+@model Room2Room.Models.DTOs.CreateItem
+
+<div class="container">
+    <h2>Post an item</h2>
+    
+    <form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <input asp-for="ItemName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea asp-for="ItemDescription" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Price</label>
+        <input asp-for="Price" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Category</label>
+        <select asp-for="CategoryId" class="form-select">
+            <option value="">Select a Category</option>
+            @foreach (var cat in ViewBag.Categories)
+            {
+                <option value="@cat.Id">@cat.CategoryName</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Images</label>
+        <input asp-for="Images" type="file" class="form-control" multiple />
+    </div>
+
+    <button type="submit" class="btn btn-success">Post</button>
+</form>
+</div>
