@@ -44,4 +44,67 @@ public class HomeController : Controller
             new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }
         );
     }
+
+    public async Task<IActionResult> Create()
+    {
+        IEnumerable<Category> categories = await _homeRepository.GetCategories();
+        ViewBag.Categories = categories;
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CreateItem dto)
+    {
+        if (!ModelState.IsValid)
+    {
+        ViewBag.Categories = await _homeRepository.GetCategories();
+        return View(dto);
+    }
+
+    var accountIdClaim = User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
+    if (string.IsNullOrEmpty(accountIdClaim))
+    {
+        return RedirectToAction("Login", "Account"); // user not logged in
+    }
+        int accountId = int.Parse(accountIdClaim);
+
+        var itemToCreate = new Item
+    {
+        ItemName = dto.ItemName,
+        ItemDescription = dto.ItemDescription,
+        ItemPrice = dto.Price,
+        CategoryId = dto.CategoryId,
+        Status = "Active",
+        AccountId = accountId
+    };
+            await _homeRepository.AddItemAsync(itemToCreate);
+
+    if (dto.Images != null && dto.Images.Count > 0)
+    {
+        foreach (var formFile in dto.Images)
+        {
+            if (formFile.Length > 0)
+            {
+                // Generate a unique file name
+                var fileName = $"{Guid.NewGuid()}_{formFile.FileName}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", fileName);
+
+                using (var stream = System.IO.File.Create(filePath))
+                {
+                    await formFile.CopyToAsync(stream);
+                }
+
+                // Save image path to database
+                await _homeRepository.AddItemImageAsync(new ItemImage
+                {
+                    ItemId = itemToCreate.Id,
+                    ImagePath = "/uploads/" + fileName
+                });
+            }
+        }
+    }
+
+    return RedirectToAction(nameof(Index));
+}
 }
