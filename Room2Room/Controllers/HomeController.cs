@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Room2Room.Models;
+using Room2Room.Models.DTOs;
 
 namespace Room2Room.Controllers;
 
@@ -18,7 +19,13 @@ public class HomeController : Controller
     public async Task<IActionResult> Index(string sTerm="", int categoryId=0)
     {
         IEnumerable<Item> items = await _homeRepository.GetItems(sTerm, categoryId);
-        return View(items);
+        IEnumerable<Category> categories = await _homeRepository.GetCategories();
+        ItemDisplayModel itemModel = new ItemDisplayModel
+        {
+            Items = items,
+            Categories = categories
+        };
+        return View(itemModel);
     }
 
     public IActionResult Privacy()

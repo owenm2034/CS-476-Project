@@ -1,25 +1,19 @@
-﻿@model IEnumerable<Item>
+﻿@model ItemDisplayModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="my-2">
-    <form class="row row-cols-lg-auto g-3 align-items-center">
+    <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
   
   <div class="col-12">
     <label class="visually-hidden" for="inlineFormSelectPref">Category</label>
-    <select class="form-select" id="categoryId">
+    <select class="form-select" id="categoryId" name="categoryId">
       <option selected>Filter by category</option>
-      <option value="1">Academic Supplies</option>
-      <option value="2">Electronics</option>
-      <option value="3">Furniture</option>
-      <option value="4">Clothing</option>
-      <option value="5">Kitchen Appliances</option>
-      <option value="6">Outdoor & Sports</option>
-      <option value="7">Entertainment</option>
-      <option value="8">Transportation</option>
-      <option value="9">Bedding</option>
-      <option value="10">Other</option>  
+      @foreach (var category in Model.Categories)
+      {
+          <option value="@category.Id">@category.CategoryName</option>
+      }
     </select>
   </div>
 
@@ -27,7 +21,7 @@
     <label class="visually-hidden" for="inlineFormInputGroupUsername">Search for items</label>
     <div class="input-group">
       <div class="input-group-text"></div>
-      <input type="text" class="form-control" id="sterm" placeholder="Search for items...">
+      <input type="text" class="form-control" id="sterm" name="sterm" placeholder="Search for items...">
     </div>
   </div>
 
@@ -38,7 +32,7 @@
 </div>
 
 <div class="w-100 mt-4 d-flex flex-wrap justify-content-center">
-    @foreach (var item in Model)
+    @foreach (var item in Model.Items)
         {
         <div class="card mx-2 mb-4" style="width: 16rem;">
             <img src="/images/comingSoon.jpg" class="card-img-top" alt="...">

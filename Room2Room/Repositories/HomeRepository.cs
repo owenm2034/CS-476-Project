@@ -8,6 +8,13 @@ public class HomeRepository : IHomeRepository
     {
         _db = db;
     }
+
+    public async Task<IEnumerable<Category>> GetCategories() // This method retrieves a list of categories from the database. It uses Entity Framework Core's ToListAsync method to asynchronously fetch all categories from the Categories table and return them as an IEnumerable of Category objects.
+    {
+        return await _db.Categories.ToListAsync();
+    }
+
+
     public async Task<IEnumerable<Item>> GetItems(string sTerm="", int categoryId=0) //expecting a search term and category id as parameters, which are used to filter the items returned from the database
     {
        sTerm = sTerm.ToLower(); 
@@ -36,3 +43,4 @@ public class HomeRepository : IHomeRepository
          return items;
     }
 }
+
