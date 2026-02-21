@@ -27,4 +27,7 @@ public class Item
     [NotMapped]
     public string CategoryName { get; set; }
     
+    [NotMapped]
+    public string ImagePath { get; set; }
+   
 }

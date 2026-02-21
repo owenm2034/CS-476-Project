@@ -36,7 +36,15 @@
     @foreach (var item in Model.Items)
         {
         <div class="card mx-2 mb-4" style="width: 16rem;">
-            <img style="width:100%; height:150px;" src="/images/comingSoon.jpg" class="card-img-top" alt="...">
+            @if (!string.IsNullOrEmpty(item.ImagePath))
+            {
+                <img style="width:100%; height:150px;" src="@item.ImagePath" class="card-img-top" alt="...">
+            }
+            else
+            {
+                <img style="width:100%; height:150px;" src="/images/comingSoon.jpg" class="card-img-top" alt="...">
+            }
+            
             <div class="card-body">
                 <h5 class="card-title">@item.ItemName</h5>
                 <p class="card-text">

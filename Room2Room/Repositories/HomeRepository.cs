@@ -32,7 +32,12 @@ public class HomeRepository : IHomeRepository
                         Status = item.Status,
                         CategoryId = item.CategoryId,
                         AccountId = item.AccountId,
-                        CategoryName = category.CategoryName
+                        CategoryName = category.CategoryName,
+
+                        ImagePath = _db.ItemImages
+                                        .Where(img => img.ItemId == item.Id)
+                                        .Select(img => img.ImagePath)
+                                        .FirstOrDefault()
                     }
                     ).ToListAsync();
        //return await items;
