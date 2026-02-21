@@ -7,21 +7,21 @@
     <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
   
   <div class="col-12">
-    <label class="visually-hidden" for="inlineFormSelectPref">Category</label>
+    <label class="visually-hidden" for="categoryId">Category</label>
     <select class="form-select" id="categoryId" name="categoryId">
       <option selected>Filter by category</option>
       @foreach (var category in Model.Categories)
       {
-          <option value="@category.Id">@category.CategoryName</option>
+          <option selected="@(category.Id == Model.CategoryId)" value="@category.Id">@category.CategoryName</option>
       }
     </select>
   </div>
 
   <div class="col-12">
-    <label class="visually-hidden" for="inlineFormInputGroupUsername">Search for items</label>
+    <label class="visually-hidden" for="sterm">Search for items</label>
     <div class="input-group">
       <div class="input-group-text"></div>
-      <input type="text" class="form-control" id="sterm" name="sterm" placeholder="Search for items...">
+      <input type="text" class="form-control" value="@Model.STerm" id="sterm" name="sterm" placeholder="Search for items...">
     </div>
   </div>
 

@@ -23,7 +23,11 @@ public class HomeController : Controller
         ItemDisplayModel itemModel = new ItemDisplayModel
         {
             Items = items,
-            Categories = categories
+            Categories = categories,
+            STerm = sTerm,
+            CategoryId = categoryId
+
+
         };
         return View(itemModel);
     }
