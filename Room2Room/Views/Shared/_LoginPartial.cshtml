@@ -3,8 +3,10 @@
 <ul class="navbar-nav">
 @if (User?.Identity?.IsAuthenticated ?? false)
 {
+    @* if user is logged in *@
     <li class="nav-item">
         @* TODO: add a modify account button *@
+        <a class="btn btn-outline-secondary" asp-controller="Account" asp-action="Edit">Edit Account</a>
     </li>
     <li class="nav-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
@@ -14,6 +16,7 @@
 }
 else
 {
+    @* if user is NOT logged in *@
     <div id='account-div' class="text-end"> 
         <a id="account-login-button" class="btn btn-outline-primary" asp-controller="Account" asp-action="Login">Login</a>
         <a id="account-signup-button" class="btn btn-primary" asp-controller="Account" asp-action="Register">Sign Up</a>
