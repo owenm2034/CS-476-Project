@@ -24,8 +24,7 @@ public class AdminController : Controller
         return View();
     }
 
-    // ===== Announcements =====
-
+    // ===== Announcements List =====
     [HttpGet]
     public IActionResult ListAnnouncements()
     {
@@ -36,6 +35,7 @@ public class AdminController : Controller
         return PartialView("_AnnouncementsList", announcements);
     }
 
+    // ===== Announcements Create =====
     [HttpPost]
     public IActionResult CreateAnnouncement(string message, DateTime? startDate, DateTime? endDate)
     {
@@ -44,7 +44,6 @@ public class AdminController : Controller
 
         var now = DateTime.Now;
 
-        // If user leaves dates blank: show immediately and never expire
         var finalStart = startDate ?? now;
         var finalEnd = endDate ?? DateTime.MaxValue;
 
@@ -67,6 +66,7 @@ public class AdminController : Controller
         return Ok();
     }
 
+    // ===== Announcements Edit =====
     [HttpPost]
     public IActionResult EditAnnouncement(int id, string message, DateTime? startDate, DateTime? endDate)
     {
@@ -80,11 +80,10 @@ public class AdminController : Controller
         var now = DateTime.Now;
         var nowMinute = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
 
-        // Default to existing values
-        var finalStart = a.StartDate;
+        var finalStart = a.StartDate; // keep original seconds
         var finalEnd = a.EndDate;
 
-        // Only validate startDate if user actually changed it
+        // Only validate if user actually changed the start time
         if (startDate.HasValue)
         {
             var incoming = startDate.Value;
@@ -95,9 +94,8 @@ public class AdminController : Controller
 
             if (incomingMinute != existingMinute)
             {
-                // User changed the start time
                 if (incomingMinute == nowMinute)
-                    finalStart = now; // treat current minute as immediate
+                    finalStart = now;
                 else if (incomingMinute < nowMinute)
                     return BadRequest("Start date must be now or later.");
                 else
@@ -105,7 +103,7 @@ public class AdminController : Controller
             }
         }
 
-        // Only update endDate if user actually changed it
+        // Only update end if user actually changed it
         if (endDate.HasValue)
         {
             var incoming = endDate.Value;
@@ -132,6 +130,21 @@ public class AdminController : Controller
         return Ok();
     }
 
+    // ===== Announcements Deactivate/Activate =====
+    [HttpPost]
+    public IActionResult ToggleAnnouncement(int id)
+    {
+        var a = _context.Announcements.FirstOrDefault(x => x.Id == id);
+        if (a == null)
+            return NotFound();
+
+        a.IsActive = !a.IsActive;
+        _context.SaveChanges();
+
+        return Ok();
+    }
+
+    // ===== Announcements Delete =====
     [HttpPost]
     public IActionResult DeleteAnnouncement(int id)
     {
@@ -144,6 +157,4 @@ public class AdminController : Controller
 
         return Ok();
     }
-
-    // ===== End Announcements =====
 }

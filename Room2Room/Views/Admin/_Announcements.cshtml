@@ -33,8 +33,10 @@
     function setMinNow() {
         const now = new Date();
         const minVal = toLocalDatetimeInputValue(now);
+
         const s = document.getElementById('announcementStart');
         const e = document.getElementById('announcementEnd');
+
         if (s) s.min = minVal;
         if (e) e.min = minVal;
     }
@@ -60,10 +62,7 @@
             body: formData.toString()
         });
 
-        if (!res.ok) {
-            alert(await res.text());
-            return;
-        }
+        if (!res.ok) { alert(await res.text()); return; }
 
         document.getElementById('announcementMessage').value = '';
         document.getElementById('announcementStart').value = '';
@@ -89,10 +88,22 @@
             body: formData.toString()
         });
 
-        if (!res.ok) {
-            alert(await res.text());
-            return;
-        }
+        if (!res.ok) { alert(await res.text()); return; }
+
+        await loadAnnouncements();
+    }
+
+    async function toggleAnnouncement(id) {
+        const formData = new URLSearchParams();
+        formData.append('id', id);
+
+        const res = await fetch('/Admin/ToggleAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) { alert(await res.text()); return; }
 
         await loadAnnouncements();
     }
@@ -109,10 +120,7 @@
             body: formData.toString()
         });
 
-        if (!res.ok) {
-            alert(await res.text());
-            return;
-        }
+        if (!res.ok) { alert(await res.text()); return; }
 
         await loadAnnouncements();
     }
@@ -120,8 +128,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         setMinNow();
         loadAnnouncements();
-
-        // Keep min updated while the page stays open
-        setInterval(setMinNow, 10000); // every 10 seconds
+        setInterval(setMinNow, 10000);
     });
 </script>
