@@ -11,12 +11,29 @@ public class AdminController : Controller
     private const string ConnectionString =
         @"Server=localhost,1433;Database=Room2Room;User Id=sa;Password=aStrong!Passw0rd;TrustServerCertificate=True;";
     private readonly ApplicationDbContext _context;
+    private readonly IHomeRepository _homeRepository;
 
-    public AdminController(ApplicationDbContext context)
+    public AdminController(ApplicationDbContext context, IHomeRepository homeRepository)
     {
         _context = context;
+        _homeRepository = homeRepository;
     }
 
+
+    public async Task<IActionResult> Listings(string sTerm = "", int categoryId = 0)
+    {
+        var items = await _homeRepository.GetAllItemsForAdmin();
+        var categories = await _homeRepository.GetCategories();
+
+        ItemDisplayModel itemModel = new ItemDisplayModel
+        {
+            Items = items,
+            Categories = categories,
+            STerm = sTerm,
+            CategoryId = categoryId
+        };
+        return PartialView("_AdminListings", itemModel);
+    }
     public IActionResult Index()
     {
         return View();
