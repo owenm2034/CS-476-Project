@@ -1,1 +1,127 @@
-<p>Announcement stuff here</p>
+<h4>Create Announcement</h4>
+
+<div class="mb-4">
+    <div class="mb-2">
+        <label class="form-label">Message</label>
+        <input id="announcementMessage" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Start Date (optional)</label>
+        <input id="announcementStart" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">End Date (optional)</label>
+        <input id="announcementEnd" type="datetime-local" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary" onclick="createAnnouncement()">Create</button>
+</div>
+
+<hr />
+
+<h4>Announcements</h4>
+<div id="announcementList">Loading...</div>
+
+<script>
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function toLocalDatetimeInputValue(d) {
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function setMinNow() {
+        const now = new Date();
+        const minVal = toLocalDatetimeInputValue(now);
+        const s = document.getElementById('announcementStart');
+        const e = document.getElementById('announcementEnd');
+        if (s) s.min = minVal;
+        if (e) e.min = minVal;
+    }
+
+    async function loadAnnouncements() {
+        const res = await fetch('/Admin/ListAnnouncements', { cache: 'no-store' });
+        document.getElementById('announcementList').innerHTML = await res.text();
+    }
+
+    async function createAnnouncement() {
+        const message = document.getElementById('announcementMessage').value;
+        const startDate = document.getElementById('announcementStart').value;
+        const endDate = document.getElementById('announcementEnd').value;
+
+        const formData = new URLSearchParams();
+        formData.append('message', message);
+        if (startDate) formData.append('startDate', startDate);
+        if (endDate) formData.append('endDate', endDate);
+
+        const res = await fetch('/Admin/CreateAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
+
+        document.getElementById('announcementMessage').value = '';
+        document.getElementById('announcementStart').value = '';
+        document.getElementById('announcementEnd').value = '';
+
+        await loadAnnouncements();
+    }
+
+    async function editAnnouncement(id) {
+        const message = document.getElementById('msg-' + id).value;
+        const startDate = document.getElementById('start-' + id).value;
+        const endDate = document.getElementById('end-' + id).value;
+
+        const formData = new URLSearchParams();
+        formData.append('id', id);
+        formData.append('message', message);
+        if (startDate) formData.append('startDate', startDate);
+        if (endDate) formData.append('endDate', endDate);
+
+        const res = await fetch('/Admin/EditAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
+
+        await loadAnnouncements();
+    }
+
+    async function deleteAnnouncement(id) {
+        if (!confirm('Delete this announcement? This cannot be undone.')) return;
+
+        const formData = new URLSearchParams();
+        formData.append('id', id);
+
+        const res = await fetch('/Admin/DeleteAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
+
+        await loadAnnouncements();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setMinNow();
+        loadAnnouncements();
+
+        // Keep min updated while the page stays open
+        setInterval(setMinNow, 10000); // every 10 seconds
+    });
+</script>

@@ -1,0 +1,50 @@
+@model List<Room2Room.Models.Announcements.Announcement>
+
+@if (Model != null && Model.Any())
+{
+    foreach (Room2Room.Models.Announcements.Announcement a in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="mb-1"><strong>Message:</strong> @a.Message</p>
+                <p class="mb-1"><strong>Start:</strong> @a.StartDate</p>
+                <p class="mb-1"><strong>End:</strong> @a.EndDate</p>
+
+                <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement(@a.Id)">
+                    Delete
+                </button>
+
+                <details class="mt-3">
+                    <summary>Edit</summary>
+
+                    <div class="mt-2">
+                        <div class="mb-2">
+                            <label class="form-label">Message</label>
+                            <input class="form-control" id="msg-@a.Id" value="@a.Message" />
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label">Start Date</label>
+                            <input class="form-control" type="datetime-local" id="start-@a.Id"
+                                   value="@a.StartDate.ToString(format: "yyyy-MM-ddTHH:mm")" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">End Date</label>
+                            <input class="form-control" type="datetime-local" id="end-@a.Id"
+                                   value="@a.EndDate.ToString(format: "yyyy-MM-ddTHH:mm")" />
+                        </div>
+
+                        <button class="btn btn-secondary btn-sm" onclick="editAnnouncement(@a.Id)">
+                            Save Changes
+                        </button>
+                    </div>
+                </details>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <p>No announcements.</p>
+}
