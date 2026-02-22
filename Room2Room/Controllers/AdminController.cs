@@ -10,26 +10,25 @@ public class AdminController : Controller
     // TODO: move out of controller, move db connection instantiation into factory
     private const string ConnectionString =
         @"Server=localhost,1433;Database=Room2Room;User Id=sa;Password=aStrong!Passw0rd;TrustServerCertificate=True;";
-    private readonly ApplicationDbContext _context;
+  
     private readonly IHomeRepository _homeRepository;
 
-    public AdminController(ApplicationDbContext context, IHomeRepository homeRepository)
+    public AdminController(IHomeRepository homeRepository)
     {
-        _context = context;
         _homeRepository = homeRepository;
     }
 
 
     public async Task<IActionResult> Listings(string sTerm = "", int categoryId = 0)
     {
-        var items = await _homeRepository.GetAllItemsForAdmin();
-        var categories = await _homeRepository.GetCategories();
+        var items = (await _homeRepository.GetAllItemsForAdmin()) ?? new List<Item>();
+        var categories = (await _homeRepository.GetCategories()) ?? new List<Category>();
 
-        ItemDisplayModel itemModel = new ItemDisplayModel
+        var itemModel = new ItemDisplayModel
         {
             Items = items,
             Categories = categories,
-            STerm = sTerm,
+            STerm = sTerm?? string.Empty,
             CategoryId = categoryId
         };
         return PartialView("_AdminListings", itemModel);
