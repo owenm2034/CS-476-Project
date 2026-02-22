@@ -206,7 +206,32 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Manage() // GET
     {
-        var model = new ManageModel();
+        var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer(ConnectionString)
+            .Options;
+
+        using var context = new ApplicationDbContext(contextOptions);
+
+        // get current user's account using AccountId claim
+        var accountIdClaim = ((ClaimsIdentity)User.Identity).FindFirst("AccountId")?.Value;
+        if (!int.TryParse(accountIdClaim, out var accountId))
+        {
+            return NotFound();
+        }
+
+        var account = context.Accounts.Where(a => a.Id == accountId).FirstOrDefault();
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        // pre-populate model with current user data
+        var model = new ManageModel
+        {
+            Email = account.Email,
+            Username = account.Username
+        };
+
         return View(model); // renders Manage.cshtml
     }
 
@@ -224,9 +249,15 @@ public class AccountController : Controller
             return View(model);
         }
 
-        // get account
-        var account = context.Accounts.Where(a => a.Email == User.Identity.Name).FirstOrDefault();
-        // var account = context.Accounts.Where(a => a.Email == model.Email).FirstOrDefault();
+        // get account using AccountId claim
+        var accountIdClaim = ((ClaimsIdentity)User.Identity).FindFirst("AccountId")?.Value;
+        if (!int.TryParse(accountIdClaim, out var accountId))
+        {
+            model.ErrorMessage = "Account not found.";
+            return View(model);
+        }
+
+        var account = context.Accounts.Where(a => a.Id == accountId).FirstOrDefault();
         if (account == null)
         {
             model.ErrorMessage = "Account not found.";
@@ -236,17 +267,14 @@ public class AccountController : Controller
         bool isError = false;
         var errorMessage = "";
 
-
-
-        if (!string.IsNullOrWhiteSpace(model.Email))
+        // Email validation
+        if (!string.IsNullOrWhiteSpace(model.Email) && model.Email != account.Email)
         {
             var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
 
             var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
-            // var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToList();
             var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email && a.Id != account.Id).ToList();
 
-            // Email validation
             if (universityExistsTask.Count == 0)
             {
                 isError = true;
@@ -265,24 +293,47 @@ public class AccountController : Controller
             }
         }
 
-        
-
         // Username validation
-        var usernameExistsTask = context.Accounts
-            .Where(a => a.Username.ToLower() == model.Username.ToLower())
-            .ToList();
-
-        if (usernameExistsTask.Count > 0)
+        if (!string.IsNullOrWhiteSpace(model.Username) && model.Username != account.Username)
         {
-            isError = true;
-            errorMessage += "An account with this username already exists. ";
+            var usernameExistsTask = context.Accounts
+                .Where(a => a.Username.ToLower() == model.Username.ToLower() && a.Id != account.Id)
+                .ToList();
+
+            if (usernameExistsTask.Count > 0)
+            {
+                isError = true;
+                errorMessage += "An account with this username already exists. ";
+            }
+            else
+            {
+                account.Username = model.Username;
+            }
         }
 
         // Password validation
-        if (model.Password.Length < 8)
+        if (!string.IsNullOrWhiteSpace(model.Password))
         {
-            isError = true;
-            errorMessage += "Your password must be at least 8 characters. ";
+            if (model.Password.Length < 8)
+            {
+                isError = true;
+                errorMessage += "Your password must be at least 8 characters. ";
+            }
+            else
+            {
+                // Hash and update password
+                byte[] salt = RandomNumberGenerator.GetBytes(16);
+                byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
+                    model.Password,
+                    salt,
+                    iterations: 100_000,
+                    hashAlgorithm: HashAlgorithmName.SHA256,
+                    outputLength: 32
+                );
+
+                account.PasswordSalt = Convert.ToBase64String(salt);
+                account.PasswordHash = Convert.ToBase64String(hash);
+            }
         }
 
         if (isError)
@@ -293,12 +344,19 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Save changes to database
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            model.Password = "";
+            model.ErrorMessage = $"Error saving changes: {ex.Message}";
+            return View(model);
+        }
 
-
-
-
-        // TODO: update user data here
-
+        model.Password = "";
         TempData["Message"] = "Profile updated!";
         return RedirectToAction("Manage"); // redirects to GET Manage after success
     }
