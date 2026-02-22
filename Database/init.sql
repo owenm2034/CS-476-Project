@@ -14,6 +14,19 @@ GO
 -- TABLE CREATION
 Print('*** BEGIN Table Creation ***')
 
+IF NOT EXISTS (select * from sys.tables where name = 'Universities')
+BEGIN
+CREATE TABLE Universities(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Domain NVARCHAR(50) NOT NULL,
+    Name NVARCHAR(200) NOT NULL
+);
+print ('Universities created')
+END
+ELSE
+    print('Universities already created :)')
+    
+
 IF NOT EXISTS (select * from sys.tables where name = 'Accounts')
 BEGIN
 CREATE TABLE Accounts(
@@ -26,24 +39,13 @@ CREATE TABLE Accounts(
     IsAdmin BIT NOT NULL DEFAULT 0,
     ProfilePictureUrl NVARCHAR(200) NOT NULL,
     UniversityId INT NOT NULL
+    CONSTRAINT FK_Accounts_Universities_UniversityId FOREIGN KEY (UniversityId) REFERENCES Universities(Id) ON DELETE CASCADE
 );
 print ('Accounts created')
 END
 ELSE
     print('Accounts already created :)')
 
-
-IF NOT EXISTS (select * from sys.tables where name = 'Universities')
-BEGIN
-CREATE TABLE Universities(
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Domain NVARCHAR(50) NOT NULL,
-    Name NVARCHAR(200) NOT NULL
-);
-print ('Universities created')
-END
-ELSE
-    print('Universities already created :)')
 
 -- Announcements
 IF NOT EXISTS (select * from sys.tables where name = 'Announcements')
@@ -96,8 +98,6 @@ CREATE TABLE Item(
     Status NVARCHAR(MAX) NOT NULL,
     CategoryId INT NOT NULL,
     AccountId INT NOT NULL,
-    UniversityId INT NOT NULL,
-    CONSTRAINT FK_Item_University_UniversityId FOREIGN KEY (UniversityId) REFERENCES Universities(Id) ON DELETE CASCADE,
     CONSTRAINT FK_Item_Accounts_AccountId FOREIGN KEY (AccountId) REFERENCES Accounts(Id) ON DELETE CASCADE,
     CONSTRAINT FK_Item_Category_CategoryId FOREIGN KEY (CategoryId) REFERENCES Category(Id) ON DELETE CASCADE
 );

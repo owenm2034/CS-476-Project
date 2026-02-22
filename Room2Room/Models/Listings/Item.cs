@@ -19,7 +19,7 @@ public class Item
     [Required]
     public int CategoryId { get; set; }
     public int AccountId { get; set; }
-    public int UniversityId { get; set; }
+
     public Category Category { get; set; }
     public List<SaveLaterDetail> SaveLaterDetail { get; set; }
     public List<ItemImage> ItemImage { get; set; } // one to many relationship with ItemImage

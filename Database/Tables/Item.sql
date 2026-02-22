@@ -14,8 +14,6 @@ CREATE TABLE Item(
     Status NVARCHAR(MAX) NOT NULL,
     CategoryId INT NOT NULL,
     AccountId INT NOT NULL,
-    UniversityId INT NOT NULL,
-    CONSTRAINT FK_Item_University_UniversityId FOREIGN KEY (UniversityId) REFERENCES Universities(Id) ON DELETE CASCADE,
     CONSTRAINT FK_Item_Accounts_AccountId FOREIGN KEY (AccountId) REFERENCES Accounts(Id) ON DELETE CASCADE,
     CONSTRAINT FK_Item_Category_CategoryId FOREIGN KEY (CategoryId) REFERENCES Category(Id) ON DELETE CASCADE
 );
