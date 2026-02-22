@@ -48,11 +48,9 @@ public class AdminController : Controller
         var finalStart = startDate ?? now;
         var finalEnd = endDate ?? DateTime.MaxValue;
 
-        // Compare at minute precision
         var nowMinute = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
         var startMinute = new DateTime(finalStart.Year, finalStart.Month, finalStart.Day, finalStart.Hour, finalStart.Minute, 0);
 
-        // If start is the current minute, treat as immediate
         if (startMinute == nowMinute)
             finalStart = now;
         else if (startMinute < nowMinute)
@@ -80,18 +78,47 @@ public class AdminController : Controller
             return BadRequest("Message is required.");
 
         var now = DateTime.Now;
-
-        // If blank, keep existing values
-        var finalStart = startDate ?? a.StartDate;
-        var finalEnd = endDate ?? a.EndDate;
-
         var nowMinute = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
-        var startMinute = new DateTime(finalStart.Year, finalStart.Month, finalStart.Day, finalStart.Hour, finalStart.Minute, 0);
 
-        if (startMinute == nowMinute)
-            finalStart = now;
-        else if (startMinute < nowMinute)
-            return BadRequest("Start date must be now or later.");
+        // Default to existing values
+        var finalStart = a.StartDate;
+        var finalEnd = a.EndDate;
+
+        // Only validate startDate if user actually changed it
+        if (startDate.HasValue)
+        {
+            var incoming = startDate.Value;
+            var incomingMinute = new DateTime(incoming.Year, incoming.Month, incoming.Day, incoming.Hour, incoming.Minute, 0);
+
+            var existing = a.StartDate;
+            var existingMinute = new DateTime(existing.Year, existing.Month, existing.Day, existing.Hour, existing.Minute, 0);
+
+            if (incomingMinute != existingMinute)
+            {
+                // User changed the start time
+                if (incomingMinute == nowMinute)
+                    finalStart = now; // treat current minute as immediate
+                else if (incomingMinute < nowMinute)
+                    return BadRequest("Start date must be now or later.");
+                else
+                    finalStart = incoming;
+            }
+        }
+
+        // Only update endDate if user actually changed it
+        if (endDate.HasValue)
+        {
+            var incoming = endDate.Value;
+            var incomingMinute = new DateTime(incoming.Year, incoming.Month, incoming.Day, incoming.Hour, incoming.Minute, 0);
+
+            var existing = a.EndDate;
+            var existingMinute = new DateTime(existing.Year, existing.Month, existing.Day, existing.Hour, existing.Minute, 0);
+
+            if (incomingMinute != existingMinute)
+            {
+                finalEnd = incoming;
+            }
+        }
 
         if (finalEnd <= finalStart)
             return BadRequest("End date must be after start date.");
@@ -117,4 +144,6 @@ public class AdminController : Controller
 
         return Ok();
     }
+
+    // ===== End Announcements =====
 }
