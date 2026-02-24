@@ -4,26 +4,41 @@
 // Write your JavaScript code.
 // ===== Announcement banner =====
 (function () {
+    async function updateBanner() {
+        try {
+            const r = await fetch('/Announcement/Active', { cache: "no-store" });
+            const a = await r.json();
+
+            const container = document.getElementById("announcementContainer");
+            const banner = document.getElementById("announcementBanner");
+            if (!container || !banner) return;
+
+            const message = (a && (a.message || a.Message)) ? (a.message || a.Message) : "";
+            if (message.trim().length === 0) {
+                container.style.display = "none";
+                banner.textContent = "";
+                return;
+            }
+
+            container.style.display = "block";
+
+            banner.className = "alert alert-warning mt-2 mb-2";
+            banner.textContent = message;
+        } catch (e) {
+            // If request fails, hide banner
+            const container = document.getElementById("announcementContainer");
+            const banner = document.getElementById("announcementBanner");
+            if (container && banner) {
+                container.style.display = "none";
+                banner.textContent = "";
+            }
+        }
+    }
+
     function run() {
-        fetch('/Announcement/Active')
-            .then(r => r.json())
-            .then(a => {
-                if (!a) return;
-
-                const container = document.getElementById("announcementContainer");
-                const banner = document.getElementById("announcementBanner");
-                if (!container || !banner) return;
-
-                const message = a.message || a.Message || "";
-                if (message.trim().length === 0) return;
-
-                container.style.display = "block";
-
-                const color = (a.color || a.Color || "warning").toLowerCase();
-                banner.className = "alert alert-" + color + " mt-2 mb-2";
-                banner.textContent = message;
-            })
-            .catch(() => {});
+        updateBanner();
+        // Auto-refresh for "timed" behavior while user stays on the page
+        setInterval(updateBanner, 30000); // every 30 seconds
     }
 
     if (document.readyState === "loading") {
@@ -32,3 +47,4 @@
         run();
     }
 })();
+// ===== End Announcement banner =====

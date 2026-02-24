@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Room2Room.Data;
-using Room2Room.Models.Announcements;
 
 namespace Room2Room.Controllers;
 
@@ -28,14 +27,13 @@ public class AnnouncementController : Controller
 
         using var context = new ApplicationDbContext(contextOptions);
 
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
 
         var announcement = context.Announcements
             .Where(a => a.IsActive && a.StartDate <= now && a.EndDate >= now)
             .OrderByDescending(a => a.StartDate)
             .FirstOrDefault();
 
-        // Return max 1, or null
         return Json(announcement);
     }
 }
