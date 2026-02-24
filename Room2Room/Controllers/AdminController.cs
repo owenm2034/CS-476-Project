@@ -11,18 +11,18 @@ public class AdminController : Controller
     private const string ConnectionString =
         @"Server=localhost,1433;Database=Room2Room;User Id=sa;Password=aStrong!Passw0rd;TrustServerCertificate=True;";
   
-    private readonly IHomeRepository _homeRepository;
+    private readonly IListingRepository _listingRepository;
 
-    public AdminController(IHomeRepository homeRepository)
+    public AdminController(IListingRepository homeRepository)
     {
-        _homeRepository = homeRepository;
+        _listingRepository = homeRepository;
     }
 
 
     public async Task<IActionResult> Listings(string sTerm = "", int categoryId = 0)
     {
-        var items = (await _homeRepository.GetAllItemsForAdmin()) ?? new List<Item>();
-        var categories = (await _homeRepository.GetCategories()) ?? new List<Category>();
+        var items = (await _listingRepository.GetAllItemsForAdmin()) ?? new List<Item>();
+        var categories = (await _listingRepository.GetCategories()) ?? new List<Category>();
 
         var itemModel = new ItemDisplayModel
         {

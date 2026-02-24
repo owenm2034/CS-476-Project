@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Room2Room.Repositories;
 
 namespace Room2Room.Controllers;
 
@@ -14,9 +15,18 @@ public class ListingController : Controller
         _listingRepository = homeRepository;
     }
 
+
     public async Task<IActionResult> Index(string sTerm = "", int categoryId = 0)
     {
-        IEnumerable<Item> items = await _listingRepository.GetItems(sTerm, categoryId);
+        int? universityId = null;
+        var universityClaim = User.Claims.FirstOrDefault(c => c.Type == "UniversityId");
+
+        if (!string.IsNullOrEmpty(universityClaim?.Value))
+        {
+            universityId = int.Parse(universityClaim.Value);
+        }
+
+        IEnumerable<Item> items = await _listingRepository.GetItems(sTerm, categoryId, universityId);
         IEnumerable<Category> categories = await _listingRepository.GetCategories();
         ItemDisplayModel itemModel = new ItemDisplayModel
         {
