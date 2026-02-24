@@ -5,7 +5,6 @@ using Room2Room.Repositories;
 
 namespace Room2Room.Controllers;
 
-
 public class ListingController : Controller
 {
     private readonly IListingRepository _listingRepository;
@@ -14,7 +13,6 @@ public class ListingController : Controller
     {
         _listingRepository = homeRepository;
     }
-
 
     public async Task<IActionResult> Index(string sTerm = "", int categoryId = 0)
     {
@@ -26,7 +24,11 @@ public class ListingController : Controller
             universityId = int.Parse(universityClaim.Value);
         }
 
-        IEnumerable<Item> items = await _listingRepository.GetItems(sTerm, categoryId, universityId);
+        IEnumerable<Item> items = await _listingRepository.GetItems(
+            sTerm,
+            categoryId,
+            universityId
+        );
         IEnumerable<Category> categories = await _listingRepository.GetCategories();
         ItemDisplayModel itemModel = new ItemDisplayModel
         {
@@ -107,7 +109,7 @@ public class ListingController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    public async Task<IActionResult> Delete(int listingId)
+    public async Task<IActionResult> Delete(int listingId, string? returnTo = null)
     {
         var listing = await _listingRepository.GetItemById(listingId);
 
@@ -117,12 +119,17 @@ public class ListingController : Controller
         }
 
         if (
-            ((ClaimsIdentity)User.Identity).FindFirst("AccountId").Value
+            (((ClaimsIdentity)User?.Identity)?.FindFirst("AccountId").Value ?? "not an id")
                 == listing.AccountId.ToString()
             || User.IsInRole("Admin")
         )
         {
             await _listingRepository.Delete(listingId);
+        }
+
+        if (User.IsInRole("Admin") && returnTo != null)
+        {
+            return Redirect(returnTo);
         }
 
         return Redirect("/Listing/Index");
