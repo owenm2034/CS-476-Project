@@ -18,10 +18,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Item> Items { get; set; } // the label "Items" will be discarded and replaced with "Item" as the table name in the database due to the [Table("Item")] attribute in the Item class
     public DbSet<ItemImage> ItemImages { get; set; } 
     public DbSet<Category> Categories { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<OrderDetail> OrderDetails { get; set; }
-    public DbSet<OrderStatus> OrderStatuses { get; set; }
-    public DbSet<ShoppingCart> ShoppingCarts { get; set; }
-    public DbSet<CartDetail> CartDetails { get; set; }
+    public DbSet<SaveLater> SaveLaters { get; set; }
+    public DbSet<SaveLaterDetail> SaveLaterDetails { get; set; }
     
 }

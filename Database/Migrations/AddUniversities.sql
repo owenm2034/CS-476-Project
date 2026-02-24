@@ -10206,3 +10206,4 @@ INSERT INTO Universities SELECT * FROM (VALUES	('student.eit.edu.au','Engineerin
 	('thu.de','Technische Hochschule Ulm')) v(Name,Domain);
 END
 ELSE PRINT('Universities already added')
+

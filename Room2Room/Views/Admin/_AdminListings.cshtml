@@ -1,0 +1,31 @@
+@model ItemDisplayModel
+@{
+    ViewData["Title"] = "Admin Listings";
+}
+
+@if (Model.Items != null && Model.Items.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.ItemName</td>
+                    <td>@item.CategoryName</td>
+                    <td>@item.ItemPrice</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No listings found.</p>
+}
