@@ -102,7 +102,7 @@ public class AccountController : Controller
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-        return Redirect("/Home/Privacy");
+        return Redirect("/Listing/Index");
     }
 
     [HttpGet]
