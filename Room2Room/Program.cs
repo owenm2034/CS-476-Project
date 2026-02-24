@@ -24,7 +24,7 @@ builder.Services
         options.Cookie.Name = "MyAuthCookie";
     });
 
-builder.Services.AddTransient<IListingRepository, ListingRepository>(); // This line registers the HomeRepository class as a transient service for the IHomeRepository interface in the dependency injection container. This means that whenever an instance of IHomeRepository is requested, a new instance of HomeRepository will be created and provided. This allows for loose coupling between the interface and its implementation, making it easier to manage dependencies and promote testability in the application.
+builder.Services.AddTransient<IListingRepository, ListingRepository>();
 
 
 var app = builder.Build();
