@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema; 
 namespace Room2Room.Models.Listings;
 
-[Table("ShoppingCart")]
-public class ShoppingCart
+[Table("SaveLater")]
+public class SaveLater
 {
     public int Id { get; set; }
     [Required]
