@@ -47,14 +47,33 @@
     }
 
     async function createAnnouncement() {
-        const message = document.getElementById('announcementMessage').value;
-        const startDate = document.getElementById('announcementStart').value;
-        const endDate = document.getElementById('announcementEnd').value;
+        const messageEl = document.getElementById('announcementMessage');
+        const startEl = document.getElementById('announcementStart');
+        const endEl = document.getElementById('announcementEnd');
+
+        const message = messageEl.value;
+        const startDate = startEl.value;
+        const endDate = endEl.value;
+
+        if (startEl.validity && startEl.validity.badInput) {
+            alert("Start Date: please enter a specific time (HH:MM).");
+            startEl.focus();
+            return;
+        }
+        if (endEl.validity && endEl.validity.badInput) {
+            alert("End Date: please enter a specific time (HH:MM).");
+            endEl.focus();
+            return;
+        }
+
+        //Show built-in browser validity UI if something is invalid
+        if (!startEl.checkValidity()) { startEl.reportValidity(); return; }
+        if (!endEl.checkValidity()) { endEl.reportValidity(); return; }
 
         const formData = new URLSearchParams();
-        formData.append('message', message);
-        if (startDate) formData.append('startDate', startDate);
-        if (endDate) formData.append('endDate', endDate);
+        formData.append('Message', message);
+        if (startDate) formData.append('StartDate', startDate);
+        if (endDate) formData.append('EndDate', endDate);
 
         const res = await fetch('/Admin/CreateAnnouncement', {
             method: 'POST',
@@ -64,23 +83,41 @@
 
         if (!res.ok) { alert(await res.text()); return; }
 
-        document.getElementById('announcementMessage').value = '';
-        document.getElementById('announcementStart').value = '';
-        document.getElementById('announcementEnd').value = '';
+        messageEl.value = '';
+        startEl.value = '';
+        endEl.value = '';
 
         await loadAnnouncements();
     }
 
     async function editAnnouncement(id) {
-        const message = document.getElementById('msg-' + id).value;
-        const startDate = document.getElementById('start-' + id).value;
-        const endDate = document.getElementById('end-' + id).value;
+        const msgEl = document.getElementById('msg-' + id);
+        const startEl = document.getElementById('start-' + id);
+        const endEl = document.getElementById('end-' + id);
+
+        const message = msgEl.value;
+        const startDate = startEl.value;
+        const endDate = endEl.value;
+
+        if (startEl.validity && startEl.validity.badInput) {
+            alert("Start Date: please enter a specific time (HH:MM).");
+            startEl.focus();
+            return;
+        }
+        if (endEl.validity && endEl.validity.badInput) {
+            alert("End Date: please enter a specific time (HH:MM).");
+            endEl.focus();
+            return;
+        }
+
+        if (!startEl.checkValidity()) { startEl.reportValidity(); return; }
+        if (!endEl.checkValidity()) { endEl.reportValidity(); return; }
 
         const formData = new URLSearchParams();
-        formData.append('id', id);
-        formData.append('message', message);
-        if (startDate) formData.append('startDate', startDate);
-        if (endDate) formData.append('endDate', endDate);
+        formData.append('Id', id);
+        formData.append('Message', message);
+        if (startDate) formData.append('StartDate', startDate);
+        if (endDate) formData.append('EndDate', endDate);
 
         const res = await fetch('/Admin/EditAnnouncement', {
             method: 'POST',

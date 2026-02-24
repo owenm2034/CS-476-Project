@@ -35,17 +35,31 @@ public class AdminController : Controller
         return PartialView("_AnnouncementsList", announcements);
     }
 
+    public class AnnouncementFormModel
+    {
+        public int Id { get; set; }               // used for Edit
+        public string? Message { get; set; }
+        public DateTime? StartDate { get; set; }  // optional
+        public DateTime? EndDate { get; set; }    // optional
+    }
+
     // ===== Announcements Create =====
     [HttpPost]
-    public IActionResult CreateAnnouncement(string message, DateTime? startDate, DateTime? endDate)
+    public IActionResult CreateAnnouncement(AnnouncementFormModel model)
     {
-        if (string.IsNullOrWhiteSpace(message))
+        if (model == null)
+            return BadRequest("Invalid request.");
+
+        if (string.IsNullOrWhiteSpace(model.Message))
             return BadRequest("Message is required.");
 
         var now = DateTime.Now;
 
-        var finalStart = startDate ?? now;
-        var finalEnd = endDate ?? DateTime.MaxValue;
+        // Rule:
+        // - If date/time not provided => show immediately
+        // - If end not provided => never expires
+        var finalStart = model.StartDate ?? now;
+        var finalEnd = model.EndDate ?? DateTime.MaxValue;
 
         var nowMinute = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
         var startMinute = new DateTime(finalStart.Year, finalStart.Month, finalStart.Day, finalStart.Hour, finalStart.Minute, 0);
@@ -58,7 +72,7 @@ public class AdminController : Controller
         if (finalEnd <= finalStart)
             return BadRequest("End date must be after start date.");
 
-        var announcement = new Announcement(message, "warning", finalStart, finalEnd);
+        var announcement = new Announcement(model.Message.Trim(), "warning", finalStart, finalEnd);
 
         _context.Announcements.Add(announcement);
         _context.SaveChanges();
@@ -68,13 +82,16 @@ public class AdminController : Controller
 
     // ===== Announcements Edit =====
     [HttpPost]
-    public IActionResult EditAnnouncement(int id, string message, DateTime? startDate, DateTime? endDate)
+    public IActionResult EditAnnouncement(AnnouncementFormModel model)
     {
-        var a = _context.Announcements.FirstOrDefault(x => x.Id == id);
+        if (model == null)
+            return BadRequest("Invalid request.");
+
+        var a = _context.Announcements.FirstOrDefault(x => x.Id == model.Id);
         if (a == null)
             return NotFound();
 
-        if (string.IsNullOrWhiteSpace(message))
+        if (string.IsNullOrWhiteSpace(model.Message))
             return BadRequest("Message is required.");
 
         var now = DateTime.Now;
@@ -84,9 +101,9 @@ public class AdminController : Controller
         var finalEnd = a.EndDate;
 
         // Only validate if user actually changed the start time
-        if (startDate.HasValue)
+        if (model.StartDate.HasValue)
         {
-            var incoming = startDate.Value;
+            var incoming = model.StartDate.Value;
             var incomingMinute = new DateTime(incoming.Year, incoming.Month, incoming.Day, incoming.Hour, incoming.Minute, 0);
 
             var existing = a.StartDate;
@@ -104,9 +121,9 @@ public class AdminController : Controller
         }
 
         // Only update end if user actually changed it
-        if (endDate.HasValue)
+        if (model.EndDate.HasValue)
         {
-            var incoming = endDate.Value;
+            var incoming = model.EndDate.Value;
             var incomingMinute = new DateTime(incoming.Year, incoming.Month, incoming.Day, incoming.Hour, incoming.Minute, 0);
 
             var existing = a.EndDate;
@@ -121,7 +138,7 @@ public class AdminController : Controller
         if (finalEnd <= finalStart)
             return BadRequest("End date must be after start date.");
 
-        a.Message = message;
+        a.Message = model.Message.Trim();
         a.StartDate = finalStart;
         a.EndDate = finalEnd;
 
