@@ -18,7 +18,15 @@ public class HomeController : Controller
     
     public async Task<IActionResult> Index(string sTerm="", int categoryId=0)
     {
-        IEnumerable<Item> items = await _homeRepository.GetItems(sTerm, categoryId);
+        int? universityId = null;
+        var universityClaim = User.Claims.FirstOrDefault(c => c.Type == "UniversityId");
+
+        if (!string.IsNullOrEmpty(universityClaim?.Value))
+        {
+            universityId = int.Parse(universityClaim.Value);
+        }
+
+        IEnumerable<Item> items = await _homeRepository.GetItems(sTerm, categoryId, universityId);
         IEnumerable<Category> categories = await _homeRepository.GetCategories();
         ItemDisplayModel itemModel = new ItemDisplayModel
         {

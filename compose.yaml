@@ -28,6 +28,7 @@ services:
         bash -c '
         /opt/mssql-tools18/bin/sqlcmd -S room2room -U sa -P ${DB_PASSWORD} -d master -i docker-entrypoint-initdb/init.sql -C;
         /opt/mssql-tools18/bin/sqlcmd -S room2room -U sa -P ${DB_PASSWORD} -d Room2Room -i docker-entrypoint-initdb/Migrations/AddUniversities.sql -C;
+        /opt/mssql-tools18/bin/sqlcmd -S room2room -U sa -P ${DB_PASSWORD} -d Room2Room -i docker-entrypoint-initdb/Migrations/SeedData.sql -C;
         echo "All done!";
         '
 

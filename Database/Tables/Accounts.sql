@@ -15,7 +15,8 @@ CREATE TABLE Accounts(
     IsEmailVerified BIT NOT NULL DEFAULT 0,
     IsAdmin BIT NOT NULL DEFAULT 0,
     ProfilePictureUrl NVARCHAR(200) NOT NULL,
-    UniversityId INT NOT NULL
+    UniversityId INT NOT NULL,
+    CONSTRAINT FK_Accounts_Universities_UniversityId FOREIGN KEY (UniversityId) REFERENCES Universities(Id) ON DELETE CASCADE
 );
 END
 ELSE
