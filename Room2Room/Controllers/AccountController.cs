@@ -19,7 +19,7 @@ public class AccountController : Controller
     public AccountController(ApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
-        ConnectionString = configuration.GetConnectionString("DefaultConnection");;
+        ConnectionString = configuration.GetConnectionString("DefaultConnection");
     }
 
     public IActionResult Index()
@@ -199,7 +199,7 @@ public class AccountController : Controller
     public async Task<IActionResult> LogOut()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return RedirectToAction("LogIn", "Account");
+        return RedirectToAction("Index", "Home");
     }
 
     // Manage Account GET/POST functions
@@ -226,11 +226,7 @@ public class AccountController : Controller
         }
 
         // pre-populate model with current user data
-        var model = new ManageModel
-        {
-            Email = account.Email,
-            Username = account.Username
-        };
+        var model = new ManageModel { Email = account.Email, Username = account.Username };
 
         return View(model); // renders Manage.cshtml
     }
@@ -273,7 +269,9 @@ public class AccountController : Controller
             var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
 
             var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
-            var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email && a.Id != account.Id).ToList();
+            var emailExistsTask = context.Accounts
+                .Where(a => a.Email == model.Email && a.Id != account.Id)
+                .ToList();
 
             if (universityExistsTask.Count == 0)
             {
