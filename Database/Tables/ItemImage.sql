@@ -1,0 +1,17 @@
+USE Room2Room;
+GO
+
+SET ANSI_NULLS OFF
+GO
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ItemImage')
+BEGIN
+CREATE TABLE ItemImage(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ImagePath NVARCHAR(MAX) NOT NULL,
+    ItemId INT NOT NULL,
+    CONSTRAINT FK_ItemImage_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE
+);
+END
+ELSE
+    PRINT('ItemImage already created :)');

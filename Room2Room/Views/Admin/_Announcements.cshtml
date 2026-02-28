@@ -1,1 +1,170 @@
-<p>Announcement stuff here</p>
+<h4>Create Announcement</h4>
+
+<div class="mb-4">
+    <div class="mb-2">
+        <label class="form-label">Message</label>
+        <input id="announcementMessage" class="form-control" />
+    </div>
+
+    <div class="mb-2">
+        <label class="form-label">Start Date (optional)</label>
+        <input id="announcementStart" type="datetime-local" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">End Date (optional)</label>
+        <input id="announcementEnd" type="datetime-local" class="form-control" />
+    </div>
+
+    <button class="btn btn-primary" onclick="createAnnouncement()">Create</button>
+</div>
+
+<hr />
+
+<h4>Announcements</h4>
+<div id="announcementList">Loading...</div>
+
+<script>
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function toLocalDatetimeInputValue(d) {
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function setMinNow() {
+        const now = new Date();
+        const minVal = toLocalDatetimeInputValue(now);
+
+        const s = document.getElementById('announcementStart');
+        const e = document.getElementById('announcementEnd');
+
+        if (s) s.min = minVal;
+        if (e) e.min = minVal;
+    }
+
+    async function loadAnnouncements() {
+        const res = await fetch('/Admin/ListAnnouncements', { cache: 'no-store' });
+        document.getElementById('announcementList').innerHTML = await res.text();
+    }
+
+    async function createAnnouncement() {
+        const messageEl = document.getElementById('announcementMessage');
+        const startEl = document.getElementById('announcementStart');
+        const endEl = document.getElementById('announcementEnd');
+
+        const message = messageEl.value;
+        const startDate = startEl.value;
+        const endDate = endEl.value;
+
+        if (startEl.validity && startEl.validity.badInput) {
+            alert("Start Date: please enter a specific time (HH:MM).");
+            startEl.focus();
+            return;
+        }
+        if (endEl.validity && endEl.validity.badInput) {
+            alert("End Date: please enter a specific time (HH:MM).");
+            endEl.focus();
+            return;
+        }
+
+        //Show built-in browser validity UI if something is invalid
+        if (!startEl.checkValidity()) { startEl.reportValidity(); return; }
+        if (!endEl.checkValidity()) { endEl.reportValidity(); return; }
+
+        const formData = new URLSearchParams();
+        formData.append('Message', message);
+        if (startDate) formData.append('StartDate', startDate);
+        if (endDate) formData.append('EndDate', endDate);
+
+        const res = await fetch('/Admin/CreateAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) { alert(await res.text()); return; }
+
+        messageEl.value = '';
+        startEl.value = '';
+        endEl.value = '';
+
+        await loadAnnouncements();
+    }
+
+    async function editAnnouncement(id) {
+        const msgEl = document.getElementById('msg-' + id);
+        const startEl = document.getElementById('start-' + id);
+        const endEl = document.getElementById('end-' + id);
+
+        const message = msgEl.value;
+        const startDate = startEl.value;
+        const endDate = endEl.value;
+
+        if (startEl.validity && startEl.validity.badInput) {
+            alert("Start Date: please enter a specific time (HH:MM).");
+            startEl.focus();
+            return;
+        }
+        if (endEl.validity && endEl.validity.badInput) {
+            alert("End Date: please enter a specific time (HH:MM).");
+            endEl.focus();
+            return;
+        }
+
+        if (!startEl.checkValidity()) { startEl.reportValidity(); return; }
+        if (!endEl.checkValidity()) { endEl.reportValidity(); return; }
+
+        const formData = new URLSearchParams();
+        formData.append('Id', id);
+        formData.append('Message', message);
+        if (startDate) formData.append('StartDate', startDate);
+        if (endDate) formData.append('EndDate', endDate);
+
+        const res = await fetch('/Admin/EditAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) { alert(await res.text()); return; }
+
+        await loadAnnouncements();
+    }
+
+    async function toggleAnnouncement(id) {
+        const formData = new URLSearchParams();
+        formData.append('id', id);
+
+        const res = await fetch('/Admin/ToggleAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) { alert(await res.text()); return; }
+
+        await loadAnnouncements();
+    }
+
+    async function deleteAnnouncement(id) {
+        if (!confirm('Delete this announcement? This cannot be undone.')) return;
+
+        const formData = new URLSearchParams();
+        formData.append('id', id);
+
+        const res = await fetch('/Admin/DeleteAnnouncement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData.toString()
+        });
+
+        if (!res.ok) { alert(await res.text()); return; }
+
+        await loadAnnouncements();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setMinNow();
+        loadAnnouncements();
+        setInterval(setMinNow, 10000);
+    });
+</script>

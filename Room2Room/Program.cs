@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Room2Room;
 using Room2Room.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,9 @@ builder.Services
         options.LoginPath = "/Account/Login";
         options.Cookie.Name = "MyAuthCookie";
     });
+
+builder.Services.AddTransient<IListingRepository, ListingRepository>();
+
 
 var app = builder.Build();
 
