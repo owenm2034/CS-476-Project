@@ -228,7 +228,7 @@ public class AccountController : Controller
         // pre-populate model with current user data
         var model = new ManageModel { Email = account.Email, Username = account.Username };
 
-        return View(model); // renders Manage.cshtml
+        return PartialView("_Manage", model); // renders Manage.cshtml
     }
 
     [HttpPost]
@@ -242,7 +242,7 @@ public class AccountController : Controller
 
         if (!ModelState.IsValid)
         {
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         // get account using AccountId claim
@@ -250,14 +250,14 @@ public class AccountController : Controller
         if (!int.TryParse(accountIdClaim, out var accountId))
         {
             model.ErrorMessage = "Account not found.";
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         var account = context.Accounts.Where(a => a.Id == accountId).FirstOrDefault();
         if (account == null)
         {
             model.ErrorMessage = "Account not found.";
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         bool isError = false;
@@ -339,7 +339,7 @@ public class AccountController : Controller
             model.Password = "";
             // model.Email = "";
             model.ErrorMessage = errorMessage;
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         // Save changes to database
@@ -351,11 +351,11 @@ public class AccountController : Controller
         {
             model.Password = "";
             model.ErrorMessage = $"Error saving changes: {ex.Message}";
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         model.Password = "";
         TempData["Message"] = "Profile updated!";
-        return RedirectToAction("Manage"); // redirects to GET Manage after success
+        return PartialView("_Manage"); // redirects to GET Manage after success
     }
 }

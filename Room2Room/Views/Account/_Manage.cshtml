@@ -9,11 +9,10 @@ TODO:
 * prefill existing information into textboxes
 *@
 
-@using (Html.BeginForm("Manage", "Account", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
+
+<form id="manage-account-form">
     @Html.AntiForgeryToken()
 
-    <h1>Manage Account</h1>
     <div class="mb-3">
         @Html.LabelFor(m => m.Email, new { @class = "form-label" })
         @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
@@ -34,9 +33,9 @@ TODO:
 
     @* TODO: profile picture functionality here *@
 
-    <button type="submit" class="btn btn-primary">Save changes</button>
+    <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
 
     <span class="text-danger">
         @(Model?.ErrorMessage ?? "")
     </span>
-}
+</form>

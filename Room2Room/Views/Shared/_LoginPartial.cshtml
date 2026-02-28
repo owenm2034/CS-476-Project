@@ -1,13 +1,42 @@
 ﻿@using Microsoft.AspNetCore.Identity
 
+
+
 @if (User?.Identity?.IsAuthenticated ?? false)
 {
     @* if user is logged in *@
+    <script>
+        async function getEditAccountForm() {
+            const r = await fetch('/Account/Manage');
+            document.getElementById("edit-account-modal").innerHTML = await r.text();
+        }
+
+        async function saveChanges() {
+            const form = document.getElementById('manage-account-form');
+            const formData = new FormData(form);
+
+            const res = await fetch('/Account/Manage', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                // Close the modal and optionally show a success message
+                const data = await res.text();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editAccountModal'));
+                document.getElementById("edit-account-modal").innerHTML = data;
+            }
+        }
+    </script>
+
     <li>
         <a id="account-logout-button" class="nav-link text-dark" asp-controller="Account" asp-action="LogOut">Logout</a>
     </li>
     <li class="nav-item">
-        <a id="account-edit-button" class="nav-link text-dark" asp-controller="Account" asp-action="Manage">Edit Account</a>
+        <button id="edit-account-button" type="button" class="nav-link text-dark" data-bs-toggle="modal"
+            data-bs-target="#editAccountModal" onclick="getEditAccountForm()">
+            Edit Account
+        </button>
     </li>
 }
 else
@@ -20,3 +49,20 @@ else
         <a id="account-login-button" class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
     </li>
 }
+
+
+<div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editAccountModalLabel">Manage Account</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id='edit-account-modal' class="modal-body">
+                @* contents loaded here via ajax. See functions at top of file *@
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
