@@ -8,11 +8,6 @@ namespace Room2Room.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
-    // TODO: move out of controller, move db connection instantiation into factory
-    private const string ConnectionString =
-        @"Server=localhost,1433;Database=Room2Room;User Id=sa;Password=aStrong!Passw0rd;TrustServerCertificate=True;";
-  
-
     private readonly IListingRepository _listingRepository;
     private readonly ApplicationDbContext _context;
 

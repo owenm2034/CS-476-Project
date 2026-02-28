@@ -14,7 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 );
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddControllersWithViews();
+var mvcBuilder = builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
