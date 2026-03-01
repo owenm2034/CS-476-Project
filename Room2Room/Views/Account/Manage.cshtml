@@ -26,6 +26,13 @@ TODO:
         @Html.ValidationMessageFor(m => m.Username, null, new { @class = "text-danger" })
     </div>
 
+    <br><h3>Change Password</h3>
+    <div class="mb-3">
+        @Html.LabelFor(m => m.OldPassword, "Current Password", new { @class = "form-label" })
+        @Html.PasswordFor(m => m.OldPassword, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.OldPassword, null, new { @class = "text-danger" })
+    </div>
+
     <div class="mb-3">
         @Html.LabelFor(m => m.Password, "New Password", new { @class = "form-label" })
         @Html.PasswordFor(m => m.Password, new { @class = "form-control" })

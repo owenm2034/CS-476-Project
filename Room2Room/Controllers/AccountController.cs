@@ -314,31 +314,56 @@ public class AccountController : Controller
         // Password validation
         if (!string.IsNullOrWhiteSpace(model.Password))
         {
-            if (model.Password.Length < 8)
+            if (string.IsNullOrWhiteSpace(model.OldPassword))
             {
                 isError = true;
-                errorMessage += "Your password must be at least 8 characters. ";
+                errorMessage += "You must provide your current password to set a new one. ";
             }
             else
             {
-                // Hash and update password
-                byte[] salt = RandomNumberGenerator.GetBytes(16);
-                byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
-                    model.Password,
+                // verify that OldPassword matches the existing hash
+                byte[] salt = Convert.FromBase64String(account.PasswordSalt);
+                byte[] expectedHash = Convert.FromBase64String(account.PasswordHash);
+                byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
+                    model.OldPassword,
                     salt,
                     iterations: 100_000,
                     hashAlgorithm: HashAlgorithmName.SHA256,
-                    outputLength: 32
+                    outputLength: expectedHash.Length
                 );
 
-                account.PasswordSalt = Convert.ToBase64String(salt);
-                account.PasswordHash = Convert.ToBase64String(hash);
+                if (!CryptographicOperations.FixedTimeEquals(actualHash, expectedHash))
+                {
+                    isError = true;
+                    errorMessage += "Current password is incorrect. ";
+                }
+                else if (model.Password.Length < 8)
+                {
+                    isError = true;
+                    errorMessage += "Your password must be at least 8 characters. ";
+                }
+                else
+                {
+                    // Hash and update password
+                    byte[] newSalt = RandomNumberGenerator.GetBytes(16);
+                    byte[] newHash = Rfc2898DeriveBytes.Pbkdf2(
+                        model.Password,
+                        newSalt,
+                        iterations: 100_000,
+                        hashAlgorithm: HashAlgorithmName.SHA256,
+                        outputLength: 32
+                    );
+
+                    account.PasswordSalt = Convert.ToBase64String(newSalt);
+                    account.PasswordHash = Convert.ToBase64String(newHash);
+                }
             }
         }
 
         if (isError)
         {
             model.Password = "";
+            model.OldPassword = "";
             // model.Email = "";
             model.ErrorMessage = errorMessage;
             return View(model);
