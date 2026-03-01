@@ -6,8 +6,14 @@ namespace Room2Room.Controllers;
 
 public class HomeController : Controller
 {
+    public HomeController() { }
+
     public IActionResult Index()
     {
+        if (User?.Identity?.IsAuthenticated ?? false)
+        {
+            return Redirect("Listing/Index");
+        }
         return View();
     }
 

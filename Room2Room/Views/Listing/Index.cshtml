@@ -1,0 +1,79 @@
+@model ItemDisplayModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="my-4">
+    <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
+
+        <div class="col-12">
+            <label class="visually-hidden" for="categoryId">Category</label>
+            <select class="form-select" id="categoryId" name="categoryId">
+                <option selected>Filter by category</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option selected="@(category.Id == Model.CategoryId)" value="@category.Id">@category.CategoryName
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="visually-hidden" for="sterm">Search for items</label>
+            <div class="input-group">
+                <div class="input-group-text"></div>
+                <input type="text" class="form-control" value="@Model.STerm" id="sterm" name="sterm"
+                    placeholder="Search for items...">
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a href="/Listing/Index" type="reset" class="btn btn-primary">Reset</a>
+        </div>
+
+        <div class="col-12">
+            <a asp-controller="Listing" asp-action="Create" class="btn btn-success">Create a Post</a>
+        </div>
+
+    </form>
+
+</div>
+
+<div class="w-100 mt-4 d-flex flex-wrap justify-content-center">
+    @foreach (var item in Model.Items)
+    {
+        <div class="card mx-2 mb-4" style="width: 16rem;">
+            @if (!string.IsNullOrEmpty(item.ImagePath))
+            {
+                <img style="width:100%; height:150px;" src="@item.ImagePath" class="card-img-top" alt="...">
+            }
+            else
+            {
+                <img style="width:100%; height:150px;" src="/images/comingSoon.jpg" class="card-img-top" alt="...">
+            }
+
+            <div class="card-body">
+                <h5 class="card-title">@item.ItemName</h5>
+                <p class="card-text">
+                    Category: @item.CategoryName<br>
+                    Description: @item.ItemDescription<br>
+                    Price: $@item.ItemPrice
+                </p>
+                <div style="display: flex; flex-direction: row; justify-content: space-around;">
+                <a href="#" class="btn btn-primary">Add to cart</a>
+
+                @if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
+                {
+                    @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id }, FormMethod.Post))
+                    {
+                        <button type="submit" class="btn btn-danger">
+                            Delete
+                        </button>
+                    }
+                }
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -14,6 +14,19 @@ GO
 -- TABLE CREATION
 Print('*** BEGIN Table Creation ***')
 
+IF NOT EXISTS (select * from sys.tables where name = 'Universities')
+BEGIN
+CREATE TABLE Universities(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Domain NVARCHAR(50) NOT NULL,
+    Name NVARCHAR(200) NOT NULL
+);
+print ('Universities created')
+END
+ELSE
+    print('Universities already created :)')
+    
+
 IF NOT EXISTS (select * from sys.tables where name = 'Accounts')
 BEGIN
 CREATE TABLE Accounts(
@@ -26,24 +39,13 @@ CREATE TABLE Accounts(
     IsAdmin BIT NOT NULL DEFAULT 0,
     ProfilePictureUrl NVARCHAR(200) NOT NULL,
     UniversityId INT NOT NULL
+    CONSTRAINT FK_Accounts_Universities_UniversityId FOREIGN KEY (UniversityId) REFERENCES Universities(Id) ON DELETE CASCADE
 );
 print ('Accounts created')
 END
 ELSE
     print('Accounts already created :)')
 
-
-IF NOT EXISTS (select * from sys.tables where name = 'Universities')
-BEGIN
-CREATE TABLE Universities(
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    Domain NVARCHAR(50) NOT NULL,
-    Name NVARCHAR(200) NOT NULL
-);
-print ('Universities created')
-END
-ELSE
-    print('Universities already created :)')
 
 -- Announcements
 IF NOT EXISTS (select * from sys.tables where name = 'Announcements')
@@ -62,38 +64,74 @@ ELSE
     print('Announcements already created :)')
 
 
--- DATA SEEDING
-Print('*** BEGIN DATA SEEDING ***')
-
-IF (SELECT COUNT(*) FROM Accounts) = 0
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Category')
 BEGIN
-    PRINT('Inserting 5 Accounts...')
-    INSERT INTO Accounts (Email, PasswordHash, PasswordSalt, Username, IsEmailVerified, IsAdmin, ProfilePictureUrl, UniversityId) VALUES
-        ('476user@uregina.ca',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'ureginauser',	1,	0,	'',	2195),
-        ('476admin@uregina.ca',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'ureginaadmin',	1,	1,	'',	2195),
-        ('476user@usask.ca',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'usaskuser',	1,	0,	'',	2196),
-        ('476admin@usask.ca',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'usaskadmin',	1,	1,	'',	2196),
-        ('476other@nagasaki-u.ac.jp',	'yNpN/VbLcE73n/RZggWQGll2aeR3R2n9OXzOrB57jd4=',	'7PYJYar8UGDwaPUCx4+r/Q==',	'unagasakiuser',	1,	0,	'',	5117)
+CREATE TABLE Category(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    CategoryName NVARCHAR(40) NOT NULL
+);
+print ('Category created')
 END
 ELSE
-    PRINT('Accounts already seeded :)')
+    PRINT('Category already created :)');
 
--- Announcement seed
-PRINT('Seeding Announcements...')
-IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Announcements')
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SaveLater')
 BEGIN
-    IF (SELECT COUNT(*) FROM Announcements) = 0
-    BEGIN
-        INSERT INTO Announcements (Message, Color, StartDate, EndDate, IsActive)
-        VALUES (
-            'Welcome to Room2Room!',
-            'warning',
-            DATEADD(day,-1, SYSUTCDATETIME()),
-            DATEADD(day,7, SYSUTCDATETIME()),
-            1
-        );
-        print('Announcement inserted')
-    END
-    ELSE
-        print('Announcements already seeded :)')
+CREATE TABLE SaveLater(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    UserId NVARCHAR(MAX) NOT NULL,
+    IsDeleted BIT NOT NULL DEFAULT 0
+);
 END
+ELSE
+    PRINT('SaveLater already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Item')
+BEGIN
+CREATE TABLE Item(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ItemName NVARCHAR(40) NOT NULL,
+    ItemDescription NVARCHAR(200) NOT NULL,
+    ItemPrice FLOAT NOT NULL,
+    Status NVARCHAR(MAX) NOT NULL,
+    CategoryId INT NOT NULL,
+    AccountId INT NOT NULL,
+    CONSTRAINT FK_Item_Accounts_AccountId FOREIGN KEY (AccountId) REFERENCES Accounts(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_Item_Category_CategoryId FOREIGN KEY (CategoryId) REFERENCES Category(Id) ON DELETE CASCADE
+);
+print ('Item created')
+END
+ELSE
+    PRINT('Item already created :)');
+
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SaveLaterDetail')
+BEGIN
+CREATE TABLE SaveLaterDetail(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    SaveLaterId INT NOT NULL,
+    ItemId INT NOT NULL,
+    CONSTRAINT FK_SaveLaterDetail_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_SaveLaterDetail_SaveLater_SaveLaterId FOREIGN KEY (SaveLaterId) REFERENCES SaveLater(Id) ON DELETE CASCADE
+);
+END
+ELSE
+    PRINT('SaveLaterDetail already created :)');
+
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ItemImage')
+BEGIN
+CREATE TABLE ItemImage(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ImagePath NVARCHAR(MAX) NOT NULL,
+    ItemId INT NOT NULL,
+    CONSTRAINT FK_ItemImage_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE
+);
+print ('ItemImage created')
+END
+ELSE
+    PRINT('ItemImage already created :)');
+    

@@ -13,13 +13,13 @@ namespace Room2Room.Controllers;
 public class AccountController : Controller
 {
     // TODO: move out of controller, move db connection instantiation into factory
-    private const string ConnectionString =
-        @"Server=localhost,1433;Database=Room2Room;User Id=sa;Password=aStrong!Passw0rd;TrustServerCertificate=True;";
+    private string ConnectionString;
     private readonly ApplicationDbContext _context;
 
-    public AccountController(ApplicationDbContext context)
+    public AccountController(ApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
+        ConnectionString = configuration.GetConnectionString("DefaultConnection");;
     }
 
     public IActionResult Index()
@@ -103,7 +103,7 @@ public class AccountController : Controller
 
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-        return Redirect("/Home/Privacy");
+        return Redirect("/Listing/Index");
     }
 
     // Register GET/POST functions
@@ -363,6 +363,25 @@ public class AccountController : Controller
                     account.PasswordHash = Convert.ToBase64String(newHash);
                     updatedFields.Add("password");
                 }
+            if (model.Password.Length < 8)
+            {
+                isError = true;
+                errorMessage += "Your password must be at least 8 characters. ";
+            }
+            else
+            {
+                // Hash and update password
+                byte[] salt = RandomNumberGenerator.GetBytes(16);
+                byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
+                    model.Password,
+                    salt,
+                    iterations: 100_000,
+                    hashAlgorithm: HashAlgorithmName.SHA256,
+                    outputLength: 32
+                );
+
+                account.PasswordSalt = Convert.ToBase64String(salt);
+                account.PasswordHash = Convert.ToBase64String(hash);
             }
         }
 
@@ -404,6 +423,8 @@ public class AccountController : Controller
 
         model.Password = "";
         TempData["Message"] = successMessage;
+        model.Password = "";
+        TempData["Message"] = "Profile updated!";
         return RedirectToAction("Manage"); // redirects to GET Manage after success
     }
 }
