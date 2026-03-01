@@ -267,6 +267,9 @@ public class AccountController : Controller
         bool isError = false;
         var errorMessage = "";
 
+        // track what fields were changed so we can craft a success message later
+        var updatedFields = new List<string>();
+
         // Email validation
         if (!string.IsNullOrWhiteSpace(model.Email) && model.Email != account.Email)
         {
@@ -290,6 +293,7 @@ public class AccountController : Controller
             if (!isError)
             {
                 account.Email = model.Email;
+                updatedFields.Add("email address");
             }
         }
 
@@ -308,6 +312,7 @@ public class AccountController : Controller
             else
             {
                 account.Username = model.Username;
+                updatedFields.Add("username");
             }
         }
 
@@ -356,6 +361,7 @@ public class AccountController : Controller
 
                     account.PasswordSalt = Convert.ToBase64String(newSalt);
                     account.PasswordHash = Convert.ToBase64String(newHash);
+                    updatedFields.Add("password");
                 }
             }
         }
@@ -381,8 +387,23 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // build a success string based on which fields changed
+        string successMessage;
+        if (updatedFields.Count == 0)       // no fields changed
+        {
+            successMessage = "No changes made.";
+        }
+        else if (updatedFields.Count == 1)  // 1 field changed
+        {
+            successMessage = "The field " + updatedFields[0] + " was successfully updated.";
+        }
+        else                                // > 1 field changed
+        {
+            successMessage = "The fields " + string.Join(", ", updatedFields) + " were successfully updated.";
+        }
+
         model.Password = "";
-        TempData["Message"] = "Profile updated!";
+        TempData["Message"] = successMessage;
         return RedirectToAction("Manage"); // redirects to GET Manage after success
     }
 }
