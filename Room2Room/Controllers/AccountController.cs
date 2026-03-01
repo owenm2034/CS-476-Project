@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Room2Room.Models.NotificationPreferences;
 
 namespace Room2Room.Controllers;
 
@@ -225,8 +226,17 @@ public class AccountController : Controller
             return NotFound();
         }
 
+        NotificationPreference pref =
+            context.NotificationPreferences.Where(x => x.AccountId == accountId).FirstOrDefault()
+            ?? new NotificationPreference(accountId);
+
         // pre-populate model with current user data
-        var model = new ManageModel { Email = account.Email, Username = account.Username };
+        var model = new ManageModel
+        {
+            Email = account.Email,
+            Username = account.Username,
+            NotificationPreferences = pref
+        };
 
         return PartialView("_Manage", model); // renders Manage.cshtml
     }
@@ -341,6 +351,38 @@ public class AccountController : Controller
             model.ErrorMessage = errorMessage;
             return PartialView("_Manage", model);
         }
+
+        // notification preferences
+        try
+        {
+            var notif = context.NotificationPreferences
+                .Where(x => x.AccountId == accountId)
+                .FirstOrDefault();
+            if (notif == null)
+            {
+                notif = new NotificationPreference(accountId);
+                context.NotificationPreferences.Add(notif);
+            }
+
+            notif.RecieveEmailNotificationOnChatMessageRecieved = model
+                .NotificationPreferences
+                .RecieveEmailNotificationOnChatMessageRecieved;
+            if (User.IsInRole("Admin"))
+            {
+                notif.RecieveEmailNotificationOnListingReported = model
+                    .NotificationPreferences
+                    .RecieveEmailNotificationOnListingReported;
+                notif.RecieveEmailNotificationOnUserReported = model
+                    .NotificationPreferences
+                    .RecieveEmailNotificationOnUserReported;
+            }
+            else
+            {
+                notif.RecieveEmailNotificationOnListingReported = false;
+                notif.RecieveEmailNotificationOnUserReported = false;
+            }
+        }
+        catch (Exception ex) { }
 
         // Save changes to database
         try

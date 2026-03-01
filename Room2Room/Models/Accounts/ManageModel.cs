@@ -1,3 +1,5 @@
+using Room2Room.Models.NotificationPreferences;
+
 namespace Room2Room.Models.Accounts;
 
 public class ManageModel
@@ -6,4 +8,5 @@ public class ManageModel
     public string? Username { get; set; }
     public string? Password { get; set; }
     public string ErrorMessage { get; set; } = "";
+    public NotificationPreference NotificationPreferences { get; set; }
 }
