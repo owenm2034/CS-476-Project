@@ -397,7 +397,7 @@ public class AccountController : Controller
         }
 
         model.Password = "";
-        TempData["Message"] = "Profile updated!";
-        return PartialView("_Manage"); // redirects to GET Manage after success
+        model.SuccessMessage = "Profile updated!";
+        return PartialView("_Manage", model); // redirects to GET Manage after success
     }
 }
