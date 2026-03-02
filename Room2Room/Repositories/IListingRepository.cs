@@ -2,8 +2,7 @@ namespace Room2Room
 {
     public interface IListingRepository
     {
-        Task<IEnumerable<Item>> GetItems(string sTerm="", int categoryId=0, int? universityId=null);
-        Task<IEnumerable<Item>> GetAllItemsForAdmin();
+        Task<IEnumerable<Item>> GetItems(string sTerm="", int? categoryId=null, int? universityId=null);
         Task<IEnumerable<Category>> GetCategories();
         Task AddItemAsync(Item newItem);
         Task AddItemImageAsync(ItemImage image);

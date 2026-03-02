@@ -14,7 +14,7 @@ public class ListingController : Controller
         _listingRepository = homeRepository;
     }
 
-    public async Task<IActionResult> Index(string sTerm = "", int categoryId = 0)
+    public async Task<IActionResult> Index(string sTerm = "", int? categoryId = null)
     {
         int? universityId = null;
         var universityClaim = User.Claims.FirstOrDefault(c => c.Type == "UniversityId");

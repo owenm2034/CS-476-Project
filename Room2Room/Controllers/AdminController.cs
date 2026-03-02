@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Room2Room.Data;
+using Room2Room.Models;
 using Room2Room.Models.Announcements;
 
 namespace Room2Room.Controllers;
@@ -18,17 +20,24 @@ public class AdminController : Controller
     }
 
 
-    public async Task<IActionResult> Listings(string sTerm = "", int categoryId = 0)
+    public async Task<IActionResult> Listings(string sTerm = "", int? categoryId = null, int? universityId = null)
     {
-        var items = (await _listingRepository.GetAllItemsForAdmin()) ?? new List<Item>();
+        var items = (await _listingRepository.GetItems(sTerm, categoryId, universityId)) ?? new List<Item>();
         var categories = (await _listingRepository.GetCategories()) ?? new List<Category>();
+        var universities = 
+            (from item in _context.Items
+            join account in _context.Accounts on item.AccountId equals account.Id
+            join university in _context.Universities on account.UniversityId equals university.Id
+            select university).Distinct();
 
         var itemModel = new ItemDisplayModel
         {
-            Items = items,
+            Items = items.OrderBy(x => x.UniversityName).ThenBy(x => x.Category).ThenBy(x => x.ItemPrice),
             Categories = categories,
+            Universities = universities,
             STerm = sTerm?? string.Empty,
-            CategoryId = categoryId
+            CategoryId = categoryId,
+            UniversityId = universityId
         };
         return PartialView("_AdminListings", itemModel);
     }
@@ -46,14 +55,6 @@ public class AdminController : Controller
             .ToList();
 
         return PartialView("_AnnouncementsList", announcements);
-    }
-
-    public class AnnouncementFormModel
-    {
-        public int Id { get; set; }               // used for Edit
-        public string? Message { get; set; }
-        public DateTime? StartDate { get; set; }  // optional
-        public DateTime? EndDate { get; set; }    // optional
     }
 
     // ===== Announcements Create =====

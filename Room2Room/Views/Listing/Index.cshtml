@@ -9,7 +9,7 @@
         <div class="col-12">
             <label class="visually-hidden" for="categoryId">Category</label>
             <select class="form-select" id="categoryId" name="categoryId">
-                <option selected>Filter by category</option>
+                <option selected value=@null>Filter by category</option>
                 @foreach (var category in Model.Categories)
                 {
                     <option selected="@(category.Id == Model.CategoryId)" value="@category.Id">@category.CategoryName

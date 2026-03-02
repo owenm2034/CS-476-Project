@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Room2Room.Data;
@@ -14,11 +15,12 @@ public class AnnouncementController : Controller
     public AnnouncementController(ApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
-        ConnectionString = configuration.GetConnectionString("DefaultConnection");
+    ConnectionString = configuration.GetConnectionString("DefaultConnection");
     }
 
     // GET: /Announcement/Active
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult Active()
     {
         var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
