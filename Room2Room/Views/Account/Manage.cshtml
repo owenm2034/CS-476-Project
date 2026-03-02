@@ -14,6 +14,13 @@ TODO:
     @Html.AntiForgeryToken()
 
     <h1>Manage Account</h1>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["Message"]
+        </div>
+    }
     <div class="mb-3">
         @Html.LabelFor(m => m.Email, new { @class = "form-label" })
         @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
@@ -24,6 +31,13 @@ TODO:
         @Html.LabelFor(m => m.Username, new { @class = "form-label" })
         @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
         @Html.ValidationMessageFor(m => m.Username, null, new { @class = "text-danger" })
+    </div>
+
+    <br><h3>Change Password</h3>
+    <div class="mb-3">
+        @Html.LabelFor(m => m.OldPassword, "Current Password", new { @class = "form-label" })
+        @Html.PasswordFor(m => m.OldPassword, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.OldPassword, null, new { @class = "text-danger" })
     </div>
 
     <div class="mb-3">
