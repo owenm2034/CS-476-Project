@@ -19,6 +19,7 @@ public class Item
     [Required]
     public int CategoryId { get; set; }
     public int AccountId { get; set; }
+    public string UniversityName { get; set; }
 
     public Category Category { get; set; }
     public List<SaveLaterDetail> SaveLaterDetail { get; set; }

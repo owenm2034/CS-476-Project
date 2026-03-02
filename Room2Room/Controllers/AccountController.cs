@@ -273,6 +273,9 @@ public class AccountController : Controller
         bool isError = false;
         var errorMessage = "";
 
+        // track what fields were changed so we can craft a success message later
+        var updatedFields = new List<string>();
+
         // Email validation
         if (!string.IsNullOrWhiteSpace(model.Email) && model.Email != account.Email)
         {
@@ -298,6 +301,7 @@ public class AccountController : Controller
             if (!isError)
             {
                 account.Email = model.Email;
+                updatedFields.Add("email address");
             }
         }
 
@@ -316,52 +320,89 @@ public class AccountController : Controller
             else
             {
                 account.Username = model.Username;
+                updatedFields.Add("username");
             }
         }
 
         // Password validation
         if (!string.IsNullOrWhiteSpace(model.Password))
         {
-            if (model.Password.Length < 8)
+            if (string.IsNullOrWhiteSpace(model.OldPassword))
             {
                 isError = true;
-                errorMessage += "Your password must be at least 8 characters. ";
+                errorMessage += "You must provide your current password to set a new one. ";
             }
             else
             {
-                // Hash and update password
-                byte[] salt = RandomNumberGenerator.GetBytes(16);
-                byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
-                    model.Password,
+                // verify that OldPassword matches the existing hash
+                byte[] salt = Convert.FromBase64String(account.PasswordSalt);
+                byte[] expectedHash = Convert.FromBase64String(account.PasswordHash);
+                byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
+                    model.OldPassword,
                     salt,
                     iterations: 100_000,
                     hashAlgorithm: HashAlgorithmName.SHA256,
-                    outputLength: 32
+                    outputLength: expectedHash.Length
                 );
 
-                account.PasswordSalt = Convert.ToBase64String(salt);
-                account.PasswordHash = Convert.ToBase64String(hash);
-            }
-        }
+                if (!CryptographicOperations.FixedTimeEquals(actualHash, expectedHash))
+                {
+                    isError = true;
+                    errorMessage += "Current password is incorrect. ";
+                }
+                else if (model.Password.Length < 8)
+                {
+                    isError = true;
+                    errorMessage += "Your password must be at least 8 characters. ";
+                }
+                else
+                {
+                    // Hash and update password
+                    byte[] newSalt = RandomNumberGenerator.GetBytes(16);
+                    byte[] newHash = Rfc2898DeriveBytes.Pbkdf2(
+                        model.Password,
+                        newSalt,
+                        iterations: 100_000,
+                        hashAlgorithm: HashAlgorithmName.SHA256,
+                        outputLength: 32
+                    );
 
-        if (isError)
-        {
-            model.Password = "";
-            // model.Email = "";
-            model.ErrorMessage = errorMessage;
-            return PartialView("_Manage", model);
+                    account.PasswordSalt = Convert.ToBase64String(newSalt);
+                    account.PasswordHash = Convert.ToBase64String(newHash);
+                    updatedFields.Add("password");
+                }
+            }
+
+            if (isError)
+            {
+                model.Password = "";
+                model.OldPassword = "";
+                // model.Email = "";
+                model.ErrorMessage = errorMessage;
+                return PartialView("_Manage", model);
+            }
         }
 
         // notification preferences
         try
         {
+            var notifUpdated = false;
             var notif = context.NotificationPreferences
                 .Where(x => x.AccountId == accountId)
                 .FirstOrDefault();
             if (notif == null)
             {
+                notifUpdated = true;
                 notif = new NotificationPreference(accountId);
                 context.NotificationPreferences.Add(notif);
+            }
+
+            if (notif.RecieveEmailNotificationOnChatMessageRecieved != model.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved
+            || notif.RecieveEmailNotificationOnListingReported != model.NotificationPreferences.RecieveEmailNotificationOnListingReported
+            || notif.RecieveEmailNotificationOnUserReported != model.NotificationPreferences.RecieveEmailNotificationOnUserReported)
+            {
+                notifUpdated = true;
+                updatedFields.Add("notification preferences");
             }
 
             notif.RecieveEmailNotificationOnChatMessageRecieved = model
@@ -396,8 +437,24 @@ public class AccountController : Controller
             return PartialView("_Manage", model);
         }
 
+        // build a success string based on which fields changed
+        string successMessage;
+        if (updatedFields.Count == 0) // no fields changed
+        {
+            successMessage = "No changes made.";
+        }
+        else if (updatedFields.Count == 1) // 1 field changed
+        {
+            successMessage = "The field " + updatedFields[0] + " was successfully updated.";
+        }
+        else // > 1 field changed
+        {
+            successMessage =
+                "The fields " + string.Join(", ", updatedFields) + " were successfully updated.";
+        }
+
         model.Password = "";
-        model.SuccessMessage = "Profile updated!";
+        model.SuccessMessage = successMessage;
         return PartialView("_Manage", model); // redirects to GET Manage after success
     }
 }

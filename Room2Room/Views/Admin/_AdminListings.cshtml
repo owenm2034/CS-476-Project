@@ -1,8 +1,53 @@
 @using Room2Room.Controllers
-@model ItemDisplayModel
+@model Room2Room.Models.DTOs.ItemDisplayModel
 @{
     ViewData["Title"] = "Admin Listings";
 }
+
+<div class="my-4">
+    <form asp-action="Listings" class="row row-cols-lg-auto g-3 align-items-center">
+        <button type="submit" style="display: none;" onclick="return false;"></button>
+        <div class="col-12">
+            <label class="visually-hidden" for="adminCategoryId">Category</label>
+            <select class="form-select" id="adminCategoryId" name="adminCategoryId">
+                <option selected value=@null>Filter by category</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option selected="@(category.Id == Model.CategoryId)" value="@category.Id">@category.CategoryName
+                    </option>
+                }
+            </select>
+        </div>
+        
+        <div class="col-12">
+            <label class="visually-hidden" for="adminUniversityId">Category</label>
+            <select class="form-select" id="adminUniversityId" name="adminUniversityId">
+                <option selected value=@null>Filter by university</option>
+                @foreach (var uni in Model.Universities)
+                {
+                    <option selected="@(uni.Id == Model.UniversityId)" value="@uni.Id">@uni.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="visually-hidden" for="adminsterm">Search for items</label>
+            <div class="input-group">
+                <div class="input-group-text"></div>
+                <input type="text" class="form-control" value="@Model.STerm" id="adminsterm" name="adminsterm"
+                    placeholder="Search for items...">
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button id="adminlistingsearch" type="button" class="btn btn-primary" onclick="searchAdminListings()">Search</button>
+            <a class="btn btn-primary" onclick="loadAdminListings()">Reset</a>
+        </div>
+    </form>
+</div>
+
+<script src="~/js/adminListings.js"></script>
 
 @if (Model.Items != null && Model.Items.Any())
 {
@@ -12,6 +57,7 @@
                 <th>Title</th>
                 <th>Category</th>
                 <th>Price</th>
+                <th>University</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -22,13 +68,15 @@
                     <td>@item.ItemName</td>
                     <td>@item.CategoryName</td>
                     <td>$@item.ItemPrice</td>
+                    <td>@item.UniversityName</td>
                     <td>@if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
-                    {
-                        @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id, returnTo = "/Admin" }, FormMethod.Post))
                         {
-                            <button type="submit" class="btn btn-danger">Delete</button>
+                            @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id, returnTo = "/Admin" },
+                                            FormMethod.Post))
+                            {
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            }
                         }
-                    }
                     </td>
                 </tr>
             }
