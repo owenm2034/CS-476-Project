@@ -19,7 +19,8 @@ public class AccountController : Controller
     public AccountController(ApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
-        ConnectionString = configuration.GetConnectionString("DefaultConnection");;
+        ConnectionString = configuration.GetConnectionString("DefaultConnection");
+        ;
     }
 
     public IActionResult Index()
@@ -226,11 +227,7 @@ public class AccountController : Controller
         }
 
         // pre-populate model with current user data
-        var model = new ManageModel
-        {
-            Email = account.Email,
-            Username = account.Username
-        };
+        var model = new ManageModel { Email = account.Email, Username = account.Username };
 
         return View(model); // renders Manage.cshtml
     }
@@ -276,7 +273,9 @@ public class AccountController : Controller
             var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
 
             var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
-            var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email && a.Id != account.Id).ToList();
+            var emailExistsTask = context.Accounts
+                .Where(a => a.Email == model.Email && a.Id != account.Id)
+                .ToList();
 
             if (universityExistsTask.Count == 0)
             {
@@ -363,35 +362,16 @@ public class AccountController : Controller
                     account.PasswordHash = Convert.ToBase64String(newHash);
                     updatedFields.Add("password");
                 }
-            if (model.Password.Length < 8)
-            {
-                isError = true;
-                errorMessage += "Your password must be at least 8 characters. ";
             }
-            else
+
+            if (isError)
             {
-                // Hash and update password
-                byte[] salt = RandomNumberGenerator.GetBytes(16);
-                byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
-                    model.Password,
-                    salt,
-                    iterations: 100_000,
-                    hashAlgorithm: HashAlgorithmName.SHA256,
-                    outputLength: 32
-                );
-
-                account.PasswordSalt = Convert.ToBase64String(salt);
-                account.PasswordHash = Convert.ToBase64String(hash);
+                model.Password = "";
+                model.OldPassword = "";
+                // model.Email = "";
+                model.ErrorMessage = errorMessage;
+                return View(model);
             }
-        }
-
-        if (isError)
-        {
-            model.Password = "";
-            model.OldPassword = "";
-            // model.Email = "";
-            model.ErrorMessage = errorMessage;
-            return View(model);
         }
 
         // Save changes to database
@@ -408,17 +388,18 @@ public class AccountController : Controller
 
         // build a success string based on which fields changed
         string successMessage;
-        if (updatedFields.Count == 0)       // no fields changed
+        if (updatedFields.Count == 0) // no fields changed
         {
             successMessage = "No changes made.";
         }
-        else if (updatedFields.Count == 1)  // 1 field changed
+        else if (updatedFields.Count == 1) // 1 field changed
         {
             successMessage = "The field " + updatedFields[0] + " was successfully updated.";
         }
-        else                                // > 1 field changed
+        else // > 1 field changed
         {
-            successMessage = "The fields " + string.Join(", ", updatedFields) + " were successfully updated.";
+            successMessage =
+                "The fields " + string.Join(", ", updatedFields) + " were successfully updated.";
         }
 
         model.Password = "";
