@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Room2Room.Models.NotificationPreferences;
 
 namespace Room2Room.Controllers;
 
@@ -20,7 +21,6 @@ public class AccountController : Controller
     {
         _context = context;
         ConnectionString = configuration.GetConnectionString("DefaultConnection");
-        ;
     }
 
     public IActionResult Index()
@@ -200,7 +200,7 @@ public class AccountController : Controller
     public async Task<IActionResult> LogOut()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return RedirectToAction("LogIn", "Account");
+        return RedirectToAction("Index", "Home");
     }
 
     // Manage Account GET/POST functions
@@ -226,10 +226,19 @@ public class AccountController : Controller
             return NotFound();
         }
 
-        // pre-populate model with current user data
-        var model = new ManageModel { Email = account.Email, Username = account.Username };
+        NotificationPreference pref =
+            context.NotificationPreferences.Where(x => x.AccountId == accountId).FirstOrDefault()
+            ?? new NotificationPreference(accountId);
 
-        return View(model); // renders Manage.cshtml
+        // pre-populate model with current user data
+        var model = new ManageModel
+        {
+            Email = account.Email,
+            Username = account.Username,
+            NotificationPreferences = pref
+        };
+
+        return PartialView("_Manage", model); // renders Manage.cshtml
     }
 
     [HttpPost]
@@ -243,7 +252,7 @@ public class AccountController : Controller
 
         if (!ModelState.IsValid)
         {
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         // get account using AccountId claim
@@ -251,14 +260,14 @@ public class AccountController : Controller
         if (!int.TryParse(accountIdClaim, out var accountId))
         {
             model.ErrorMessage = "Account not found.";
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         var account = context.Accounts.Where(a => a.Id == accountId).FirstOrDefault();
         if (account == null)
         {
             model.ErrorMessage = "Account not found.";
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         bool isError = false;
@@ -370,9 +379,51 @@ public class AccountController : Controller
                 model.OldPassword = "";
                 // model.Email = "";
                 model.ErrorMessage = errorMessage;
-                return View(model);
+                return PartialView("_Manage", model);
             }
         }
+
+        // notification preferences
+        try
+        {
+            var notifUpdated = false;
+            var notif = context.NotificationPreferences
+                .Where(x => x.AccountId == accountId)
+                .FirstOrDefault();
+            if (notif == null)
+            {
+                notifUpdated = true;
+                notif = new NotificationPreference(accountId);
+                context.NotificationPreferences.Add(notif);
+            }
+
+            if (notif.RecieveEmailNotificationOnChatMessageRecieved != model.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved
+            || notif.RecieveEmailNotificationOnListingReported != model.NotificationPreferences.RecieveEmailNotificationOnListingReported
+            || notif.RecieveEmailNotificationOnUserReported != model.NotificationPreferences.RecieveEmailNotificationOnUserReported)
+            {
+                notifUpdated = true;
+                updatedFields.Add("notification preferences");
+            }
+
+            notif.RecieveEmailNotificationOnChatMessageRecieved = model
+                .NotificationPreferences
+                .RecieveEmailNotificationOnChatMessageRecieved;
+            if (User.IsInRole("Admin"))
+            {
+                notif.RecieveEmailNotificationOnListingReported = model
+                    .NotificationPreferences
+                    .RecieveEmailNotificationOnListingReported;
+                notif.RecieveEmailNotificationOnUserReported = model
+                    .NotificationPreferences
+                    .RecieveEmailNotificationOnUserReported;
+            }
+            else
+            {
+                notif.RecieveEmailNotificationOnListingReported = false;
+                notif.RecieveEmailNotificationOnUserReported = false;
+            }
+        }
+        catch (Exception ex) { }
 
         // Save changes to database
         try
@@ -383,7 +434,7 @@ public class AccountController : Controller
         {
             model.Password = "";
             model.ErrorMessage = $"Error saving changes: {ex.Message}";
-            return View(model);
+            return PartialView("_Manage", model);
         }
 
         // build a success string based on which fields changed
@@ -403,9 +454,7 @@ public class AccountController : Controller
         }
 
         model.Password = "";
-        TempData["Message"] = successMessage;
-        model.Password = "";
-        TempData["Message"] = "Profile updated!";
-        return RedirectToAction("Manage"); // redirects to GET Manage after success
+        model.SuccessMessage = successMessage;
+        return PartialView("_Manage", model); // redirects to GET Manage after success
     }
 }

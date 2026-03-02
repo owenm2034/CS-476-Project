@@ -1,3 +1,4 @@
+@using Room2Room.Models.NotificationPreferences
 @model Room2Room.Models.Accounts.ManageModel
 
 @*
@@ -9,18 +10,10 @@ TODO:
 * prefill existing information into textboxes
 *@
 
-@using (Html.BeginForm("Manage", "Account", FormMethod.Post, new { enctype = "multipart/form-data" }))
-{
+
+<form id="manage-account-form">
     @Html.AntiForgeryToken()
 
-    <h1>Manage Account</h1>
-
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success" role="alert">
-            @TempData["Message"]
-        </div>
-    }
     <div class="mb-3">
         @Html.LabelFor(m => m.Email, new { @class = "form-label" })
         @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
@@ -46,11 +39,31 @@ TODO:
         @Html.ValidationMessageFor(m => m.Password, null, new { @class = "text-danger" })
     </div>
 
+     <div class="mb-3">
+        @Html.CheckBoxFor(m => m.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved)
+        @Html.LabelFor(m => m.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved, "Receive email notifications for new chat messages.", new { @class = "form-label" })
+    </div>
+
+    @if(User.IsInRole("Admin")) {
+        <div class="mb-3">
+            @Html.CheckBoxFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnListingReported)
+            @Html.LabelFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnListingReported, "Recieve email notifications when a listing is reported.", new { @class = "form-label" })
+        </div>
+        
+        <div class="mb-3">
+            @Html.CheckBoxFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnUserReported)
+            @Html.LabelFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnUserReported, "Recieve email notifications when a user is reported.", new { @class = "form-label" })
+        </div>
+    }
     @* TODO: profile picture functionality here *@
 
-    <button type="submit" class="btn btn-primary">Save changes</button>
+    <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
 
     <span class="text-danger">
         @(Model?.ErrorMessage ?? "")
     </span>
-}
+
+    <span class="text-success">
+        @(Model?.SuccessMessage ?? "")
+    </span>
+</form>

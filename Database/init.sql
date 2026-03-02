@@ -135,3 +135,16 @@ END
 ELSE
     PRINT('ItemImage already created :)');
     
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'NotificationPreferences')
+BEGIN
+CREATE TABLE NotificationPreferences(
+    AccountId INT PRIMARY KEY,
+    RecieveEmailNotificationOnChatMessageRecieved BIT NOT NULL,
+    RecieveEmailNotificationOnUserReported BIT NOT NULL,
+    RecieveEmailNotificationOnListingReported BIT NOT NULL,
+    CONSTRAINT FK_NotificationPreference_Account_AccountId FOREIGN KEY (AccountId) REFERENCES Accounts(Id) ON DELETE CASCADE
+);
+print ('NotificationPreferences created')
+END
+ELSE
+    PRINT('NotificationPreferences already created :)');
