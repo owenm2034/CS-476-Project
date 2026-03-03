@@ -16,10 +16,12 @@ public class AccountController : Controller
     private const string ConnectionString =
         @"Server=localhost,1433;Database=Room2Room;User Id=sa;Password=aStrong!Passw0rd;TrustServerCertificate=True;";
     private readonly ApplicationDbContext _context;
+    private readonly IEmailService _emailService;
 
-    public AccountController(ApplicationDbContext context)
+    public AccountController(ApplicationDbContext context, IEmailService emailService)
     {
         _context = context;
+        _emailService = emailService;
     }
 
     public IActionResult Index()
@@ -190,6 +192,9 @@ public class AccountController : Controller
 
         context.Accounts.Add(account);
         await context.SaveChangesAsync();
+
+        //Send Welcome Email
+        await _emailService.SendWelcomeEmailAsync(model.Email, model.Username);
 
         return Redirect("/Account/LogIn");
     }
