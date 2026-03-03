@@ -19,28 +19,38 @@ public class AdminController : Controller
         _context = context;
     }
 
-
-    public async Task<IActionResult> Listings(string sTerm = "", int? categoryId = null, int? universityId = null)
+    public async Task<IActionResult> Listings(
+        string sTerm = "",
+        int? categoryId = null,
+        int? universityId = null
+    )
     {
-        var items = (await _listingRepository.GetItems(sTerm, categoryId, universityId)) ?? new List<Item>();
+        var items =
+            (await _listingRepository.GetItems(sTerm, categoryId, universityId))
+            ?? new List<Item>();
         var categories = (await _listingRepository.GetCategories()) ?? new List<Category>();
-        var universities = 
-            (from item in _context.Items
+        var universities = (
+            from item in _context.Items
             join account in _context.Accounts on item.AccountId equals account.Id
             join university in _context.Universities on account.UniversityId equals university.Id
-            select university).Distinct();
+            select university
+        ).Distinct();
 
         var itemModel = new ItemDisplayModel
         {
-            Items = items.OrderBy(x => x.UniversityName).ThenBy(x => x.Category).ThenBy(x => x.ItemPrice),
+            Items = items
+                .OrderBy(x => x.UniversityName)
+                .ThenBy(x => x.Category)
+                .ThenBy(x => x.ItemPrice),
             Categories = categories,
             Universities = universities,
-            STerm = sTerm?? string.Empty,
+            STerm = sTerm ?? string.Empty,
             CategoryId = categoryId,
             UniversityId = universityId
         };
         return PartialView("_AdminListings", itemModel);
     }
+
     public IActionResult Index()
     {
         return View();
@@ -50,9 +60,7 @@ public class AdminController : Controller
     [HttpGet]
     public IActionResult ListAnnouncements()
     {
-        var announcements = _context.Announcements
-            .OrderByDescending(a => a.StartDate)
-            .ToList();
+        var announcements = _context.Announcements.OrderByDescending(a => a.StartDate).ToList();
 
         return PartialView("_AnnouncementsList", announcements);
     }
@@ -76,7 +84,14 @@ public class AdminController : Controller
         var finalEnd = model.EndDate ?? DateTime.MaxValue;
 
         var nowMinute = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
-        var startMinute = new DateTime(finalStart.Year, finalStart.Month, finalStart.Day, finalStart.Hour, finalStart.Minute, 0);
+        var startMinute = new DateTime(
+            finalStart.Year,
+            finalStart.Month,
+            finalStart.Day,
+            finalStart.Hour,
+            finalStart.Minute,
+            0
+        );
 
         if (startMinute == nowMinute)
             finalStart = now;
@@ -118,10 +133,24 @@ public class AdminController : Controller
         if (model.StartDate.HasValue)
         {
             var incoming = model.StartDate.Value;
-            var incomingMinute = new DateTime(incoming.Year, incoming.Month, incoming.Day, incoming.Hour, incoming.Minute, 0);
+            var incomingMinute = new DateTime(
+                incoming.Year,
+                incoming.Month,
+                incoming.Day,
+                incoming.Hour,
+                incoming.Minute,
+                0
+            );
 
             var existing = a.StartDate;
-            var existingMinute = new DateTime(existing.Year, existing.Month, existing.Day, existing.Hour, existing.Minute, 0);
+            var existingMinute = new DateTime(
+                existing.Year,
+                existing.Month,
+                existing.Day,
+                existing.Hour,
+                existing.Minute,
+                0
+            );
 
             if (incomingMinute != existingMinute)
             {
@@ -138,10 +167,24 @@ public class AdminController : Controller
         if (model.EndDate.HasValue)
         {
             var incoming = model.EndDate.Value;
-            var incomingMinute = new DateTime(incoming.Year, incoming.Month, incoming.Day, incoming.Hour, incoming.Minute, 0);
+            var incomingMinute = new DateTime(
+                incoming.Year,
+                incoming.Month,
+                incoming.Day,
+                incoming.Hour,
+                incoming.Minute,
+                0
+            );
 
             var existing = a.EndDate;
-            var existingMinute = new DateTime(existing.Year, existing.Month, existing.Day, existing.Hour, existing.Minute, 0);
+            var existingMinute = new DateTime(
+                existing.Year,
+                existing.Month,
+                existing.Day,
+                existing.Hour,
+                existing.Minute,
+                0
+            );
 
             if (incomingMinute != existingMinute)
             {
@@ -187,5 +230,12 @@ public class AdminController : Controller
         _context.SaveChanges();
 
         return Ok();
+    }
+
+    public async Task<IActionResult> GetCategories()
+    {
+        var categories = await _listingRepository.GetCategories();
+        categories = categories.OrderBy(x => x.CategoryName);
+        return PartialView("_AdminCategories", categories);
     }
 }
