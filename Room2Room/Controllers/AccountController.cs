@@ -13,15 +13,16 @@ namespace Room2Room.Controllers;
 public class AccountController : Controller
 {
     // TODO: move out of controller, move db connection instantiation into factory
-    private const string ConnectionString =
-        @"Server=localhost,1433;Database=Room2Room;User Id=sa;Password=aStrong!Passw0rd;TrustServerCertificate=True;";
+    private string ConnectionString;
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
 
-    public AccountController(ApplicationDbContext context, IEmailService emailService)
+    public AccountController(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration)
     {
         _context = context;
         _emailService = emailService;
+
+        ConnectionString = configuration.GetConnectionString("DefaultConnection");
     }
 
     public IActionResult Index()
