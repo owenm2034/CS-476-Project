@@ -76,18 +76,6 @@ ELSE
     PRINT('Category already created :)');
 
 
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SaveLater')
-BEGIN
-CREATE TABLE SaveLater(
-    Id INT IDENTITY(1,1) PRIMARY KEY,
-    UserId NVARCHAR(MAX) NOT NULL,
-    IsDeleted BIT NOT NULL DEFAULT 0
-);
-END
-ELSE
-    PRINT('SaveLater already created :)');
-
-
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Item')
 BEGIN
 CREATE TABLE Item(
@@ -107,19 +95,21 @@ ELSE
     PRINT('Item already created :)');
 
 
-
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SaveLaterDetail')
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Watchlist')
 BEGIN
-CREATE TABLE SaveLaterDetail(
+CREATE TABLE Watchlist(
     Id INT IDENTITY(1,1) PRIMARY KEY,
-    SaveLaterId INT NOT NULL,
+    UserId INT NOT NULL,
     ItemId INT NOT NULL,
-    CONSTRAINT FK_SaveLaterDetail_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE,
-    CONSTRAINT FK_SaveLaterDetail_SaveLater_SaveLaterId FOREIGN KEY (SaveLaterId) REFERENCES SaveLater(Id) ON DELETE CASCADE
+    DateAdded DATETIME NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT FK_Watchlist_Accounts_UserId FOREIGN KEY (UserId) REFERENCES Accounts(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_Watchlist_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id)
 );
+print ('Watchlist created')
 END
 ELSE
-    PRINT('SaveLaterDetail already created :)');
+    PRINT('Watchlist already created :)');
 
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ItemImage')
