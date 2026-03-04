@@ -1,80 +1,13 @@
-﻿@model ItemDisplayModel
-@{
-    ViewData["Title"] = "Home Page";
+﻿@{
+  ViewData["Title"] = "Home Page";
 }
 
-<div class="my-4">
-    <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
-  
-  <div class="col-12">
-    <label class="visually-hidden" for="categoryId">Category</label>
-    <select class="form-select" id="categoryId" name="categoryId">
-      <option selected>Filter by category</option>
-      @foreach (var category in Model.Categories)
-      {
-          <option selected="@(category.Id == Model.CategoryId)" value="@category.Id">@category.CategoryName</option>
-      }
-    </select>
-  </div>
 
-  <div class="col-12">
-    <label class="visually-hidden" for="sterm">Search for items</label>
-    <div class="input-group">
-      <div class="input-group-text"></div>
-      <input type="text" class="form-control" value="@Model.STerm" id="sterm" name="sterm" placeholder="Search for items...">
-    </div>
-  </div>
-
-  <div class="col-12">
-    <button type="submit" class="btn btn-primary">Search</button>
-    <a href="/Home/Index" type="reset" class="btn btn-primary">Reset</a>
-  </div>
-
-  <div class="col-12">
-    <a asp-controller="Home" asp-action="Create" class="btn btn-success">Create a Post</a>
-  </div>
-
-</form>
-
-</div>
-
-<div class="w-100 mt-4 d-flex flex-wrap justify-content-center">
-    @foreach (var item in Model.Items)
-        {
-        <div class="card mx-2 mb-4" style="width: 16rem;">
-            @if (!string.IsNullOrEmpty(item.ImagePath))
-            {
-                <img style="width:100%; height:150px;" src="@item.ImagePath" class="card-img-top" alt="...">
-            }
-            else
-            {
-                <img style="width:100%; height:150px;" src="/images/comingSoon.jpg" class="card-img-top" alt="...">
-            }
-            
-            <div class="card-body">
-                <h5 class="card-title">@item.ItemName</h5>
-                <p class="card-text">
-                    Category: @item.CategoryName<br>
-                    Description: @item.ItemDescription<br>
-                    Price: $@item.ItemPrice
-                    </p>
-                <a href="#" class="btn btn-primary">Add to cart</a>
-            </div>
-            </div>
-        }
-</div>
-        @if (!User?.Identity?.IsAuthenticated ?? true)
-        {
-            // not logged in
-            <p>Not authed</p>
-        }
-        else if (User.IsInRole("Admin"))
-        {
-            // is administrator
-            <p>Is admin</p>
-        }
-        else
-        {
-            // is normal user
-            <p>Not admin</p>
-        }
+<h3>What is Room2Room?</h3>
+<p>In university housing, students living away from home struggle to buy and sell dorm furnishings due
+to quick semester changeovers and a lack of transportation access. This causes students to buy and sell
+items at pawn shops and online marketplaces where sellers are trying to make money, not help students.
+This adds stress to students, who are already financially burdened and are typically on a short timeline to
+move in or out before the next semester begins. The goal of this project is to create an online marketplace
+where students can buy and sell housing furnishings to other students at the same campus, eliminating
+transportation issues and allowing students to support other students.</p>

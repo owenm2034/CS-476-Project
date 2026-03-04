@@ -1,0 +1,69 @@
+@using Room2Room.Models.NotificationPreferences
+@model Room2Room.Models.Accounts.ManageModel
+
+@*
+TODO:
+*add error message upon invalid verification
+    - email address domain not valid
+    - new password parameters not met
+    - any restrictions on profile pic image
+* prefill existing information into textboxes
+*@
+
+
+<form id="manage-account-form">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Email, new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email" })
+        @Html.ValidationMessageFor(m => m.Email, null, new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Username, new { @class = "form-label" })
+        @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Username, null, new { @class = "text-danger" })
+    </div>
+
+    <br><h3>Change Password</h3>
+    <div class="mb-3">
+        @Html.LabelFor(m => m.OldPassword, "Current Password", new { @class = "form-label" })
+        @Html.PasswordFor(m => m.OldPassword, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.OldPassword, null, new { @class = "text-danger" })
+    </div>
+
+    <div class="mb-3">
+        @Html.LabelFor(m => m.Password, "New Password", new { @class = "form-label" })
+        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Password, null, new { @class = "text-danger" })
+    </div>
+
+     <div class="mb-3">
+        @Html.CheckBoxFor(m => m.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved)
+        @Html.LabelFor(m => m.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved, "Receive email notifications for new chat messages.", new { @class = "form-label" })
+    </div>
+
+    @if(User.IsInRole("Admin")) {
+        <div class="mb-3">
+            @Html.CheckBoxFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnListingReported)
+            @Html.LabelFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnListingReported, "Recieve email notifications when a listing is reported.", new { @class = "form-label" })
+        </div>
+        
+        <div class="mb-3">
+            @Html.CheckBoxFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnUserReported)
+            @Html.LabelFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnUserReported, "Recieve email notifications when a user is reported.", new { @class = "form-label" })
+        </div>
+    }
+    @* TODO: profile picture functionality here *@
+
+    <button type="button" class="btn btn-primary" onclick="saveChanges()">Save changes</button>
+
+    <span class="text-danger">
+        @(Model?.ErrorMessage ?? "")
+    </span>
+
+    <span class="text-success">
+        @(Model?.SuccessMessage ?? "")
+    </span>
+</form>

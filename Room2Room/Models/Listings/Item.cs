@@ -19,9 +19,10 @@ public class Item
     [Required]
     public int CategoryId { get; set; }
     public int AccountId { get; set; }
+    public string UniversityName { get; set; }
+
     public Category Category { get; set; }
-    public List<OrderDetail> OrderDetail { get; set; }
-    public List<CartDetail> CartDetail { get; set; }
+    public List<SaveLaterDetail> SaveLaterDetail { get; set; }
     public List<ItemImage> ItemImage { get; set; } // one to many relationship with ItemImage
 
     [NotMapped]
