@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Room2Room;
 using Room2Room.Data;
+using Resend;
+using Room2Room.Models;
+using Room2Room.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +29,11 @@ builder.Services
 
 builder.Services.AddTransient<IListingRepository, ListingRepository>();
 
+// Email Service- ReSend
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 var app = builder.Build();
 
