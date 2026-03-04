@@ -60,8 +60,13 @@
                     Description: @item.ItemDescription<br>
                     Price: $@item.ItemPrice
                 </p>
-                <div style="display: flex; flex-direction: row; justify-content: space-around;">
-                <a href="#" class="btn btn-primary">Add to cart</a>
+                <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+                    @using (Html.BeginForm("AddToWatchlist", "Watchlist", new { itemId = item.Id }, FormMethod.Post))
+                    {
+                        <button class="watchlist-heart" type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
+                            <i class="bi bi-heart" style="font-size: 1.5rem;"></i>
+                        </button>
+                    }
 
                 @if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
                 {

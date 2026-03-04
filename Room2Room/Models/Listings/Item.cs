@@ -22,7 +22,6 @@ public class Item
     public string UniversityName { get; set; }
 
     public Category Category { get; set; }
-    public List<SaveLaterDetail> SaveLaterDetail { get; set; }
     public List<ItemImage> ItemImage { get; set; } // one to many relationship with ItemImage
 
     [NotMapped]

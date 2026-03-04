@@ -25,6 +25,7 @@ builder.Services
     });
 
 builder.Services.AddTransient<IListingRepository, ListingRepository>();
+builder.Services.AddScoped<IWatchlistRepository, WatchlistRepository>();
 
 
 var app = builder.Build();

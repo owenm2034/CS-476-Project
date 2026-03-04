@@ -3,4 +3,3 @@ global using Room2Room.Models.Listings;
 global using Room2Room.Models.DTOs;
 global using Room2Room.Repositories;
 
-
