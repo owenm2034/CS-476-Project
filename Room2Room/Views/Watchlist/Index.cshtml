@@ -3,53 +3,19 @@
         ViewData["Title"] = "My Watchlist";
     }
 
-<div class="container mt-4">
-    <h2>My Watchlist</h2>
+<h2>My Watchlist</h2>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info mt-3">
-            You haven't saved any items yet. Browse listings and click the 
-            <i class="bi bi-heart"></i> to save them here.
-        </div>
-    }
-    else
-    {
-        <div class="row row-cols-1 row-cols-md-3 g-4 mt-2">
-            @foreach (var entry in Model)
-            {
-                <div class="col" id="watchlist-item-@entry.WatchlistId">
-                    <div class="card h-100 shadow-sm">
-                        <img src="#" class="card-img-top"
-                             style="height:200px; object-fit:cover;"
-                             alt="#" />
-                        <div class="card-body">
-                            <h5 class="card-title">#</h5>
-                            <p class="card-text fw-bold text-success">
-                                #
-                            </p>
-                            <small class="text-muted">
-                                ("MMM d, yyyy")
-                            </small>
-                        </div>
-                        <div class="card-footer d-flex justify-content-between">
-                            <a asp-controller="Listings" asp-action="Details"
-                               asp-route-id="#"
-                               class="btn btn-sm btn-outline-primary">View Item</a>
-
-                            <form asp-action="Remove" asp-controller="Watchlist" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="watchlistId" value="@entry.WatchlistId" />
-                                <input type="hidden" name="returnUrl" value="/Watchlist" />
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="removeItem(@entry.WatchlistId, event)">
-                                    <i class="bi bi-trash"></i> Remove
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-</div>
+@foreach (var item in Model)
+{
+    <div class="watch-item">
+        <img src="@item.ImagePath" width="120" />
+        <h3>@item.ItemName</h3>
+        <p>@item.Status</p>
+        <p>@item.ItemPrice</p>
+        <p>@item.ItemDescription</p>
+        <form asp-action="Remove" method="post">
+            <input type="hidden" name="itemId" value="@item.ItemId" />
+            <button type="submit">Remove</button>
+        </form>
+    </div>
+}
