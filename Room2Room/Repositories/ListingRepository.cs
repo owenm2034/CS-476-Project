@@ -86,4 +86,24 @@ public class ListingRepository : IListingRepository
     {
         await _db.Items.Where(x => x.Id == id).ExecuteDeleteAsync();
     }
+
+    public async Task<List<int>> GetWatchlistedItemIdsAsync(int userId)
+    {
+        return await _db.Watchlists
+        .Where(w => w.UserId == userId)
+        .Select(w => w.ItemId)
+        .ToListAsync();
+    }
+
+    public async Task<string> GetUniversityNameByAccountIdAsync(int accountId)
+    {
+        var result = await (
+            from account in _db.Accounts
+            join university in _db.Universities on account.UniversityId equals university.Id
+            where account.Id == accountId
+            select university.Name
+        ).FirstOrDefaultAsync();
+
+        return result ?? "";
+    }
 }

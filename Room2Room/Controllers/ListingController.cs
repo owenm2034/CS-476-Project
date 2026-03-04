@@ -18,18 +18,23 @@ public class ListingController : Controller
     {
         int? universityId = null;
         var universityClaim = User.Claims.FirstOrDefault(c => c.Type == "UniversityId");
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
 
         if (!string.IsNullOrEmpty(universityClaim?.Value))
         {
             universityId = int.Parse(universityClaim.Value);
         }
 
-        IEnumerable<Item> items = await _listingRepository.GetItems(
-            sTerm,
-            categoryId,
-            universityId
-        );
+        IEnumerable<Item> items = await _listingRepository.GetItems(sTerm, categoryId, universityId);
         IEnumerable<Category> categories = await _listingRepository.GetCategories();
+
+        var watchlistedItemIds = await _listingRepository.GetWatchlistedItemIdsAsync(userId);
+
+        foreach (var item in items)
+        {
+            item.InWatchlist = watchlistedItemIds.Contains(item.Id);
+        }
+        
         ItemDisplayModel itemModel = new ItemDisplayModel
         {
             Items = items,
@@ -71,7 +76,8 @@ public class ListingController : Controller
             ItemPrice = dto.Price,
             CategoryId = dto.CategoryId,
             Status = "Active",
-            AccountId = accountId
+            AccountId = accountId,
+            UniversityName = await _listingRepository.GetUniversityNameByAccountIdAsync(accountId)
         };
         await _listingRepository.AddItemAsync(itemToCreate);
 

@@ -8,5 +8,7 @@ namespace Room2Room
         Task AddItemImageAsync(ItemImage image);
         Task<Item?> GetItemById(int id);
         Task Delete(int id);
+        Task<List<int>> GetWatchlistedItemIdsAsync(int userId);
+        Task<string> GetUniversityNameByAccountIdAsync(int accountId);
     }
 }

@@ -28,6 +28,7 @@ builder.Services
     });
 
 builder.Services.AddTransient<IListingRepository, ListingRepository>();
+builder.Services.AddScoped<IWatchlistRepository, WatchlistRepository>();
 
 // Email Service- ReSend
 builder.Services.Configure<EmailSettings>(
