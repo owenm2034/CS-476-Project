@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-
+@Html.AntiForgeryToken()
 <div class="my-4">
     <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
 
@@ -61,24 +61,26 @@
                     Price: $@item.ItemPrice
                 </p>
                 <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
-                    @using (Html.BeginForm("AddToWatchlist", "Watchlist", new { itemId = item.Id }, FormMethod.Post))
-                    {
-                        <button class="watchlist-heart" type="submit" style="border: none; background: none; padding: 0; cursor: pointer;">
-                            <i class="bi bi-heart" style="font-size: 1.5rem;"></i>
-                        </button>
-                    }
+                   <button class="watchlist-heart" data-item-id="@item.Id"
+                        style="border: none; background: none; padding: 0; cursor: pointer;">
+                        <i class="bi @(item.InWatchlist ? "bi-heart-fill" : "bi-heart")" style="font-size: 1.5rem;"></i>
+                    </button>
 
-                @if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
-                {
-                    @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id }, FormMethod.Post))
+                    @if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
                     {
-                        <button type="submit" class="btn btn-danger">
-                            Delete
-                        </button>
+                        @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id }, FormMethod.Post))
+                        {
+                            <button type="submit" class="btn btn-danger">
+                                Delete
+                            </button>
+                        }
                     }
-                }
                 </div>
             </div>
         </div>
     }
 </div>
+
+@section Scripts {
+    <script src="~/js/watchlist.js"></script>
+}

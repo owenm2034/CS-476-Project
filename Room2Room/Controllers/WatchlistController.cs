@@ -31,8 +31,13 @@ public class WatchlistController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddToWatchlist(int itemId) // Add an item to the watchlist
     {
-        await _watchlistRepository.AddToWatchlistAsync(CurrentUserId, itemId); // Add the item to the user's watchlist
-        return RedirectToAction("Index"); // Redirect back to the watchlist page
+        bool isInWatchlist = await _watchlistRepository.IsInWatchlistAsync(CurrentUserId, itemId);
+        if (!isInWatchlist)
+            await _watchlistRepository.AddToWatchlistAsync(CurrentUserId, itemId);
+        else
+            await _watchlistRepository.RemoveFromWatchlistAsync(CurrentUserId, itemId);
+
+        return Json(new { success = true, inWatchlist = !isInWatchlist }); // Return a JSON response indicating the new state of the watchlist item (for AJAX calls)
     }
 
     [HttpPost]

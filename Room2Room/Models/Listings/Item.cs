@@ -19,7 +19,7 @@ public class Item
     [Required]
     public int CategoryId { get; set; }
     public int AccountId { get; set; }
-    public string UniversityName { get; set; }
+    public string? UniversityName { get; set; }
 
     public Category Category { get; set; }
     public List<ItemImage> ItemImage { get; set; } // one to many relationship with ItemImage
@@ -29,5 +29,8 @@ public class Item
     
     [NotMapped]
     public string ImagePath { get; set; }
+
+    [NotMapped]
+    public bool InWatchlist { get; set; }
 
 }

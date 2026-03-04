@@ -21,7 +21,10 @@ public class WatchlistRepository : IWatchlistRepository
             ItemDescription = w.Item.ItemDescription,
             ItemPrice = w.Item.ItemPrice,
             Status = w.Item.Status,
-            ImagePath = w.Item.ImagePath            
+            ImagePath = w.Item.ItemImage
+                            .OrderBy(img => img.Id) // Ensure consistent ordering
+                            .Select(img => img.ImagePath)
+                            .FirstOrDefault() // Get the first image path or null if no images        
         })
         .ToListAsync();
     }
