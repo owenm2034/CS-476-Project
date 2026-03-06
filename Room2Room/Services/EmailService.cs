@@ -24,7 +24,7 @@ public class EmailService : IEmailService
         var payload = new
         {
             from = $"{_settings.FromName} <{_settings.FromEmail}>",
-            to = new[] { "pushpmehrok.singh@gmail.com" }, // Will change toEmail after domain verification
+            to = new[] { toEmail },
             subject = "Welcome to Room2Room!",
             html = $@"
             <div style=""margin:0;padding:0;background:#f4f4f4;"">
