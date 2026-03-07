@@ -53,7 +53,7 @@
                         <small style="display: block; text-align: @(myMessage ? "right" : "left");">@m.CreatedAt</small>
                     </div>
                 }
-                <input id="chat-box-for-chat-@(cm.Chat.ChatId)" type="text" />
+                <input id="chat-box-for-chat-@(cm.Chat.ChatId)" type="text" /><button onclick="sendChat(@cm.Chat.ChatId)" type="button">Send</button>
             </div>
         }
     </div>
@@ -72,6 +72,14 @@
                     document.getElementById("chat-messages-" + chatId).style.display = "flex";
                 })
             }
+        }
+
+        function sendChat(chatId) {
+            var box = document.getElementById("chat-box-for-chat-" + chatId)
+            var message = box.value
+            console.log(message);
+
+            box.value = ""
         }
     
         document.addEventListener('DOMContentLoaded', () => {
