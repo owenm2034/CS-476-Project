@@ -12,9 +12,8 @@
             @for (int i = 0; i < Model.Count; i++)
             {
                 var cm = Model[i];
-                <li class="list-group-item p-0 border-0">
-                    <a href="#" class="list-group-item list-group-item-action @(i == 0 ? "active" : "")"
-                        aria-current="true">
+                <li class="list-group-item p-0 border-0 chatSidebarContainer">
+                    <a href="#" id="chat-@cm.Chat.ChatId" data="@cm.Chat.ChatId" class="list-group-item list-group-item-action @(i == 0 ? "active" : "")" aria-current="true" style="min-width: 275px">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">@cm.ChatName</h5>
                             <small>@cm.LastUpdated</small>
@@ -43,7 +42,7 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             var cm = Model[i];
-            <div id="chat-messages-@(cm.Chat.ChatId)" style="visibility: @(i == 0 ? "visible" : "hidden"); display: flex; flex-direction: column;">
+            <div id="chat-messages-@(cm.Chat.ChatId)" class="chat-message-container" style="visibility: @(i == 0 ? "visible" : "hidden"); display: flex; flex-direction: column;">
                 @foreach (var m in cm.Messages)
                 {
                     var myMessage = myId == m.FromAccountId;
@@ -58,4 +57,25 @@
             </div>
         }
     </div>
+
+    <script>
+        function registerChatEvents() {
+            var elements = document.getElementsByClassName("chatSidebarContainer")
+            
+            for (let item of elements) {
+                item.addEventListener("click", function(x) {
+                    var chatId = item.firstChild.nextElementSibling.attributes["data"].value 
+                    item.parentElement.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
+                    Array.from(document.getElementsByClassName('chat-message-container')).forEach(el => {el.style.visibility = 'hidden'; el.style.display = 'none' });
+                    item.firstChild.nextElementSibling.classList.add("active");
+                    document.getElementById("chat-messages-" + chatId).style.visibility = "visible";
+                    document.getElementById("chat-messages-" + chatId).style.display = "flex";
+                })
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            registerChatEvents();
+        });
+    </script>
 </div>
