@@ -43,17 +43,7 @@
         {
             var cm = Model[i];
             <div id="chat-messages-@(cm.Chat.ChatId)" class="chat-message-container" style="visibility: @(i == 0 ? "visible" : "hidden"); display: flex; flex-direction: column;">
-                @foreach (var m in cm.Messages)
-                {
-                    var myMessage = myId == m.FromAccountId;
-                    <div id="chat-message-@m.MessageId" style="align-self: @(myMessage ? "end" : "start"); max-width: 60%; background:@(myMessage ? "aliceblue" : "lightgray")">
-                        <p style="margin-bottom: 0px;">
-                            <span class="@(myMessage ? "text-info" : "text-primary")">@m.Message</span>
-                        </p>
-                        <small style="display: block; text-align: @(myMessage ? "right" : "left");">@m.CreatedAt</small>
-                    </div>
-                }
-                <input id="chat-box-for-chat-@(cm.Chat.ChatId)" type="text" /><button onclick="sendChat(@cm.Chat.ChatId)" type="button">Send</button>
+                @Html.Partial("_Messages", cm)
             </div>
         }
     </div>
