@@ -146,7 +146,7 @@ BEGIN
        (8, 1, 'How about around noon?', DATEADD(minute, -3, SYSUTCDATETIME()), 2),
        (9, 1, 'Noon is perfect. See you then!', DATEADD(minute, -2, SYSUTCDATETIME()), 1),
        (10, 7, 'This is a chat without a listing', DATEADD(minute, -4, SYSUTCDATETIME()), 1),
-       (11, 7, 'Woah, how can there be no listing???', DATEADD(minute, -1, SYSUTCDATETIME()), 1)
+       (11, 7, 'Woah, how can there be no listing???', DATEADD(minute, -1, SYSUTCDATETIME()), 2)
 END
 ELSE
     PRINT('ItemImage already seeded :)')

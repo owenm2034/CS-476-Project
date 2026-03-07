@@ -1,0 +1,49 @@
+@using Room2Room.Models.Chats
+@model System.Collections.Generic.List<Room2Room.Models.Chats.ChatModel>
+
+<link href="/css/bootstrap.min.css" rel="stylesheet" />
+<div class="container" style="display:flex;">
+    <div style="flex:1">
+        <ul class="list-group">
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var cm = Model[i];
+                <li class="list-group-item p-0 border-0">
+                    <a href="#" class="list-group-item list-group-item-action @(i == 0 ? "active" : "")"
+                        aria-current="true">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@cm.ChatName</h5>
+                            <small>@cm.LastUpdated</small>
+                        </div>
+                        <p class="mb-1">
+                            @(cm.Messages.Count > 0
+                                                    ? cm.Messages.Last().Message.Substring(0, 20) + "..."
+                                                    : ""
+                            )
+                        </p>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div style="flex:5;">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var cm = Model[i];
+            <div id="chat-messages-@(cm.Chat.ChatId)" style="visibility: @(i == 0 ? "visible" : "hidden"); display: flex; flex-direction: column;">
+                @foreach (var m in cm.Messages)
+                {
+                    var myMessage = int.Parse(User.FindFirst("AccountId")?.Value) == m.FromAccountId;
+                    <div id="chat-message-@m.MessageId" style="align-self: @(myMessage ? "end" : "start"); max-width: 60%; background:@(myMessage ? "aliceblue" : "lightgray")">
+                        <p style="margin-bottom: 0px;">
+                            <span class="@(myMessage ? "text-info" : "text-primary")">@m.Message</span>
+                        </p>
+                        <small style="display: block; text-align: @(myMessage ? "right" : "left");">@m.CreatedAt</small>
+                    </div>
+                }
+                <input id="chat-box-for-chat-@(cm.Chat.ChatId)" type="text" />
+            </div>
+        }
+    </div>
+</div>

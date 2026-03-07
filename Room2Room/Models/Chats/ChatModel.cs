@@ -6,4 +6,22 @@ public class ChatModel
     public Item? Item { get; set; }
     public Dictionary<int, string> AccountIdToNameDictionary { get; set; }
     public List<ChatMessage> Messages { get; set; }
+
+    public string ChatName
+    {
+        get
+        {
+            if (Item != null)
+            {
+                return Item.ItemName;
+            }
+            else
+                return string.Join(", ", AccountIdToNameDictionary.Select(x => x.Value));
+        }
+    }
+
+    public DateTime? LastUpdated
+    {
+        get { return Messages.OrderByDescending(x => x.CreatedAt).FirstOrDefault()?.CreatedAt; }
+    }
 }
