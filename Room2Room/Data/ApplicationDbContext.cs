@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Room2Room.Models;
 using Room2Room.Models.Accounts;
-using Room2Room.Models.Listings;
 using Room2Room.Models.NotificationPreferences;
 using Room2Room.Models.Announcements;
 using Room2Room.Models.Watchlist;
+using Room2Room.Models.Chats;
 
 
 namespace Room2Room.Data;
@@ -20,5 +20,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ItemImage> ItemImages { get; set; } 
     public DbSet<Category> Categories { get; set; }
     public DbSet<Watchlist> Watchlists { get; set; }
+
+    public DbSet<Chat> Chat { get; set; }
+    public DbSet<ChatMessage> ChatMessage { get; set; }
+    public DbSet<ChatMember> ChatMember { get; set; }
     
 }
