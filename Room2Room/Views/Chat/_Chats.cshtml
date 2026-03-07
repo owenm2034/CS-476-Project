@@ -1,6 +1,10 @@
 @using Room2Room.Models.Chats
 @model System.Collections.Generic.List<Room2Room.Models.Chats.ChatModel>
 
+
+@{
+    var myId = int.Parse(User.FindFirst("AccountId")?.Value);
+}
 <link href="/css/bootstrap.min.css" rel="stylesheet" />
 <div class="container" style="display:flex;">
     <div style="flex:1">
@@ -16,10 +20,18 @@
                             <small>@cm.LastUpdated</small>
                         </div>
                         <p class="mb-1">
-                            @(cm.Messages.Count > 0
-                                                    ? cm.Messages.Last().Message.Substring(0, 20) + "..."
-                                                    : ""
-                            )
+                            @if (cm.Messages.Count > 0) {
+                                var message = cm.Messages.Last();
+                                string un = "";
+                                if (message.FromAccountId == myId) {
+                                    un = "Me";
+                                } else {
+                                    un = cm.AccountIdToNameDictionary.GetValueOrDefault(message.FromAccountId);
+                                }
+                                <span>@un: @message.Message</span>
+                            } else {
+                                <span/>
+                            }
                         </p>
                     </a>
                 </li>
@@ -27,14 +39,14 @@
         </ul>
     </div>
 
-    <div style="flex:5;">
+    <div style="flex:2;">
         @for (int i = 0; i < Model.Count; i++)
         {
             var cm = Model[i];
             <div id="chat-messages-@(cm.Chat.ChatId)" style="visibility: @(i == 0 ? "visible" : "hidden"); display: flex; flex-direction: column;">
                 @foreach (var m in cm.Messages)
                 {
-                    var myMessage = int.Parse(User.FindFirst("AccountId")?.Value) == m.FromAccountId;
+                    var myMessage = myId == m.FromAccountId;
                     <div id="chat-message-@m.MessageId" style="align-self: @(myMessage ? "end" : "start"); max-width: 60%; background:@(myMessage ? "aliceblue" : "lightgray")">
                         <p style="margin-bottom: 0px;">
                             <span class="@(myMessage ? "text-info" : "text-primary")">@m.Message</span>
