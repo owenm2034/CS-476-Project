@@ -49,6 +49,10 @@ public class ChatController : Controller
         
         List<ChatModel> chatModels = [];
         foreach (Chat c in chatsTask) {
+            var messages = messagesTask.Where(x => x.ChatId == c.ChatId).OrderBy(x => x.CreatedAt).ToList();
+            if (messages.Count == 0) {
+                continue;
+            }
             var accountIds = messagesTask.Where(x => x.ChatId == c.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
@@ -56,13 +60,53 @@ public class ChatController : Controller
                 Chat = c,
                 Item = c.ListingId.HasValue ? itemIdToItemDict.GetValueOrDefault(c.ListingId.Value) : null,
                 AccountIdToNameDictionary = accountDict,
-                Messages = messagesTask.Where(x => x.ChatId == c.ChatId).OrderBy(x => x.CreatedAt).ToList()
+                Messages = messages
             };
 
             chatModels.Add(cm);
         }
 
         return PartialView("_Chats", chatModels);
+    }
+
+    [HttpGet] 
+    public IActionResult GetNewMessages(DateTime since) {
+        // get new chatModels since the supllied date time. Return this object, selectively update the messages ONLY. this solves all the poling issues
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
+
+        var chatIds = _context.ChatMember.Where(x => x.AccountId == userId).Select(x => x.ChatId).ToList();
+        var chatsTask = _context.Chat.Where(x => chatIds.Contains(x.ChatId)).ToList();
+        var messagesTask = _context.ChatMessage.Where(x => chatIds.Contains(x.ChatId) && x.CreatedAt > since).ToList();
+        var accountIdsTask = _context.ChatMember.Where(x => chatIds.Contains(x.ChatId)).Select(x => x.AccountId).ToList();
+
+
+        Dictionary<int, Item> itemIdToItemDict =
+            _context.Items.Where(x => chatsTask.Select(x => x.ListingId).ToList().Contains(x.Id))
+                .ToList().Distinct().ToDictionary(x => x.Id);
+
+        List<Account> accounts = _context.Accounts.Where(x => accountIdsTask.Distinct().ToList().Contains(x.Id)).ToList();
+
+        List<ChatModel> chatModels = [];
+        foreach (Chat c in chatsTask) {
+            var messages = messagesTask.Where(x => x.ChatId == c.ChatId).OrderBy(x => x.CreatedAt).ToList();
+
+            if (messages.Count == 0) {
+                continue;
+            }
+            var accountIds = messagesTask.Where(x => x.ChatId == c.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
+            var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
+
+            var cm = new ChatModel {
+                Chat = c,
+                Item = c.ListingId.HasValue ? itemIdToItemDict.GetValueOrDefault(c.ListingId.Value) : null,
+                AccountIdToNameDictionary = accountDict,
+                Messages = messages
+            };
+
+            chatModels.Add(cm);
+        }
+
+        return PartialView("_NewChats", chatModels);
     }
 
     

@@ -27,7 +27,7 @@
                                 } else {
                                     un = cm.AccountIdToNameDictionary.GetValueOrDefault(message.FromAccountId);
                                 }
-                                <span>@un: @message.Message</span>
+                                <span>@un: @(message.Message.Length > 50 ? message.Message.Substring(0, 50) + "..." : message.Message)</span>
                             } else {
                                 <span/>
                             }
@@ -42,13 +42,15 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             var cm = Model[i];
-            <div id="chat-messages-@(cm.Chat.ChatId)" class="chat-message-container" style="visibility: @(i == 0 ? "visible" : "hidden"); display: @(i == 0 ? "flex" : "none"); flex-direction: column; overflow-y: auto; min-height: 400px">
+            <div id="chat-messages-@(cm.Chat.ChatId)" class="chat-message-container" style="visibility: @(i == 0 ? "visible" : "hidden"); display: @(i == 0 ? "flex" : "none"); flex-direction: column; overflow-y: auto; min-height: 400px; max-height: 530px">
                 @Html.Partial("_Messages", cm)
             </div>
         }
     </div>
 
     <script>
+        let lastUpdated = new Date("2021-01-01").toISOString();
+        
         function registerChatEvents() {
             var elements = document.getElementsByClassName("chatSidebarContainer")
             
@@ -87,6 +89,43 @@
             toReplace.innerHTML = resp;
             toReplace.scrollTop = toReplace.scrollHeight;
             box.value = ""
+        }
+
+        async function pollChats() {
+            var chatContainers = document.getElementsByClassName("chat-message-container")
+
+            const res = await fetch('/Chat/GetNewMessages?since=' + lastUpdated, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            });
+
+            var html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, "text/html");
+            var newChats = Array.from(doc.getElementsByClassName("chat-message-container"));
+
+            for (let item of newChats) {
+                var target = document.getElementById(item.id);
+                if (!target) {
+                    continue;
+                }
+
+                while (item.firstChild) {
+                    let node = item.firstChild;
+                    if (node.classList && node.classList.contains("chat-box-for-chat")) {
+                        item.removeChild(node);
+                        continue;
+                    }
+                    
+                    target.appendChild(node);
+                }
+
+                const el = target.querySelector(".chat-box-for-chat");
+                target.appendChild(el);
+            }
+
+            lastUpdated = new Date().toISOString();
+            setTimeout(pollChats, 5000);
         }
     
         document.addEventListener('DOMContentLoaded', () => {
