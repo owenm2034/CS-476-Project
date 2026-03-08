@@ -1,0 +1,61 @@
+@model IEnumerable<Room2Room.Models.Listings.Item>
+
+@{
+    ViewData[index: "Title"] = "My Listings";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Listings</h2>
+        <a asp-controller="Listing" asp-action="Create" class="btn btn-success">Create a Post</a>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>University</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Item item in Model)
+                {
+                    <tr>
+                        <td>@item.ItemName</td>
+                        <td>@item.CategoryName</td>
+                        <td>$@item.ItemPrice</td>
+                        <td>@item.UniversityName</td>
+                        <td>
+                            <div style="display:flex; gap:8px;">
+                                <a asp-controller="Listing"
+                                   asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   asp-route-returnTo="/Listing/MyListings"
+                                   class="btn btn-warning btn-sm">
+                                    Edit
+                                </a>
+
+                                @using (Html.BeginForm(actionName: "Delete", controllerName: "Listing",
+                                       new { listingId = item.Id, returnTo = "/Listing/MyListings" },
+                                       FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>You have not posted any listings yet.</p>
+    }
+</div>

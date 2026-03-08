@@ -30,7 +30,7 @@ public class ListingRepository : IListingRepository
             join university in _db.Universities on account.UniversityId equals university.Id
             where
                 string.IsNullOrWhiteSpace(sTerm)
-                || (item != null && item.ItemName.ToLower().Contains(sTerm.ToLower()))
+                || (item.ItemName != null && item.ItemName.ToLower().Contains(sTerm.ToLower()))
             where categoryId == null || item.CategoryId == categoryId
             where universityId == null || account.UniversityId == universityId
             select new Item
@@ -47,7 +47,7 @@ public class ListingRepository : IListingRepository
                 ImagePath = _db.ItemImages
                     .Where(img => img.ItemId == item.Id)
                     .Select(img => img.ImagePath)
-                    .FirstOrDefault()
+                    .FirstOrDefault() ?? ""
             }
         ).ToListAsync();
         //return await items;
@@ -55,6 +55,36 @@ public class ListingRepository : IListingRepository
         {
             items = items.Where(a => a.CategoryId == categoryId).ToList();
         }
+
+        return items;
+    }
+
+    public async Task<IEnumerable<Item>> GetItemsByAccountId(int accountId)
+    {
+        IEnumerable<Item> items = await (
+            from item in _db.Items
+            join category in _db.Categories on item.CategoryId equals category.Id
+            join account in _db.Accounts on item.AccountId equals account.Id
+            join university in _db.Universities on account.UniversityId equals university.Id
+            where item.AccountId == accountId
+            select new Item
+            {
+                Id = item.Id,
+                ItemName = item.ItemName,
+                ItemDescription = item.ItemDescription,
+                ItemPrice = item.ItemPrice,
+                Status = item.Status,
+                CategoryId = item.CategoryId,
+                AccountId = item.AccountId,
+                UniversityName = university.Name,
+                CategoryName = category.CategoryName,
+                ImagePath = _db.ItemImages
+                    .Where(img => img.ItemId == item.Id)
+                    .Select(img => img.ImagePath)
+                    .FirstOrDefault() ?? ""
+            }
+        ).ToListAsync();
+
         return items;
     }
 
@@ -79,7 +109,18 @@ public class ListingRepository : IListingRepository
 
     public async Task<Item?> GetItemById(int id)
     {
-        return _db.Items.Where(item => item.Id == id).ToList().FirstOrDefault();
+        return await _db.Items.FirstOrDefaultAsync(item => item.Id == id);
+    }
+
+    public async Task UpdateItemAsync(Item item)
+    {
+        if (item == null)
+        {
+            throw new ArgumentNullException(nameof(item));
+        }
+
+        _db.Items.Update(item);
+        await _db.SaveChangesAsync();
     }
 
     public async Task Delete(int id)
