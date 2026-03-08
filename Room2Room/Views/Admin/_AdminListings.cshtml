@@ -69,13 +69,26 @@
                     <td>@item.CategoryName</td>
                     <td>$@item.ItemPrice</td>
                     <td>@item.UniversityName</td>
-                    <td>@if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
+                    <td>
+                        @if (User.FindFirst(type: "AccountId")?.Value == item.AccountId.ToString() || User.IsInRole(role: "Admin"))
                         {
-                            @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id, returnTo = "/Admin" },
-                                            FormMethod.Post))
-                            {
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                            }
+                            <div style="display:flex; gap:8px;">
+                                <a asp-controller="Listing"
+                                   asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   asp-route-returnTo="/Admin"
+                                   class="btn btn-warning btn-sm">
+                                    Edit
+                                </a>
+
+                                @using (Html.BeginForm(actionName: "Delete", controllerName: "Listing",
+                                       new { listingId = item.Id, returnTo = "/Admin" },
+                                       FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                }
+                            </div>
                         }
                     </td>
                 </tr>

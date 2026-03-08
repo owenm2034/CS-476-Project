@@ -34,6 +34,7 @@
 
         <div class="col-12">
             <a asp-controller="Listing" asp-action="Create" class="btn btn-success">Create a Post</a>
+            <a asp-controller="Listing" asp-action="MyListings" class="btn btn-outline-primary">My Listings</a>
         </div>
 
     </form>
@@ -68,12 +69,22 @@
 
                     @if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
                     {
-                        @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id }, FormMethod.Post))
-                        {
-                            <button type="submit" class="btn btn-danger">
-                                Delete
-                            </button>
-                        }
+                        <div style="display:flex; gap:8px;">
+                            <a asp-controller="Listing"
+                               asp-action="Edit"
+                               asp-route-id="@item.Id"
+                               class="btn btn-warning">
+                                Edit
+                            </a>
+
+                            @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger">
+                                    Delete
+                                </button>
+                            }
+                        </div>
                     }
                 </div>
             </div>
