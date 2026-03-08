@@ -9,7 +9,7 @@
 {
     var myMessage = myId == m.FromAccountId;
     <div id="chat-message-@m.MessageId" class="message-container"
-        style="align-self: @(myMessage ? "end" : "start"); max-width: 60%; background:@(myMessage ? "aliceblue" : "lightgray")">
+        style="align-self: @(myMessage ? "end" : "start"); max-width: 60%; background:@(myMessage ? "aliceblue" : "lightgray"); margin: 2px; border-radius: 5px; padding: 5px;">
         <p style="margin-bottom: 0px;">
             <span class="@(myMessage ? "text-info" : "text-primary")">@m.Message</span>
         </p>
