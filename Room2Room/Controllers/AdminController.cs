@@ -46,6 +46,71 @@ public class AdminController : Controller
         return View();
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Statistics()
+    {
+        var totalUsers = await _context.Accounts.CountAsync();
+        var totalListings = await _context.Items.CountAsync();
+
+        var listingsByUniversity = await (
+            from item in _context.Items
+            join account in _context.Accounts on item.AccountId equals account.Id
+            join university in _context.Universities on account.UniversityId equals university.Id
+            group item by university.Name into g
+            orderby g.Count() descending, g.Key
+            select new UniversityListingStat
+            {
+                UniversityName = g.Key,
+                ListingCount = g.Count()
+            }
+        ).ToListAsync();
+
+        var listingsByCategory = await (
+            from item in _context.Items
+            join category in _context.Categories on item.CategoryId equals category.Id
+            group item by category.CategoryName into g
+            orderby g.Count() descending, g.Key
+            select new CategoryListingStat
+            {
+                CategoryName = g.Key,
+                ListingCount = g.Count()
+            }
+        ).ToListAsync();
+
+        var topUsersByListings = await (
+            from item in _context.Items
+            join account in _context.Accounts on item.AccountId equals account.Id
+            group item by new
+            {
+                account.Id,
+                account.Email
+            } into g
+            orderby g.Count() descending
+            select new TopUserListingStat
+            {
+                UserDisplayName = g.Key.Email,
+                ListingCount = g.Count()
+            }
+        ).Take(3).ToListAsync();
+
+        var averageListingsPerUser = totalUsers == 0
+            ? 0
+            : Math.Round((double)totalListings / totalUsers, 1);
+
+        var model = new AdminStatisticsViewModel
+        {
+            TotalUsers = totalUsers,
+            TotalListings = totalListings,
+            UniversitiesWithListings = listingsByUniversity.Count,
+            AverageListingsPerUser = averageListingsPerUser,
+            ListingsByUniversity = listingsByUniversity,
+            ListingsByCategory = listingsByCategory,
+            TopUsersByListings = topUsersByListings
+        };
+
+        return PartialView("_Statistics", model);
+    }
+
     // ===== Announcements List =====
     [HttpGet]
     public IActionResult ListAnnouncements()
