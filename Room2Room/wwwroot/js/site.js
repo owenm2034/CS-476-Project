@@ -15,6 +15,8 @@ async function openChat() {
         document.getElementById("chat-modal").innerHTML = data;
         registerChatEvents();
         setTimeout(pollChats, 5000);
+        // need to scroll to the bottom on chat load.
+        // target.scrollTop = target.scrollHeight;
     }
 }
 
@@ -91,6 +93,7 @@ async function pollChats() {
 
         const el = target.querySelector(".chat-box-for-chat");
         target.appendChild(el);
+        target.scrollTop = target.scrollHeight;
     }
 
     lastUpdated = new Date().toISOString();

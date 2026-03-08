@@ -72,6 +72,7 @@ public class ChatController : Controller
     [HttpGet] 
     public IActionResult GetNewMessages(DateTime since) {
         // get new chatModels since the supllied date time. Return this object, selectively update the messages ONLY. this solves all the poling issues
+        since = since.ToLocalTime();
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
 
         var chatIds = _context.ChatMember.Where(x => x.AccountId == userId).Select(x => x.ChatId).ToList();
