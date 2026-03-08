@@ -16,5 +16,7 @@
         <small style="display: block; text-align: @(myMessage ? "right" : "left");">@m.CreatedAt</small>
     </div>
 }
-<input id="chat-box-for-chat-@(cm.Chat.ChatId)" type="text" /><button onclick="sendChat(@cm.Chat.ChatId)"
-    type="button">Send</button>
+<div style="position: sticky;bottom: 0; width: 100%">
+<input id="chat-box-for-chat-@(cm.Chat.ChatId)" style="width: 87%" type="text" /><button onclick="sendChat(@cm.Chat.ChatId)"
+type="button">Send</button>
+</div>

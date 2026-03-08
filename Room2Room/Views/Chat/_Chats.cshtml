@@ -8,12 +8,12 @@
 <link href="/css/bootstrap.min.css" rel="stylesheet" />
 <div class="container" style="display:flex;">
     <div style="flex:1">
-        <ul class="list-group">
+        <ul class="list-group" style="overflow-y: auto; height: 33%">
             @for (int i = 0; i < Model.Count; i++)
             {
                 var cm = Model[i];
                 <li class="list-group-item p-0 border-0 chatSidebarContainer">
-                    <a href="#" id="chat-@cm.Chat.ChatId" data="@cm.Chat.ChatId" class="list-group-item list-group-item-action @(i == 0 ? "active" : "")" aria-current="true" style="min-width: 275px">
+                    <a href="#" id="chat-@cm.Chat.ChatId" data="@cm.Chat.ChatId" class="list-group-item list-group-item-action @(i == 0 ? "active" : "")" aria-current="true" style="min-width: 275px;">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">@cm.ChatName</h5>
                             <small>@cm.LastUpdated</small>
@@ -42,7 +42,7 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             var cm = Model[i];
-            <div id="chat-messages-@(cm.Chat.ChatId)" class="chat-message-container" style="visibility: @(i == 0 ? "visible" : "hidden"); display: flex; flex-direction: column;">
+            <div id="chat-messages-@(cm.Chat.ChatId)" class="chat-message-container" style="visibility: @(i == 0 ? "visible" : "hidden"); display: @(i == 0 ? "flex" : "none"); flex-direction: column; overflow-y: auto; height: 33%; min-height: 400px">
                 @Html.Partial("_Messages", cm)
             </div>
         }
@@ -79,10 +79,13 @@
                 body: formData.toString()
             });
 
+            if (!res.ok) return;
+
             var resp = await res.text();
 
             var toReplace = document.getElementById("chat-messages-" + chatId);
             toReplace.innerHTML = resp;
+            toReplace.scrollTop = toReplace.scrollHeight;
             box.value = ""
         }
     

@@ -68,7 +68,10 @@ public class ChatController : Controller
     
     [HttpPost]
     public IActionResult SendMessage(ChatMessage message) {
-        // todo
+        if (string.IsNullOrEmpty(message.Message)) {
+            return BadRequest();
+        }
+
         var nextId = _context.ChatMessage.OrderByDescending(x => x.MessageId).First().MessageId + 1;
         
         message.FromAccountId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
