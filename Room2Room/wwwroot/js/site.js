@@ -11,23 +11,28 @@ async function openChat() {
     if (res.ok) {
         // Close the modal and optionally show a success message
         const data = await res.text();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('chatModal'));
         document.getElementById("chat-modal").innerHTML = data;
         registerChatEvents();
         setTimeout(pollChats, 5000);
-        // need to scroll to the bottom on chat load.
-        // target.scrollTop = target.scrollHeight;
+
+        // this ensures the chat container scrolls to the bottom when opening a chat
+        setTimeout(() => {
+            var nodes = Array.from(document.getElementsByClassName("chat-message-container"));
+            nodes.forEach(x => {
+                x.scrollTop = x.scrollHeight;
+            });
+        }, 500);
     }
 }
 
 let lastUpdated = new Date().toISOString();
-        
+
 function registerChatEvents() {
     var elements = document.getElementsByClassName("chatSidebarContainer")
-    
+
     for (let item of elements) {
         item.addEventListener("click", function(x) {
-            var chatId = item.firstChild.nextElementSibling.attributes["data"].value 
+            var chatId = item.firstChild.nextElementSibling.attributes["data"].value
             item.parentElement.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
             Array.from(document.getElementsByClassName('chat-message-container')).forEach(el => {el.style.visibility = 'hidden'; el.style.display = 'none' });
             item.firstChild.nextElementSibling.classList.add("active");
@@ -87,7 +92,7 @@ async function pollChats() {
                 item.removeChild(node);
                 continue;
             }
-            
+
             target.appendChild(node);
         }
 
