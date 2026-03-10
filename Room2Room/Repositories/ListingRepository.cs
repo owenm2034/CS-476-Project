@@ -112,6 +112,13 @@ public class ListingRepository : IListingRepository
         return await _db.Items.FirstOrDefaultAsync(item => item.Id == id);
     }
 
+    public async Task<ItemImage?> GetFirstItemImageAsync(int itemId)
+    {
+        return await _db.ItemImages
+            .Where(img => img.ItemId == itemId)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task UpdateItemAsync(Item item)
     {
         if (item == null)
@@ -120,6 +127,17 @@ public class ListingRepository : IListingRepository
         }
 
         _db.Items.Update(item);
+        await _db.SaveChangesAsync();
+    }
+
+    public async Task UpdateItemImageAsync(ItemImage image)
+    {
+        if (image == null)
+        {
+            throw new ArgumentNullException(nameof(image));
+        }
+
+        _db.ItemImages.Update(image);
         await _db.SaveChangesAsync();
     }
 
