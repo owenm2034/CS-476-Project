@@ -41,8 +41,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 async function openItemChat(itemId) {
     var el = document.querySelector('[data-listingid="' + itemId + '"]');
-    if (el != undefined)
+    if (el != null) {
         console.log("chat exists");
         await openChat();
-    // }
+        var chatId = el.attributes["data-chatid"].value
+        var listGroup = document.querySelector('.list-group');
+        if (listGroup && listGroup.parentElement) {
+            listGroup.parentElement.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
+        }
+        Array.from(document.getElementsByClassName('chat-message-container')).forEach(el => {el.style.visibility = 'hidden'; el.style.display = 'none' });
+        el.classList.add("active");
+        document.getElementById("chat-messages-" + chatId).style.visibility = "visible";
+        document.getElementById("chat-messages-" + chatId).style.display = "flex";
+    }
 }
