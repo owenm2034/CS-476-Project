@@ -40,18 +40,28 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 async function openItemChat(itemId) {
+    await openChat();
     var el = document.querySelector('[data-listingid="' + itemId + '"]');
     if (el != null) {
+        var modalElement = document.getElementById('chatModal');
+        var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modal.show();
+        
         console.log("chat exists");
-        await openChat();
         var chatId = el.attributes["data-chatid"].value
         var listGroup = document.querySelector('.list-group');
         if (listGroup && listGroup.parentElement) {
             listGroup.parentElement.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
         }
         Array.from(document.getElementsByClassName('chat-message-container')).forEach(el => {el.style.visibility = 'hidden'; el.style.display = 'none' });
-        el.classList.add("active");
         document.getElementById("chat-messages-" + chatId).style.visibility = "visible";
         document.getElementById("chat-messages-" + chatId).style.display = "flex";
+        setTimeout(el.classList.add("active"), 1000);
+    } else {
+        var modalElement = document.getElementById('newChatModal');
+        var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modal.show()
+        
+        var textElement = document.getElementById('newChatMessageInput').value = "Hi, is this still available?";
     }
 }
