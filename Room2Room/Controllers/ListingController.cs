@@ -161,6 +161,8 @@ public class ListingController : Controller
 
         ViewBag.Categories = await _listingRepository.GetCategories();
 
+        var currentImage = await _listingRepository.GetFirstItemImageAsync(id);
+
         EditItem dto = new EditItem
         {
             Id = item.Id,
@@ -168,7 +170,8 @@ public class ListingController : Controller
             ItemDescription = item.ItemDescription ?? "",
             Price = item.ItemPrice,
             CategoryId = item.CategoryId,
-            ReturnTo = returnTo
+            ReturnTo = returnTo,
+            CurrentImagePath = currentImage?.ImagePath
         };
 
         return View(dto);
@@ -182,6 +185,8 @@ public class ListingController : Controller
         if (!ModelState.IsValid)
         {
             ViewBag.Categories = await _listingRepository.GetCategories();
+            var currentImage = await _listingRepository.GetFirstItemImageAsync(dto.Id);
+            dto.CurrentImagePath = currentImage?.ImagePath;
             return View(dto);
         }
 
@@ -212,6 +217,49 @@ public class ListingController : Controller
         item.CategoryId = dto.CategoryId;
 
         await _listingRepository.UpdateItemAsync(item);
+
+        if (dto.NewImage != null && dto.NewImage.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(dto.NewImage.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = System.IO.File.Create(filePath))
+            {
+                await dto.NewImage.CopyToAsync(stream);
+            }
+
+            var existingImage = await _listingRepository.GetFirstItemImageAsync(dto.Id);
+
+            if (existingImage != null)
+            {
+                var oldFilePath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot",
+                    existingImage.ImagePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString())
+                );
+
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+
+                existingImage.ImagePath = "/uploads/" + fileName;
+                await _listingRepository.UpdateItemImageAsync(existingImage);
+            }
+            else
+            {
+                await _listingRepository.AddItemImageAsync(
+                    new ItemImage
+                    {
+                        ItemId = item.Id,
+                        ImagePath = "/uploads/" + fileName
+                    }
+                );
+            }
+        }
 
         if (!string.IsNullOrEmpty(dto.ReturnTo))
         {

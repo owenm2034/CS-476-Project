@@ -12,5 +12,7 @@ namespace Room2Room
         Task<List<int>> GetWatchlistedItemIdsAsync(int userId);
         Task<string> GetUniversityNameByAccountIdAsync(int accountId);
         Task<IEnumerable<Item>> GetItemsByAccountId(int accountId);
+        Task<ItemImage?> GetFirstItemImageAsync(int itemId);
+        Task UpdateItemImageAsync(ItemImage image);
     }
 }

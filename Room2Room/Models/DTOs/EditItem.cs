@@ -8,5 +8,7 @@ namespace Room2Room.Models.DTOs
         public double Price { get; set; }
         public int CategoryId { get; set; }
         public string? ReturnTo { get; set; }
+        public string? CurrentImagePath { get; set; }
+        public IFormFile? NewImage { get; set; }
     }
 }
