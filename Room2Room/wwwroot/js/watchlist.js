@@ -33,4 +33,16 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    (async () => {
+        await openChat();
+    })();
+
 });
+
+async function openItemChat(itemId) {
+    var el = document.querySelector('[data-listingid="' + itemId + '"]');
+    if (el != undefined)
+        console.log("chat exists");
+        await openChat();
+    // }
+}

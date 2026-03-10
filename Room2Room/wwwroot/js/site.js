@@ -32,7 +32,7 @@ function registerChatEvents() {
 
     for (let item of elements) {
         item.addEventListener("click", function(x) {
-            var chatId = item.firstChild.nextElementSibling.attributes["data"].value
+            var chatId = item.firstChild.nextElementSibling.attributes["data-chatid"].value
             item.parentElement.querySelectorAll('.active').forEach(el => el.classList.remove('active'));
             Array.from(document.getElementsByClassName('chat-message-container')).forEach(el => {el.style.visibility = 'hidden'; el.style.display = 'none' });
             item.firstChild.nextElementSibling.classList.add("active");
