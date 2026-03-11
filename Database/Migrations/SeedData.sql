@@ -148,5 +148,3 @@ BEGIN
        (10, 7, 'This is a chat without a listing', DATEADD(minute, -4, GETDATE()), 1),
        (11, 7, 'Woah, how can there be no listing???', DATEADD(minute, -1, GETDATE()), 2)
 END
-ELSE
-    PRINT('ItemImage already seeded :)')
