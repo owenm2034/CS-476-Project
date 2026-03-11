@@ -60,8 +60,9 @@ async function openItemChat(itemId) {
     } else {
         var modalElement = document.getElementById('newChatModal');
         var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modalElement.attributes['data-itemid'] = itemId;
         modal.show()
         
-        var textElement = document.getElementById('newChatMessageInput').value = "Hi, is this still available?";
+        document.getElementById('newChatMessageInput').value = "Hi, is this still available?";
     }
 }
