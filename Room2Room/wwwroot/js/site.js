@@ -92,8 +92,12 @@ async function pollChats() {
                 item.removeChild(node);
                 continue;
             }
-
-            target.appendChild(node);
+            // Only append if a node with the same id does not already exist
+            if (node.id && target.querySelector('#' + node.id)) {
+                item.removeChild(node);
+            } else {
+                target.appendChild(node);
+            }
         }
 
         const el = target.querySelector(".chat-box-for-chat");
