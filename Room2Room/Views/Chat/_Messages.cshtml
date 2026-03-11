@@ -1,0 +1,22 @@
+@model Room2Room.Models.Chats.ChatModel
+
+@{
+    var cm = Model;
+    var myId = int.Parse(User.FindFirst("AccountId")?.Value);
+}
+
+@foreach (var m in cm.Messages)
+{
+    var myMessage = myId == m.FromAccountId;
+    <div id="chat-message-@m.MessageId" class="message-container"
+        style="align-self: @(myMessage ? "end" : "start"); max-width: 60%; background:@(myMessage ? "aliceblue" : "lightgray"); margin: 2px; border-radius: 5px; padding: 5px;">
+        <p style="margin-bottom: 0px;">
+            <span class="@(myMessage ? "text-info" : "text-primary")">@m.Message</span>
+        </p>
+        <small style="display: block; text-align: @(myMessage ? "right" : "left");">@m.CreatedAt</small>
+    </div>
+}
+<div class="chat-box-for-chat" style="position: sticky;bottom: 0; width: 100%">
+<input id="chat-box-for-chat-@(cm.Chat.ChatId)" style="width: 87%" type="text" /><button onclick="sendChat(@cm.Chat.ChatId)"
+type="button">Send</button>
+</div>

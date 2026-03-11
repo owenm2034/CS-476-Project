@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 
+<script src="~/js/site.js" asp-append-version="true"></script>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg bg-primary mb-3" data-bs-theme="dark">
@@ -60,6 +61,27 @@
     <div id="announcementContainer" class="container" style="display:none;">
         <div id="announcementBanner" class="alert mt-2 mb-2" role="alert"></div>
     </div>
+    @if (User?.Identity?.IsAuthenticated ?? false)
+    {
+        <button id="open-chat-modal" type="btn" class="btn btn-dark" data-bs-toggle="modal" onclick="openChat()" data-bs-target="#chatModal" style="z-index: 999; position: fixed; bottom: 10px; right: 10px">Chat</button>
+    }
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="chatModalLabel">Chat</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div id='chat-modal' class="modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
     <div class="container">
         @RenderBody()
     </div>
@@ -69,7 +91,6 @@
     crossorigin="anonymous"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
 
 </html>
 

@@ -104,3 +104,47 @@ BEGIN
 END
 ELSE
     PRINT('ItemImage already seeded :)')
+
+IF (SELECT COUNT(*) FROM Chat) = 0
+BEGIN
+    PRINT('Inserting Chat')
+    INSERT INTO Chat (ChatId, ListingId) VALUES
+       (1, 1),
+       (2, 2),
+       (3, 3),
+       (4, 3),
+       (5, 3),
+       (6, 3),
+       (7, null)
+    
+    PRINT('Inserting ChatMembers')
+    INSERT INTO ChatMember (ChatId, AccountId) VALUES
+       (1, 1),
+       (1, 2),
+       (2, 1),
+       (2, 2),
+       (3, 1),
+       (3, 2),
+       (4, 1),
+       (4, 2),
+       (5, 1),
+       (5, 2),
+       (6, 1),
+       (6, 2),
+       (7, 1),
+       (7, 2)
+    
+    PRINT('Inserting ChatMessage')
+    INSERT INTO ChatMessage ([MessageId],[ChatId],[Message],[CreatedAt],[FromAccountId]) VALUES
+       (1, 1, 'Hello there', DATEADD(minute, -10, GETDATE()), 1),
+       (2, 1, 'Hi! Is the laptop still available?', DATEADD(minute, -9, GETDATE()), 2),
+       (3, 1, 'Yes, it is. Do you have any questions about it?', DATEADD(minute, -8, GETDATE()), 1),
+       (4, 1, 'What is the battery life like?', DATEADD(minute, -7, GETDATE()), 2),
+       (5, 1, 'It lasts about 6 hours on a full charge.', DATEADD(minute, -6, GETDATE()), 1),
+       (6, 1, 'Great! I am interested. Can we meet tomorrow?', DATEADD(minute, -5, GETDATE()), 2),
+       (7, 1, 'Tomorrow works for me. What time were you thinking?', DATEADD(minute, -4, GETDATE()), 1),
+       (8, 1, 'How about around noon?', DATEADD(minute, -3, GETDATE()), 2),
+       (9, 1, 'Noon is perfect. See you then!', DATEADD(minute, -2, GETDATE()), 1),
+       (10, 7, 'This is a chat without a listing', DATEADD(minute, -4, GETDATE()), 1),
+       (11, 7, 'Woah, how can there be no listing???', DATEADD(minute, -1, GETDATE()), 2)
+END

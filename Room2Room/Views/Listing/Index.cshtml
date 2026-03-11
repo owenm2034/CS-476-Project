@@ -1,8 +1,14 @@
-@model ItemDisplayModel
+@model Room2Room.Models.DTOs.ItemDisplayModel
 @{
     ViewData["Title"] = "Home Page";
 }
 @Html.AntiForgeryToken()
+
+@section Scripts {
+    <script src="~/js/watchlist.js"></script>
+
+}
+
 <div class="my-4">
     <form asp-action="Index" class="row row-cols-lg-auto g-3 align-items-center">
 
@@ -54,28 +60,29 @@
                 <img style="width:100%; height:150px;" src="/images/comingSoon.jpg" class="card-img-top" alt="...">
             }
 
-            <div class="card-body">
+            <div class="card-body" style="display: flex; flex-direction: column; justify-content:space-between;">
                 <h5 class="card-title">@item.ItemName</h5>
                 <p class="card-text">
                     Category: @item.CategoryName<br>
                     Description: @item.ItemDescription<br>
                     Price: $@item.ItemPrice
                 </p>
-                <div style="display: flex; flex-direction: row; justify-content: space-between; align-items: center;">
+                <div style="display: flex; flex-direction: row; justify-content: space-between;">
+
+                    <div style="display:flex; gap:8px;">
                    <button class="watchlist-heart" data-item-id="@item.Id"
                         style="border: none; background: none; padding: 0; cursor: pointer;">
                         <i class="bi @(item.InWatchlist ? "bi-heart-fill" : "bi-heart")" style="font-size: 1.5rem;"></i>
                     </button>
-
                     @if (User.FindFirst("AccountId")?.Value == item.AccountId.ToString() || User.IsInRole("Admin"))
                     {
-                        <div style="display:flex; gap:8px;">
                             <a asp-controller="Listing"
                                asp-action="Edit"
                                asp-route-id="@item.Id"
                                class="btn btn-warning">
                                 Edit
                             </a>
+
 
                             @using (Html.BeginForm("Delete", "Listing", new { listingId = item.Id }, FormMethod.Post))
                             {
@@ -84,14 +91,33 @@
                                     Delete
                                 </button>
                             }
-                        </div>
                     }
+                    <button class="btn btn-info" onclick="openItemChat(@item.Id)">Chat</button>
+                    </div>
                 </div>
             </div>
         </div>
     }
 </div>
 
-@section Scripts {
-    <script src="~/js/watchlist.js"></script>
-}
+<div class="modal fade" id="newChatModal" tabindex="-1" aria-labelledby="newChatModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="newChatModalLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+            <label for="newChatMessageInput" class="form-label">Your message:</label>
+            <textarea class="form-control" id="newChatMessageInput"  rows="3">Hi, is this still available?</textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="sendFirstMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
