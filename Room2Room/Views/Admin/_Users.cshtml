@@ -1,0 +1,66 @@
+@model Room2Room.Models.DTOs.AdminUsersViewModel
+
+<div class="my-4">
+    <form class="row row-cols-lg-auto g-3 align-items-center" onsubmit="return false;">
+        <div class="col-12">
+            <label class="visually-hidden" for="adminUserSearchTerm">Search users</label>
+            <div class="input-group">
+                <input
+                    type="text"
+                    class="form-control"
+                    value="@Model.STerm"
+                    id="adminUserSearchTerm"
+                    name="adminUserSearchTerm"
+                    placeholder="Search by email, username, or university..."
+                >
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button type="button" class="btn btn-primary" onclick="searchAdminUsers()">Search</button>
+            <a class="btn btn-primary" onclick="loadAdminUsers()">Reset</a>
+        </div>
+    </form>
+</div>
+
+@if (Model.Users != null && Model.Users.Any())
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>University</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@user.Username</td>
+                    <td>@user.Email</td>
+                    <td>@user.UniversityName</td>
+                    <td>
+                        @if (user.IsAdmin)
+                        {
+                            <span class="badge bg-danger">Admin</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">User</span>
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-outline-primary btn-sm" asp-controller="Admin" asp-action="EditUser" asp-route-id="@user.Id">Edit Account</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No users found.</p>
+}
