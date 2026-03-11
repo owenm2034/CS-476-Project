@@ -210,6 +210,8 @@ public class ChatController : Controller
             chatModels.Add(cm);
         }
 
+        chatModels = chatModels.OrderByDescending(x => x.Messages.Last().CreatedAt).ToList();
+
         return new AllChatsModel() { ChatModels = chatModels, SelectedIndex = 0 };
     }
 }

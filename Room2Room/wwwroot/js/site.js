@@ -124,12 +124,16 @@ async function sendFirstMessage() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
     });
+    lastUpdated = new Date().toISOString();
 
     // open big chat window
     const data = await res.text();
     document.getElementById("chat-modal").innerHTML = data;
     registerChatEvents();
     setTimeout(pollChats, 5000);
+    var modalElement = document.getElementById('chatModal');
+    var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modal.show();
 
     // this ensures the chat container scrolls to the bottom when opening a chat
     setTimeout(() => {
