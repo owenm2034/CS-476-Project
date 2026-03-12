@@ -1,0 +1,37 @@
+@model IEnumerable<WatchListDisplayModel>
+
+@{
+    ViewData["Title"] = "My Watchlist";
+}
+
+<h2>My Watchlist</h2>
+
+@foreach (var item in Model)
+{
+    <div class="watch-item">
+
+        <div class="watch-image">
+            @if (!string.IsNullOrEmpty(item.ImagePath))
+            {
+                <img src="@item.ImagePath" alt="Item Image">
+            }
+            else
+            {
+                <img src="/images/comingSoon.jpg" alt="Coming Soon">
+            }
+        </div>
+
+        <div class="watch-details">
+            <h3>@item.ItemName</h3>
+            <p><strong>Status:</strong> @item.Status</p>
+            <p><strong>Price:</strong> $@item.ItemPrice</p>
+            <p>@item.ItemDescription</p>
+
+            <form asp-action="RemoveFromWatchlist" method="post">
+                <input type="hidden" name="itemId" value="@item.ItemId" />
+                <button type="submit">Remove</button>
+            </form>
+        </div>
+
+    </div>
+}

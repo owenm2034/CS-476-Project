@@ -1,5 +1,6 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Room2Room.Models.DTOs;
 
 namespace Room2Room.Controllers;
 
@@ -7,27 +8,32 @@ public class ListingController : Controller
 {
     private readonly IListingRepository _listingRepository;
 
-    public ListingController(IListingRepository homeRepository)
+    public ListingController(IListingRepository listingRepository)
     {
-        _listingRepository = homeRepository;
+        _listingRepository = listingRepository;
     }
 
     public async Task<IActionResult> Index(string sTerm = "", int? categoryId = null)
     {
         int? universityId = null;
         var universityClaim = User.Claims.FirstOrDefault(c => c.Type == "UniversityId");
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
 
         if (!string.IsNullOrEmpty(universityClaim?.Value))
         {
             universityId = int.Parse(universityClaim.Value);
         }
 
-        IEnumerable<Item> items = await _listingRepository.GetItems(
-            sTerm,
-            categoryId,
-            universityId
-        );
+        IEnumerable<Item> items = await _listingRepository.GetItems(sTerm, categoryId, universityId);
         IEnumerable<Category> categories = await _listingRepository.GetCategories();
+
+        var watchlistedItemIds = await _listingRepository.GetWatchlistedItemIdsAsync(userId);
+
+        foreach (var item in items)
+        {
+            item.InWatchlist = watchlistedItemIds.Contains(item.Id);
+        }
+
         ItemDisplayModel itemModel = new ItemDisplayModel
         {
             Items = items,
@@ -38,6 +44,24 @@ public class ListingController : Controller
         return View(itemModel);
     }
 
+    [Authorize]
+    public async Task<IActionResult> MyListings()
+    {
+        var accountIdClaim = User.FindFirstValue("AccountId");
+
+        if (string.IsNullOrEmpty(accountIdClaim))
+        {
+            return RedirectToAction("LogIn", "Account");
+        }
+
+        int accountId = int.Parse(accountIdClaim);
+
+        IEnumerable<Item> items = await _listingRepository.GetItemsByAccountId(accountId);
+
+        return View(items);
+    }
+
+    [Authorize]
     public async Task<IActionResult> Create()
     {
         IEnumerable<Category> categories = await _listingRepository.GetCategories();
@@ -45,6 +69,7 @@ public class ListingController : Controller
         return View();
     }
 
+    [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateItem dto)
@@ -55,11 +80,13 @@ public class ListingController : Controller
             return View(dto);
         }
 
-        var accountIdClaim = User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value;
+        var accountIdClaim = User.FindFirstValue("AccountId");
+
         if (string.IsNullOrEmpty(accountIdClaim))
         {
-            return RedirectToAction("Login", "Account"); // user not logged in
+            return RedirectToAction("LogIn", "Account");
         }
+
         int accountId = int.Parse(accountIdClaim);
 
         var itemToCreate = new Item
@@ -69,7 +96,8 @@ public class ListingController : Controller
             ItemPrice = dto.Price,
             CategoryId = dto.CategoryId,
             Status = "Active",
-            AccountId = accountId
+            AccountId = accountId,
+            UniversityName = await _listingRepository.GetUniversityNameByAccountIdAsync(accountId)
         };
         await _listingRepository.AddItemAsync(itemToCreate);
 
@@ -79,7 +107,6 @@ public class ListingController : Controller
             {
                 if (formFile.Length > 0)
                 {
-                    // Generate a unique file name
                     var fileName = $"{Guid.NewGuid()}_{formFile.FileName}";
                     var filePath = Path.Combine(
                         Directory.GetCurrentDirectory(),
@@ -92,7 +119,6 @@ public class ListingController : Controller
                         await formFile.CopyToAsync(stream);
                     }
 
-                    // Save image path to database
                     await _listingRepository.AddItemImageAsync(
                         new ItemImage
                         {
@@ -107,6 +133,143 @@ public class ListingController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize]
+    public async Task<IActionResult> Edit(int id, string? returnTo = null)
+    {
+        var item = await _listingRepository.GetItemById(id);
+
+        if (item == null)
+        {
+            return NotFound();
+        }
+
+        var accountIdClaim = User.FindFirstValue("AccountId");
+
+        if (string.IsNullOrEmpty(accountIdClaim))
+        {
+            return RedirectToAction("LogIn", "Account");
+        }
+
+        int currentUserId = int.Parse(accountIdClaim);
+
+        if (item.AccountId != currentUserId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        ViewBag.Categories = await _listingRepository.GetCategories();
+
+        var currentImage = await _listingRepository.GetFirstItemImageAsync(id);
+
+        EditItem dto = new EditItem
+        {
+            Id = item.Id,
+            ItemName = item.ItemName ?? "",
+            ItemDescription = item.ItemDescription ?? "",
+            Price = item.ItemPrice,
+            CategoryId = item.CategoryId,
+            ReturnTo = returnTo,
+            CurrentImagePath = currentImage?.ImagePath
+        };
+
+        return View(dto);
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(EditItem dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Categories = await _listingRepository.GetCategories();
+            var currentImage = await _listingRepository.GetFirstItemImageAsync(dto.Id);
+            dto.CurrentImagePath = currentImage?.ImagePath;
+            return View(dto);
+        }
+
+        var item = await _listingRepository.GetItemById(dto.Id);
+
+        if (item == null)
+        {
+            return NotFound();
+        }
+
+        var accountIdClaim = User.FindFirstValue("AccountId");
+
+        if (string.IsNullOrEmpty(accountIdClaim))
+        {
+            return RedirectToAction("LogIn", "Account");
+        }
+
+        int currentUserId = int.Parse(accountIdClaim);
+
+        if (item.AccountId != currentUserId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        item.ItemName = dto.ItemName;
+        item.ItemDescription = dto.ItemDescription;
+        item.ItemPrice = dto.Price;
+        item.CategoryId = dto.CategoryId;
+
+        await _listingRepository.UpdateItemAsync(item);
+
+        if (dto.NewImage != null && dto.NewImage.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(dto.NewImage.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = System.IO.File.Create(filePath))
+            {
+                await dto.NewImage.CopyToAsync(stream);
+            }
+
+            var existingImage = await _listingRepository.GetFirstItemImageAsync(dto.Id);
+
+            if (existingImage != null)
+            {
+                var oldFilePath = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot",
+                    existingImage.ImagePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString())
+                );
+
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+
+                existingImage.ImagePath = "/uploads/" + fileName;
+                await _listingRepository.UpdateItemImageAsync(existingImage);
+            }
+            else
+            {
+                await _listingRepository.AddItemImageAsync(
+                    new ItemImage
+                    {
+                        ItemId = item.Id,
+                        ImagePath = "/uploads/" + fileName
+                    }
+                );
+            }
+        }
+
+        if (!string.IsNullOrEmpty(dto.ReturnTo))
+        {
+            return LocalRedirect(dto.ReturnTo);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int listingId, string? returnTo = null)
     {
         var listing = await _listingRepository.GetItemById(listingId);
@@ -116,20 +279,27 @@ public class ListingController : Controller
             return NotFound();
         }
 
-        if (
-            (((ClaimsIdentity)User?.Identity)?.FindFirst("AccountId").Value ?? "not an id")
-                == listing.AccountId.ToString()
-            || User.IsInRole("Admin")
-        )
+        var accountIdClaim = User.FindFirstValue("AccountId");
+
+        if (string.IsNullOrEmpty(accountIdClaim))
         {
-            await _listingRepository.Delete(listingId);
+            return RedirectToAction("LogIn", "Account");
         }
 
-        if (User.IsInRole("Admin") && returnTo != null)
+        int currentUserId = int.Parse(accountIdClaim);
+
+        if (listing.AccountId != currentUserId && !User.IsInRole("Admin"))
         {
-            return Redirect(returnTo);
+            return Forbid();
         }
 
-        return Redirect("/Listing/Index");
+        await _listingRepository.Delete(listingId);
+
+        if (!string.IsNullOrEmpty(returnTo))
+        {
+            return LocalRedirect(returnTo);
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 }

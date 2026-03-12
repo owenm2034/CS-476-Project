@@ -16,10 +16,13 @@ public class AccountController : Controller
     // TODO: move out of controller, move db connection instantiation into factory
     private string ConnectionString;
     private readonly ApplicationDbContext _context;
+    private readonly IEmailService _emailService;
 
-    public AccountController(ApplicationDbContext context, IConfiguration configuration)
+    public AccountController(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration)
     {
         _context = context;
+        _emailService = emailService;
+
         ConnectionString = configuration.GetConnectionString("DefaultConnection");
     }
 
@@ -193,6 +196,9 @@ public class AccountController : Controller
 
         context.Accounts.Add(account);
         await context.SaveChangesAsync();
+
+        //Send Welcome Email
+        await _emailService.SendWelcomeEmailAsync(model.Email, model.Username);
 
         return Redirect("/Account/LogIn");
     }

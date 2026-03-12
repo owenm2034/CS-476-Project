@@ -1,0 +1,44 @@
+.watch-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.watch-image img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.watch-details {
+    flex: 1;
+}
+
+.watchlist-heart {
+    transition: transform 0.2s ease;
+}
+
+.watchlist-heart:hover {
+    transform: scale(1.2);
+}
+
+.watchlist-heart:active {
+    transform: scale(0.85);
+}
+
+.watchlist-heart i {
+    transition: color 0.2s ease;
+}
+
+.bi-heart-fill {
+    color: red;
+}
+
+.bi-heart {
+    color: black;
+}

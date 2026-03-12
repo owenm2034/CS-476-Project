@@ -1,0 +1,224 @@
+@model Room2Room.Models.DTOs.AdminStatisticsViewModel
+
+@{
+    int totalUniversityListings = Model.ListingsByUniversity.Sum(x => x.ListingCount);
+    int totalCategoryListings = Model.ListingsByCategory.Sum(x => x.ListingCount);
+}
+
+<div class="my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="mb-1">Admin Statistics</h3>
+            <p class="text-muted mb-0">Overview of current platform activity.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-dark-subtle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <span class="fw-bold text-dark">U</span>
+                    </div>
+                    <div>
+                        <p class="text-muted text-uppercase small mb-2">Users</p>
+                        <h2 class="mb-1">@Model.TotalUsers</h2>
+                        <p class="mb-0 text-muted small">Total registered accounts</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <span class="fw-bold text-primary">L</span>
+                    </div>
+                    <div>
+                        <p class="text-muted text-uppercase small mb-2">Listings</p>
+                        <h2 class="mb-1">@Model.TotalListings</h2>
+                        <p class="mb-0 text-muted small">Total listings in the system</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-success-subtle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <span class="fw-bold text-success">S</span>
+                    </div>
+                    <div>
+                        <p class="text-muted text-uppercase small mb-2">Universities</p>
+                        <h2 class="mb-1">@Model.UniversitiesWithListings</h2>
+                        <p class="mb-0 text-muted small">Universities that currently have listings</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-start gap-3">
+                    <div class="rounded-circle bg-warning-subtle d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <span class="fw-bold text-warning">A</span>
+                    </div>
+                    <div>
+                        <p class="text-muted text-uppercase small mb-2">Avg Listings / User</p>
+                        <h2 class="mb-1">@Model.AverageListingsPerUser</h2>
+                        <p class="mb-0 text-muted small">Average number of listings per user</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h4 class="mb-1">Listings by University</h4>
+                        <p class="text-muted mb-0 small">Counts the number of listings grouped by university.</p>
+                    </div>
+
+                    @if (Model.ListingsByUniversity.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>University</th>
+                                        <th style="width: 45%;">Distribution</th>
+                                        <th class="text-end">Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (UniversityListingStat stat in Model.ListingsByUniversity)
+                                    {
+                                        int widthPercent = totalUniversityListings == 0 ? 0 : (int)Math.Round((double)stat.ListingCount / totalUniversityListings * 100);
+
+                                        <tr>
+                                            <td class="fw-medium">@stat.UniversityName</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="progress flex-grow-1" style="height: 12px;">
+                                                        <div class="progress-bar bg-dark" style="width: @widthPercent%"></div>
+                                                    </div>
+                                                    <span class="text-muted small">@widthPercent%</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-end fw-medium">@stat.ListingCount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No statistics available.</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h4 class="mb-1">Listings by Category</h4>
+                        <p class="text-muted mb-0 small">Counts the number of listings grouped by category.</p>
+                    </div>
+
+                    @if (Model.ListingsByCategory.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Category</th>
+                                        <th style="width: 45%;">Distribution</th>
+                                        <th class="text-end">Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (CategoryListingStat stat in Model.ListingsByCategory)
+                                    {
+                                        int widthPercent = totalCategoryListings == 0 ? 0 : (int)Math.Round((double)stat.ListingCount / totalCategoryListings * 100);
+
+                                        <tr>
+                                            <td class="fw-medium">@stat.CategoryName</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="progress flex-grow-1" style="height: 12px;">
+                                                        <div class="progress-bar bg-secondary" style="width: @widthPercent%"></div>
+                                                    </div>
+                                                    <span class="text-muted small">@widthPercent%</span>
+                                                </div>
+                                            </td>
+                                            <td class="text-end fw-medium">@stat.ListingCount</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No category statistics available.</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h4 class="mb-1">Top 3 Users by Listings</h4>
+                        <p class="text-muted mb-0 small">Users with the highest number of listings.</p>
+                    </div>
+
+                    @if (Model.TopUsersByListings.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="width: 90px;">Rank</th>
+                                        <th>User</th>
+                                        <th class="text-end">Listings</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var rank = 1;
+                                    }
+                                    @foreach (TopUserListingStat user in Model.TopUsersByListings)
+                                    {
+                                        string medal = rank == 1 ? "🥇" : rank == 2 ? "🥈" : "🥉";
+
+                                        <tr>
+                                            <td class="fw-medium">@medal #@rank</td>
+                                            <td>@user.UserDisplayName</td>
+                                            <td class="text-end fw-medium">@user.ListingCount</td>
+                                        </tr>
+
+                                        rank++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-muted">No user statistics available.</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

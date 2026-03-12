@@ -1,0 +1,54 @@
+@using Room2Room.Models.Chats
+@model Room2Room.Models.Chats.AllChatsModel
+
+
+@{
+    var myId = int.Parse(User.FindFirst("AccountId")?.Value);
+}
+@if (Model.ChatModels.Count == 0) {
+    <text><p>No chats<p/></text>
+}
+<link href="/css/bootstrap.min.css" rel="stylesheet" />
+<div class="container" style="display:flex;">
+    <div style="flex:1; height auto;">
+        <ul class="list-group" style="overflow-y: auto; min-heght:400px; max-height: 530px">
+            @for (int i = 0; i < Model.ChatModels.Count; i++)
+            {
+                var cm = Model.ChatModels[i];
+                <li class="list-group-item p-0 border-0 chatSidebarContainer">
+                    <a href="#" id="chat-@cm.Chat.ChatId" data-chatId="@cm.Chat.ChatId" data-listingId="@cm.Item?.Id" class="list-group-item list-group-item-action @(i == Model.SelectedIndex ? "active" : "")" aria-current="true" style="min-width: 275px;">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">@cm.ChatName</h5>
+                            <small>@cm.LastUpdated</small>
+                        </div>
+                        <p class="mb-1">
+                            @if (cm.Messages.Count > 0) {
+                                var message = cm.Messages.Last();
+                                string un = "";
+                                if (message.FromAccountId == myId) {
+                                    un = "Me";
+                                } else {
+                                    un = cm.AccountIdToNameDictionary.GetValueOrDefault(message.FromAccountId);
+                                }
+                                <span>@un: @(message.Message.Length > 50 ? message.Message.Substring(0, 50) + "..." : message.Message)</span>
+                            } else {
+                                <span/>
+                            }
+                        </p>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div style="flex:2; min-height: 400px; flex-shrink: 0; margin-top:auto">
+        @for (int i = 0; i < Model.ChatModels.Count; i++)
+        {
+            var cm = Model.ChatModels[i];
+            <div id="chat-messages-@(cm.Chat.ChatId)" class="chat-message-container" style="visibility: @(i == Model.SelectedIndex ? "visible" : "hidden"); display: @(i == Model.SelectedIndex ? "flex" : "none"); flex-direction: column; overflow-y: auto; min-height: 400px; max-height: 530px">
+                @Html.Partial("_Messages", cm)
+            </div>
+        }
+    </div>
+
+</div>
