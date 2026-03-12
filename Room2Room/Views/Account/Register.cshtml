@@ -22,6 +22,17 @@
         @Html.ValidationMessageFor(m => m.Password, null, new { @class = "text-danger" })
     </div>
 
+    <div class="mb-3">
+        <label for="ProfilePicture" class="form-label">Profile Picture</label>
+        <input type="file" 
+            name="ProfilePicture" 
+            id="ProfilePicture" 
+            class="form-control" 
+            accept="image/png, image/jpeg, image/jpg" />
+        <div class="form-text">Optional: Choose a square image for best results.</div>
+        @Html.ValidationMessageFor(m => m.ProfilePicture, null, new { @class = "text-danger" })
+    </div>
+
     <button type="submit" class="btn btn-primary">Register</button>
 
     <span class="text-danger">

@@ -142,6 +142,7 @@ public class AccountController : Controller
 
         bool isError = false;
         var errorMessage = "";
+        string profilePicturePath = "";
 
         if (universityExistsTask.Count == 0)
         {
@@ -163,6 +164,7 @@ public class AccountController : Controller
             isError = true;
             errorMessage += "Your password must be at least 8 characters. ";
         }
+        
 
         if (isError)
         {
@@ -171,6 +173,30 @@ public class AccountController : Controller
             model.ErrorMessage = errorMessage;
             return View(model);
         }
+
+
+        if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+        {
+            // Looks up the folder where we will save uploaded profile pictures (wwwroot/uploads)
+            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            
+            // Secures the file path, delete if not needed
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            // Unique name to prevent overwriting existing files, and to prevent issues with special characters in original file names
+            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfilePicture.FileName);
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            // save the file to wwwroot/uploads
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await model.ProfilePicture.CopyToAsync(fileStream);
+            }
+
+            // save the relative path to the profile picture in the database (e.g., "/uploads/uniquefilename.jpg")
+            profilePicturePath = "/uploads/" + uniqueFileName;
+        }
+
 
         // Validation passed, create account here
         byte[] salt = RandomNumberGenerator.GetBytes(16);
@@ -190,7 +216,7 @@ public class AccountController : Controller
             hashString,
             saltString,
             model.Username,
-            "", // todo, save profile picture,
+            profilePicturePath,
             universityExistsTask.First().Id
         );
 
