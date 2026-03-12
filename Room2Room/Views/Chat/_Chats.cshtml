@@ -5,6 +5,9 @@
 @{
     var myId = int.Parse(User.FindFirst("AccountId")?.Value);
 }
+@if (Model.ChatModels.Count == 0) {
+    <text><p>No chats<p/></text>
+}
 <link href="/css/bootstrap.min.css" rel="stylesheet" />
 <div class="container" style="display:flex;">
     <div style="flex:1; height auto;">
