@@ -473,6 +473,9 @@ public class AdminController : Controller
             return BadRequest();
         }
 
+        var itemIds = _context.Items.Where(x => x.CategoryId == oldCat.Id).Select(x => x.Id).ToList();
+        _context.RemoveRange(_context.Watchlists.Where(x => itemIds.Contains(x.ItemId)).ToList());
+        _context.SaveChanges();
         _context.Categories.Remove(oldCat);
         _context.SaveChanges();
 
