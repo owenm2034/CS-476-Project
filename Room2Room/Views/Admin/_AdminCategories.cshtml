@@ -14,11 +14,33 @@
             {
                 <tr>
                     <td>@item.CategoryName</td>
-                    <td><button type="button" class="btn btn-danger">Delete</button></td>
+                    <td>
+                        <button type="button" class="btn btn-danger">Delete</button>
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editCategory-@item.Id">Edit</button>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
+            @foreach (var item in Model) {
+                <div class="modal fade" id="editCategory-@item.Id" tabindex="-1" aria-labelledby="editCategoryLabel-@item.Id" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="editCategoryLabel-@item.Id">Edit Listing Category</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div id='category-modal' class="modal-body">
+                                <input id="category-name-@item.Id" class="form-control" type="text" value="@item.CategoryName" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="upsertCategory(@item.Id)">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
 }
 else
 {

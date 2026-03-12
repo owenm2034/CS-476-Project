@@ -22,3 +22,20 @@ function loadCategories() {
             console.error('Error loading admin listings:', error);
         });
 }
+
+async function upsertCategory(itemId) {
+    var el = document.getElementById("category-name-" + itemId);
+    var name = el.value;
+
+    const formData = new URLSearchParams();
+    formData.append('cat.Id', itemId);
+    formData.append('cat.CategoryName', name);
+
+    const res = await fetch('/Admin/UpsertCategory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    });
+    
+    loadCategories();
+}

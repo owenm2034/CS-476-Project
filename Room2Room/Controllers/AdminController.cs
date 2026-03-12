@@ -1,3 +1,4 @@
+using System.Net.WebSockets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -440,5 +441,21 @@ public class AdminController : Controller
         var categories = await _listingRepository.GetCategories();
         categories = categories.OrderBy(x => x.CategoryName);
         return PartialView("_AdminCategories", categories);
+    }
+
+    public async Task<IActionResult> UpsertCategory(Category cat)
+    {
+        var oldCat = _context.Categories.Where(x => x.Id == cat.Id).FirstOrDefault();
+
+        if (cat == null) {
+            // return BadRequest();
+            _context.Categories.Add(cat);
+        } else {
+            oldCat!.CategoryName = cat.CategoryName;
+        }
+
+        _context.SaveChanges();
+
+        return Ok();
     }
 }

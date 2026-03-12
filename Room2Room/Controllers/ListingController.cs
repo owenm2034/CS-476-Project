@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Room2Room.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Room2Room.Controllers;
 
