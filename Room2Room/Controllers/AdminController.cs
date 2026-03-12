@@ -443,17 +443,37 @@ public class AdminController : Controller
         return PartialView("_AdminCategories", categories);
     }
 
+    [HttpPost]
     public async Task<IActionResult> UpsertCategory(Category cat)
     {
         var oldCat = _context.Categories.Where(x => x.Id == cat.Id).FirstOrDefault();
 
-        if (cat == null) {
+        if (string.IsNullOrEmpty(cat.CategoryName)) {
+            return BadRequest();
+        }
+
+        if (cat == null || cat.Id == 0) {
             // return BadRequest();
             _context.Categories.Add(cat);
         } else {
             oldCat!.CategoryName = cat.CategoryName;
         }
 
+        _context.SaveChanges();
+
+        return Ok();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteCategory(int catId)
+    {
+        var oldCat = _context.Categories.Where(x => x.Id == catId).FirstOrDefault();
+        if (oldCat == null)
+        {
+            return BadRequest();
+        }
+
+        _context.Categories.Remove(oldCat);
         _context.SaveChanges();
 
         return Ok();

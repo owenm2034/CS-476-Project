@@ -13,7 +13,7 @@ CREATE TABLE Watchlist(
     DateAdded DATETIME NOT NULL DEFAULT GETDATE(),
 
     CONSTRAINT FK_Watchlist_Accounts_UserId FOREIGN KEY (UserId) REFERENCES Accounts(Id) ON DELETE CASCADE,
-    CONSTRAINT FK_Watchlist_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id)
+    CONSTRAINT FK_Watchlist_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE NO ACTION
 );
 print ('Watchlist created')
 END

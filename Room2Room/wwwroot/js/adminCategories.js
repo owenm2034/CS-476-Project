@@ -23,15 +23,34 @@ function loadCategories() {
         });
 }
 
-async function upsertCategory(itemId) {
-    var el = document.getElementById("category-name-" + itemId);
+async function upsertCategory(catId) {
+    var el;
+    if (!catId) {
+        el = document.getElementById("new-category-name")
+    } else {
+        el = document.getElementById("category-name-" + catId);
+    }
+    
     var name = el.value;
 
     const formData = new URLSearchParams();
-    formData.append('cat.Id', itemId);
+    formData.append('cat.Id', catId);
     formData.append('cat.CategoryName', name);
 
     const res = await fetch('/Admin/UpsertCategory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    });
+    
+    loadCategories();
+}
+
+async function deleteCategory(catId) {
+    const formData = new URLSearchParams();
+    formData.append('catId', catId);
+
+    const res = await fetch('/Admin/DeleteCategory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
