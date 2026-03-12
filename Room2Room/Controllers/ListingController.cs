@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Room2Room.Models.DTOs;
-using Room2Room.Repositories;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Room2Room.Controllers;
 

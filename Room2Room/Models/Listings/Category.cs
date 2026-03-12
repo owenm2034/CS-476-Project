@@ -10,7 +10,7 @@ public class Category
     [MaxLength(40)]
     public string CategoryName { get; set; }
 
-    public List<Item> Item { get; set; } // one category can have many items
+    // public List<Item> Item { get; set; } // one category can have many items
    
     
 }
