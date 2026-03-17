@@ -6,24 +6,25 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text;
 using Room2Room.Models.NotificationPreferences;
 
 namespace Room2Room.Controllers;
 
 public class AccountController : Controller
 {
-    // TODO: move out of controller, move db connection instantiation into factory
     private string ConnectionString;
     private readonly ApplicationDbContext _context;
     private readonly IEmailService _emailService;
 
-    public AccountController(ApplicationDbContext context, IEmailService emailService, IConfiguration configuration)
+    public AccountController(
+        ApplicationDbContext context,
+        IEmailService emailService,
+        IConfiguration configuration
+    )
     {
         _context = context;
         _emailService = emailService;
-
-        ConnectionString = configuration.GetConnectionString("DefaultConnection");
+        ConnectionString = configuration.GetConnectionString("DefaultConnection")!;
     }
 
     public IActionResult Index()
@@ -31,7 +32,6 @@ public class AccountController : Controller
         return NotFound();
     }
 
-    // Log In GET/POST functions
     [HttpGet]
     public IActionResult LogIn()
     {
@@ -48,8 +48,24 @@ public class AccountController : Controller
 
         using var context = new ApplicationDbContext(contextOptions);
 
-        // get account
-        var account = context.Accounts.Where(a => a.Email == model.Email).FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            model.ErrorMessage = "Please enter your email.";
+            model.Password = "";
+            return View(model);
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Password))
+        {
+            model.ErrorMessage = "Please enter your password.";
+            model.Password = "";
+            return View(model);
+        }
+
+        var email = model.Email.Trim();
+
+        var account = await context.Accounts
+            .FirstOrDefaultAsync(a => a.Email == email);
 
         if (account == null)
         {
@@ -76,26 +92,44 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var university = context.Universities
-            .Where(u => u.Id == account.UniversityId)
-            .FirstOrDefault();
+        var restriction = await context.AccountRestrictions
+            .FirstOrDefaultAsync(x => x.AccountId == account.Id);
 
-        // set claims
+        if (restriction != null)
+        {
+            if (restriction.Status == "Suspended")
+            {
+                model.ErrorMessage = "Your account has been suspended. Please contact an administrator.";
+                model.Password = "";
+                return View(model);
+            }
+
+            if (restriction.Status == "Deactivated")
+            {
+                model.ErrorMessage = "Your account has been deactivated. Please contact an administrator.";
+                model.Password = "";
+                return View(model);
+            }
+        }
+
+        var university = await context.Universities
+            .FirstOrDefaultAsync(u => u.Id == account.UniversityId);
+
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, account.Username), //
-            new Claim("AccountId", account.Id.ToString()), // use ((ClaimsIdentity)User.Identity).FindFirst("AccountId").Value
-            new Claim("UniversityId", account.UniversityId.ToString()), //  use ((ClaimsIdentity)User.Identity).FindFirst("UniversityId").Value
-            new Claim("UniversityName", university?.Name ?? ""), // use ((ClaimsIdentity)User.Identity).FindFirst("UniversityName").Value
+            new Claim(ClaimTypes.Name, account.Username),
+            new Claim("AccountId", account.Id.ToString()),
+            new Claim("UniversityId", account.UniversityId.ToString()),
+            new Claim("UniversityName", university?.Name ?? "")
         };
 
         if (account.IsAdmin)
         {
-            claims.Add(new Claim(ClaimTypes.Role, "Admin")); // use User.IsInRole("Admin")
+            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
         }
         else
         {
-            claims.Add(new Claim(ClaimTypes.Role, "User")); // use User.IsInRole("User")
+            claims.Add(new Claim(ClaimTypes.Role, "User"));
         }
 
         var identity = new ClaimsIdentity(
@@ -105,12 +139,14 @@ public class AccountController : Controller
 
         var principal = new ClaimsPrincipal(identity);
 
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            principal
+        );
 
         return Redirect("/Listing/Index");
     }
 
-    // Register GET/POST functions
     [HttpGet]
     public IActionResult Register()
     {
@@ -132,39 +168,67 @@ public class AccountController : Controller
             return View(model);
         }
 
-        var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
+        if (string.IsNullOrWhiteSpace(model.Email) || !model.Email.Contains("@"))
+        {
+            model.Password = "";
+            model.ErrorMessage = "Please enter a valid university email.";
+            return View(model);
+        }
 
-        var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
-        var emailExistsTask = context.Accounts.Where(a => a.Email == model.Email).ToList();
-        var usernameExistsTask = context.Accounts
-            .Where(a => a.Username.ToLower() == model.Username.ToLower())
-            .ToList();
+        if (string.IsNullOrWhiteSpace(model.Username))
+        {
+            model.Password = "";
+            model.ErrorMessage = "Username is required.";
+            return View(model);
+        }
+
+        if (string.IsNullOrWhiteSpace(model.Password))
+        {
+            model.ErrorMessage = "Password is required.";
+            return View(model);
+        }
+
+        var email = model.Email.Trim();
+        var username = model.Username.Trim();
+        var domain = email[(email.IndexOf("@") + 1)..];
+
+        var university = await context.Universities
+            .FirstOrDefaultAsync(x => x.Domain == domain);
+
+        var emailExists = await context.Accounts
+            .AnyAsync(a => a.Email == email);
+
+        var usernameLower = username.ToLower();
+        var usernameExists = await context.Accounts
+            .AnyAsync(a => a.Username.ToLower() == usernameLower);
 
         bool isError = false;
         var errorMessage = "";
         string profilePicturePath = "";
 
-        if (universityExistsTask.Count == 0)
+        if (university == null)
         {
             isError = true;
             errorMessage += "Please use a university email. ";
         }
-        if (emailExistsTask.Count > 0)
+
+        if (emailExists)
         {
             isError = true;
             errorMessage += "An account with this email already exists. ";
         }
-        if (usernameExistsTask.Count > 0)
+
+        if (usernameExists)
         {
             isError = true;
             errorMessage += "An account with this username already exists. ";
         }
+
         if (model.Password.Length < 8)
         {
             isError = true;
             errorMessage += "Your password must be at least 8 characters. ";
         }
-        
 
         if (isError)
         {
@@ -174,31 +238,31 @@ public class AccountController : Controller
             return View(model);
         }
 
-
         if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
         {
-            // Looks up the folder where we will save uploaded profile pictures (wwwroot/uploads)
-            string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            
-            // Secures the file path, delete if not needed
-            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+            string uploadsFolder = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "uploads"
+            );
 
-            // Unique name to prevent overwriting existing files, and to prevent issues with special characters in original file names
-            string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfilePicture.FileName);
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            string uniqueFileName =
+                Guid.NewGuid() + "_" + Path.GetFileName(model.ProfilePicture.FileName);
             string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            // save the file to wwwroot/uploads
             using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
                 await model.ProfilePicture.CopyToAsync(fileStream);
             }
 
-            // save the relative path to the profile picture in the database (e.g., "/uploads/uniquefilename.jpg")
             profilePicturePath = "/uploads/" + uniqueFileName;
         }
 
-
-        // Validation passed, create account here
         byte[] salt = RandomNumberGenerator.GetBytes(16);
         byte[] hash = Rfc2898DeriveBytes.Pbkdf2(
             model.Password,
@@ -212,19 +276,18 @@ public class AccountController : Controller
         string hashString = Convert.ToBase64String(hash);
 
         var account = new Account(
-            email: model.Email,
+            email: email,
             hashString,
             saltString,
-            model.Username,
+            username,
             profilePicturePath,
-            universityExistsTask.First().Id
+            university!.Id
         );
 
         context.Accounts.Add(account);
         await context.SaveChangesAsync();
 
-        //Send Welcome Email
-        await _emailService.SendWelcomeEmailAsync(model.Email, model.Username);
+        await _emailService.SendWelcomeEmailAsync(email, username);
 
         return Redirect("/Account/LogIn");
     }
@@ -235,9 +298,8 @@ public class AccountController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    // Manage Account GET/POST functions
     [HttpGet]
-    public IActionResult Manage() // GET
+    public IActionResult Manage()
     {
         var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(ConnectionString)
@@ -245,24 +307,22 @@ public class AccountController : Controller
 
         using var context = new ApplicationDbContext(contextOptions);
 
-        // get current user's account using AccountId claim
-        var accountIdClaim = ((ClaimsIdentity)User.Identity).FindFirst("AccountId")?.Value;
+        var accountIdClaim = ((ClaimsIdentity)User.Identity!).FindFirst("AccountId")?.Value;
         if (!int.TryParse(accountIdClaim, out var accountId))
         {
             return NotFound();
         }
 
-        var account = context.Accounts.Where(a => a.Id == accountId).FirstOrDefault();
+        var account = context.Accounts.FirstOrDefault(a => a.Id == accountId);
         if (account == null)
         {
             return NotFound();
         }
 
         NotificationPreference pref =
-            context.NotificationPreferences.Where(x => x.AccountId == accountId).FirstOrDefault()
+            context.NotificationPreferences.FirstOrDefault(x => x.AccountId == accountId)
             ?? new NotificationPreference(accountId);
 
-        // pre-populate model with current user data
         var model = new ManageModel
         {
             Email = account.Email,
@@ -270,11 +330,11 @@ public class AccountController : Controller
             NotificationPreferences = pref
         };
 
-        return PartialView("_Manage", model); // renders Manage.cshtml
+        return PartialView("_Manage", model);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Manage(ManageModel model) // POST
+    public async Task<IActionResult> Manage(ManageModel model)
     {
         var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(ConnectionString)
@@ -284,79 +344,95 @@ public class AccountController : Controller
 
         if (!ModelState.IsValid)
         {
+            model.NotificationPreferences ??= new NotificationPreference(0);
             return PartialView("_Manage", model);
         }
 
-        // get account using AccountId claim
-        var accountIdClaim = ((ClaimsIdentity)User.Identity).FindFirst("AccountId")?.Value;
+        var accountIdClaim = ((ClaimsIdentity)User.Identity!).FindFirst("AccountId")?.Value;
         if (!int.TryParse(accountIdClaim, out var accountId))
         {
             model.ErrorMessage = "Account not found.";
+            model.NotificationPreferences ??= new NotificationPreference(0);
             return PartialView("_Manage", model);
         }
 
-        var account = context.Accounts.Where(a => a.Id == accountId).FirstOrDefault();
+        var account = await context.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
         if (account == null)
         {
             model.ErrorMessage = "Account not found.";
+            model.NotificationPreferences ??= new NotificationPreference(accountId);
             return PartialView("_Manage", model);
         }
 
+        model.NotificationPreferences ??= new NotificationPreference(accountId);
+
         bool isError = false;
         var errorMessage = "";
-
-        // track what fields were changed so we can craft a success message later
         var updatedFields = new List<string>();
 
-        // Email validation
-        if (!string.IsNullOrWhiteSpace(model.Email) && model.Email != account.Email)
+        if (!string.IsNullOrWhiteSpace(model.Email) &&
+            !model.Email.Equals(account.Email, StringComparison.OrdinalIgnoreCase))
         {
-            var domain = model.Email.Substring(model.Email.IndexOf("@") + 1);
-
-            var universityExistsTask = context.Universities.Where(x => x.Domain == domain).ToList();
-            var emailExistsTask = context.Accounts
-                .Where(a => a.Email == model.Email && a.Id != account.Id)
-                .ToList();
-
-            if (universityExistsTask.Count == 0)
+            if (!model.Email.Contains("@"))
             {
                 isError = true;
                 errorMessage += "Please use a university email. ";
             }
-            if (emailExistsTask.Count > 0)
+            else
             {
-                isError = true;
-                errorMessage += "An account with this email already exists. ";
-            }
+                var newEmail = model.Email.Trim();
+                var domain = newEmail[(newEmail.IndexOf("@") + 1)..];
 
-            // If no error, update account email
-            if (!isError)
-            {
-                account.Email = model.Email;
-                updatedFields.Add("email address");
+                var university = await context.Universities
+                    .FirstOrDefaultAsync(x => x.Domain == domain);
+
+                var emailExists = await context.Accounts.AnyAsync(a =>
+                    a.Email == newEmail && a.Id != account.Id
+                );
+
+                if (university == null)
+                {
+                    isError = true;
+                    errorMessage += "Please use a university email. ";
+                }
+
+                if (emailExists)
+                {
+                    isError = true;
+                    errorMessage += "An account with this email already exists. ";
+                }
+
+                if (!isError)
+                {
+                    account.Email = newEmail;
+                    account.UniversityId = university!.Id;
+                    updatedFields.Add("email address");
+                }
             }
         }
 
-        // Username validation
-        if (!string.IsNullOrWhiteSpace(model.Username) && model.Username != account.Username)
+        if (!string.IsNullOrWhiteSpace(model.Username) &&
+            !model.Username.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
         {
-            var usernameExistsTask = context.Accounts
-                .Where(a => a.Username.ToLower() == model.Username.ToLower() && a.Id != account.Id)
-                .ToList();
+            var newUsername = model.Username.Trim();
+            var newUsernameLower = newUsername.ToLower();
 
-            if (usernameExistsTask.Count > 0)
+            var usernameExists = await context.Accounts.AnyAsync(a =>
+                a.Username.ToLower() == newUsernameLower && a.Id != account.Id
+            );
+
+            if (usernameExists)
             {
                 isError = true;
                 errorMessage += "An account with this username already exists. ";
             }
             else
             {
-                account.Username = model.Username;
+                account.Username = newUsername;
                 updatedFields.Add("username");
             }
         }
 
-        // Password validation
         if (!string.IsNullOrWhiteSpace(model.Password))
         {
             if (string.IsNullOrWhiteSpace(model.OldPassword))
@@ -366,9 +442,9 @@ public class AccountController : Controller
             }
             else
             {
-                // verify that OldPassword matches the existing hash
                 byte[] salt = Convert.FromBase64String(account.PasswordSalt);
                 byte[] expectedHash = Convert.FromBase64String(account.PasswordHash);
+
                 byte[] actualHash = Rfc2898DeriveBytes.Pbkdf2(
                     model.OldPassword,
                     salt,
@@ -389,7 +465,6 @@ public class AccountController : Controller
                 }
                 else
                 {
-                    // Hash and update password
                     byte[] newSalt = RandomNumberGenerator.GetBytes(16);
                     byte[] newHash = Rfc2898DeriveBytes.Pbkdf2(
                         model.Password,
@@ -404,60 +479,61 @@ public class AccountController : Controller
                     updatedFields.Add("password");
                 }
             }
-
-            if (isError)
-            {
-                model.Password = "";
-                model.OldPassword = "";
-                // model.Email = "";
-                model.ErrorMessage = errorMessage;
-                return PartialView("_Manage", model);
-            }
         }
 
-        // notification preferences
+        if (isError)
+        {
+            model.Password = "";
+            model.OldPassword = "";
+            model.ErrorMessage = errorMessage;
+            return PartialView("_Manage", model);
+        }
+
         try
         {
-            var notifUpdated = false;
-            var notif = context.NotificationPreferences
-                .Where(x => x.AccountId == accountId)
-                .FirstOrDefault();
+            var notif = await context.NotificationPreferences
+                .FirstOrDefaultAsync(x => x.AccountId == accountId);
+
             if (notif == null)
             {
-                notifUpdated = true;
                 notif = new NotificationPreference(accountId);
                 context.NotificationPreferences.Add(notif);
             }
 
-            if (notif.RecieveEmailNotificationOnChatMessageRecieved != model.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved
-            || notif.RecieveEmailNotificationOnListingReported != model.NotificationPreferences.RecieveEmailNotificationOnListingReported
-            || notif.RecieveEmailNotificationOnUserReported != model.NotificationPreferences.RecieveEmailNotificationOnUserReported)
-            {
-                notifUpdated = true;
-                updatedFields.Add("notification preferences");
-            }
+            bool notifChanged =
+                notif.RecieveEmailNotificationOnChatMessageRecieved != model.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved ||
+                notif.RecieveEmailNotificationOnListingReported != model.NotificationPreferences.RecieveEmailNotificationOnListingReported ||
+                notif.RecieveEmailNotificationOnUserReported != model.NotificationPreferences.RecieveEmailNotificationOnUserReported;
 
-            notif.RecieveEmailNotificationOnChatMessageRecieved = model
-                .NotificationPreferences
-                .RecieveEmailNotificationOnChatMessageRecieved;
+            notif.RecieveEmailNotificationOnChatMessageRecieved =
+                model.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved;
+
             if (User.IsInRole("Admin"))
             {
-                notif.RecieveEmailNotificationOnListingReported = model
-                    .NotificationPreferences
-                    .RecieveEmailNotificationOnListingReported;
-                notif.RecieveEmailNotificationOnUserReported = model
-                    .NotificationPreferences
-                    .RecieveEmailNotificationOnUserReported;
+                notif.RecieveEmailNotificationOnListingReported =
+                    model.NotificationPreferences.RecieveEmailNotificationOnListingReported;
+                notif.RecieveEmailNotificationOnUserReported =
+                    model.NotificationPreferences.RecieveEmailNotificationOnUserReported;
             }
             else
             {
                 notif.RecieveEmailNotificationOnListingReported = false;
                 notif.RecieveEmailNotificationOnUserReported = false;
             }
-        }
-        catch (Exception ex) { }
 
-        // Save changes to database
+            if (notifChanged)
+            {
+                updatedFields.Add("notification preferences");
+            }
+        }
+        catch (Exception ex)
+        {
+            model.Password = "";
+            model.OldPassword = "";
+            model.ErrorMessage = $"Error updating notification preferences: {ex.Message}";
+            return PartialView("_Manage", model);
+        }
+
         try
         {
             await context.SaveChangesAsync();
@@ -465,28 +541,29 @@ public class AccountController : Controller
         catch (Exception ex)
         {
             model.Password = "";
+            model.OldPassword = "";
             model.ErrorMessage = $"Error saving changes: {ex.Message}";
             return PartialView("_Manage", model);
         }
 
-        // build a success string based on which fields changed
         string successMessage;
-        if (updatedFields.Count == 0) // no fields changed
+        if (updatedFields.Count == 0)
         {
             successMessage = "No changes made.";
         }
-        else if (updatedFields.Count == 1) // 1 field changed
+        else if (updatedFields.Count == 1)
         {
             successMessage = "The field " + updatedFields[0] + " was successfully updated.";
         }
-        else // > 1 field changed
+        else
         {
             successMessage =
                 "The fields " + string.Join(", ", updatedFields) + " were successfully updated.";
         }
 
         model.Password = "";
+        model.OldPassword = "";
         model.SuccessMessage = successMessage;
-        return PartialView("_Manage", model); // redirects to GET Manage after success
+        return PartialView("_Manage", model);
     }
 }

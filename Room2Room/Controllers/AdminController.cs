@@ -1,4 +1,3 @@
-using System.Net.WebSockets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +29,11 @@ public class AdminController : Controller
         var items =
             (await _listingRepository.GetItems(sTerm, categoryId, universityId))
             ?? new List<Item>();
-        var categories = (await _listingRepository.GetCategories()) ?? new List<Category>();
+
+        var categories =
+            (await _listingRepository.GetCategories())
+            ?? new List<Category>();
+
         var universities = (
             from item in _context.Items
             join account in _context.Accounts on item.AccountId equals account.Id
@@ -50,6 +53,7 @@ public class AdminController : Controller
             CategoryId = categoryId,
             UniversityId = universityId
         };
+
         return PartialView("_AdminListings", itemModel);
     }
 
@@ -61,27 +65,30 @@ public class AdminController : Controller
     [HttpGet]
     public async Task<IActionResult> Users(string sTerm = "")
     {
-        var normalizedSearch = sTerm.Trim();
+        var normalizedSearch = (sTerm ?? string.Empty).Trim();
 
         var query =
             from account in _context.Accounts
             join university in _context.Universities on account.UniversityId equals university.Id into universityJoin
             from university in universityJoin.DefaultIfEmpty()
+            join restriction in _context.AccountRestrictions on account.Id equals restriction.AccountId into restrictionJoin
+            from restriction in restrictionJoin.DefaultIfEmpty()
             select new AdminUserListItem
             {
                 Id = account.Id,
                 Email = account.Email,
                 Username = account.Username,
                 IsAdmin = account.IsAdmin,
-                UniversityName = university != null ? university.Name : "Unknown"
+                UniversityName = university != null ? university.Name : "Unknown",
+                AccountStatus = restriction != null ? restriction.Status : "Active"
             };
 
         if (!string.IsNullOrWhiteSpace(normalizedSearch))
         {
             query = query.Where(x =>
-                x.Email.Contains(normalizedSearch)
-                || x.Username.Contains(normalizedSearch)
-                || x.UniversityName.Contains(normalizedSearch)
+                x.Email.Contains(normalizedSearch) ||
+                x.Username.Contains(normalizedSearch) ||
+                x.UniversityName.Contains(normalizedSearch)
             );
         }
 
@@ -97,6 +104,70 @@ public class AdminController : Controller
         };
 
         return PartialView("_Users", model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateUserStatus(int id, string newStatus)
+    {
+        if (string.IsNullOrWhiteSpace(newStatus))
+        {
+            return BadRequest("Invalid status.");
+        }
+
+        var validStatuses = new[] { "Active", "Suspended", "Deactivated" };
+        if (!validStatuses.Contains(newStatus))
+        {
+            return BadRequest("Invalid status.");
+        }
+
+        var account = await _context.Accounts.FirstOrDefaultAsync(x => x.Id == id);
+        if (account == null)
+        {
+            return NotFound();
+        }
+
+        var currentAdminIdClaim = User.FindFirst("AccountId")?.Value;
+        if (int.TryParse(currentAdminIdClaim, out var currentAdminId) &&
+            account.Id == currentAdminId &&
+            newStatus != "Active")
+        {
+            return BadRequest("You cannot suspend or deactivate your own account.");
+        }
+
+        var restriction = await _context.AccountRestrictions
+            .FirstOrDefaultAsync(x => x.AccountId == id);
+
+        if (newStatus == "Active")
+        {
+            if (restriction != null)
+            {
+                _context.AccountRestrictions.Remove(restriction);
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok();
+        }
+
+        if (restriction == null)
+        {
+            restriction = new AccountRestriction
+            {
+                AccountId = id,
+                Status = newStatus,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.AccountRestrictions.Add(restriction);
+        }
+        else
+        {
+            restriction.Status = newStatus;
+            restriction.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok();
     }
 
     [HttpGet]
@@ -149,8 +220,10 @@ public class AdminController : Controller
 
         if (!newEmail.Equals(account.Email, StringComparison.OrdinalIgnoreCase))
         {
+            var newEmailLower = newEmail.ToLower();
+
             var emailExists = await _context.Accounts.AnyAsync(x =>
-                x.Id != account.Id && x.Email.ToLower() == newEmail.ToLower()
+                x.Id != account.Id && x.Email.ToLower() == newEmailLower
             );
 
             if (emailExists)
@@ -161,7 +234,9 @@ public class AdminController : Controller
 
             var domainStart = newEmail.IndexOf("@", StringComparison.Ordinal);
             var domain = domainStart >= 0 ? newEmail[(domainStart + 1)..] : string.Empty;
-            var university = await _context.Universities.FirstOrDefaultAsync(x => x.Domain == domain);
+
+            var university = await _context.Universities
+                .FirstOrDefaultAsync(x => x.Domain == domain);
 
             if (university == null)
             {
@@ -175,8 +250,10 @@ public class AdminController : Controller
 
         if (!newUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
         {
+            var newUsernameLower = newUsername.ToLower();
+
             var usernameExists = await _context.Accounts.AnyAsync(x =>
-                x.Id != account.Id && x.Username.ToLower() == newUsername.ToLower()
+                x.Id != account.Id && x.Username.ToLower() == newUsernameLower
             );
 
             if (usernameExists)
@@ -260,18 +337,18 @@ public class AdminController : Controller
         return PartialView("_Statistics", model);
     }
 
-    // ===== Announcements List =====
     [HttpGet]
-    public IActionResult ListAnnouncements()
+    public async Task<IActionResult> ListAnnouncements()
     {
-        var announcements = _context.Announcements.OrderByDescending(a => a.StartDate).ToList();
+        var announcements = await _context.Announcements
+            .OrderByDescending(a => a.StartDate)
+            .ToListAsync();
 
         return PartialView("_AnnouncementsList", announcements);
     }
 
-    // ===== Announcements Create =====
     [HttpPost]
-    public IActionResult CreateAnnouncement(AnnouncementFormModel model)
+    public async Task<IActionResult> CreateAnnouncement(AnnouncementFormModel model)
     {
         if (model == null)
             return BadRequest("Invalid request.");
@@ -281,9 +358,6 @@ public class AdminController : Controller
 
         var now = DateTime.Now;
 
-        // Rule:
-        // - If date/time not provided => show immediately
-        // - If end not provided => never expires
         var finalStart = model.StartDate ?? now;
         var finalEnd = model.EndDate ?? DateTime.MaxValue;
 
@@ -308,19 +382,18 @@ public class AdminController : Controller
         var announcement = new Announcement(model.Message.Trim(), "warning", finalStart, finalEnd);
 
         _context.Announcements.Add(announcement);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return Ok();
     }
 
-    // ===== Announcements Edit =====
     [HttpPost]
-    public IActionResult EditAnnouncement(AnnouncementFormModel model)
+    public async Task<IActionResult> EditAnnouncement(AnnouncementFormModel model)
     {
         if (model == null)
             return BadRequest("Invalid request.");
 
-        var a = _context.Announcements.FirstOrDefault(x => x.Id == model.Id);
+        var a = await _context.Announcements.FirstOrDefaultAsync(x => x.Id == model.Id);
         if (a == null)
             return NotFound();
 
@@ -330,10 +403,9 @@ public class AdminController : Controller
         var now = DateTime.Now;
         var nowMinute = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
 
-        var finalStart = a.StartDate; // keep original seconds
+        var finalStart = a.StartDate;
         var finalEnd = a.EndDate;
 
-        // Only validate if user actually changed the start time
         if (model.StartDate.HasValue)
         {
             var incoming = model.StartDate.Value;
@@ -367,7 +439,6 @@ public class AdminController : Controller
             }
         }
 
-        // Only update end if user actually changed it
         if (model.EndDate.HasValue)
         {
             var incoming = model.EndDate.Value;
@@ -403,63 +474,73 @@ public class AdminController : Controller
         a.StartDate = finalStart;
         a.EndDate = finalEnd;
 
-        _context.SaveChanges();
-
+        await _context.SaveChangesAsync();
         return Ok();
     }
 
-    // ===== Announcements Deactivate/Activate =====
     [HttpPost]
-    public IActionResult ToggleAnnouncement(int id)
+    public async Task<IActionResult> ToggleAnnouncement(int id)
     {
-        var a = _context.Announcements.FirstOrDefault(x => x.Id == id);
+        var a = await _context.Announcements.FirstOrDefaultAsync(x => x.Id == id);
         if (a == null)
             return NotFound();
 
         a.IsActive = !a.IsActive;
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return Ok();
     }
 
-    // ===== Announcements Delete =====
     [HttpPost]
-    public IActionResult DeleteAnnouncement(int id)
+    public async Task<IActionResult> DeleteAnnouncement(int id)
     {
-        var a = _context.Announcements.FirstOrDefault(x => x.Id == id);
+        var a = await _context.Announcements.FirstOrDefaultAsync(x => x.Id == id);
         if (a == null)
             return NotFound();
 
         _context.Announcements.Remove(a);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return Ok();
     }
 
     public async Task<IActionResult> GetCategories()
     {
-        var categories = await _listingRepository.GetCategories();
-        categories = categories.OrderBy(x => x.CategoryName);
+        var categories = (await _listingRepository.GetCategories()) ?? new List<Category>();
+        categories = categories.OrderBy(x => x.CategoryName).ToList();
         return PartialView("_AdminCategories", categories);
     }
 
     [HttpPost]
-    public async Task<IActionResult> UpsertCategory(Category cat)
+    public async Task<IActionResult> UpsertCategory(Category? cat)
     {
-        var oldCat = _context.Categories.Where(x => x.Id == cat.Id).FirstOrDefault();
-
-        if (string.IsNullOrEmpty(cat.CategoryName)) {
+        if (cat == null)
+        {
             return BadRequest();
         }
 
-        if (cat == null || cat.Id == 0) {
-            // return BadRequest();
-            _context.Categories.Add(cat);
-        } else {
-            oldCat!.CategoryName = cat.CategoryName;
+        if (string.IsNullOrWhiteSpace(cat.CategoryName))
+        {
+            return BadRequest();
         }
 
-        _context.SaveChanges();
+        cat.CategoryName = cat.CategoryName.Trim();
+
+        if (cat.Id == 0)
+        {
+            _context.Categories.Add(cat);
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        var oldCat = await _context.Categories.FirstOrDefaultAsync(x => x.Id == cat.Id);
+        if (oldCat == null)
+        {
+            return NotFound();
+        }
+
+        oldCat.CategoryName = cat.CategoryName;
+        await _context.SaveChangesAsync();
 
         return Ok();
     }
@@ -467,17 +548,26 @@ public class AdminController : Controller
     [HttpPost]
     public async Task<IActionResult> DeleteCategory(int catId)
     {
-        var oldCat = _context.Categories.Where(x => x.Id == catId).FirstOrDefault();
+        var oldCat = await _context.Categories.FirstOrDefaultAsync(x => x.Id == catId);
         if (oldCat == null)
         {
             return BadRequest();
         }
 
-        var itemIds = _context.Items.Where(x => x.CategoryId == oldCat.Id).Select(x => x.Id).ToList();
-        _context.RemoveRange(_context.Watchlists.Where(x => itemIds.Contains(x.ItemId)).ToList());
-        _context.SaveChanges();
+        var itemIds = await _context.Items
+            .Where(x => x.CategoryId == oldCat.Id)
+            .Select(x => x.Id)
+            .ToListAsync();
+
+        var watchlists = await _context.Watchlists
+            .Where(x => itemIds.Contains(x.ItemId))
+            .ToListAsync();
+
+        _context.RemoveRange(watchlists);
+        await _context.SaveChangesAsync();
+
         _context.Categories.Remove(oldCat);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return Ok();
     }

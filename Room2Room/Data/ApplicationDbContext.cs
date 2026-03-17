@@ -6,12 +6,12 @@ using Room2Room.Models.Announcements;
 using Room2Room.Models.Watchlist;
 using Room2Room.Models.Chats;
 
-
 namespace Room2Room.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<AccountRestriction> AccountRestrictions { get; set; }
     public DbSet<NotificationPreference> NotificationPreferences { get; set; }
     public DbSet<University> Universities { get; set; }
     public DbSet<Announcement> Announcements { get; set; }
@@ -24,5 +24,4 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Chat> Chat { get; set; }
     public DbSet<ChatMessage> ChatMessage { get; set; }
     public DbSet<ChatMember> ChatMember { get; set; }
-    
 }

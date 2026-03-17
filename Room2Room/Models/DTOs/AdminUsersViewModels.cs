@@ -13,6 +13,7 @@ public class AdminUserListItem
     public string Username { get; set; } = string.Empty;
     public bool IsAdmin { get; set; }
     public string UniversityName { get; set; } = string.Empty;
+    public string AccountStatus { get; set; } = "Active";
 }
 
 public class AdminEditUserModel

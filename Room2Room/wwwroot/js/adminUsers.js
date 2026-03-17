@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const userTab = document.getElementById("user-tab");
 
     if (userTab) {
@@ -42,5 +42,34 @@ function searchAdminUsers() {
         })
         .catch(error => {
             console.error("Error searching admin users:", error);
+        });
+}
+
+function updateUserStatus(userId, newStatus) {
+    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+    fetch("/Admin/UpdateUserStatus", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "RequestVerificationToken": token
+        },
+        body: `id=${encodeURIComponent(userId)}&newStatus=${encodeURIComponent(newStatus)}`
+    })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(text || "Failed to update user status.");
+                });
+            }
+
+            return response.text();
+        })
+        .then(() => {
+            loadAdminUsers();
+        })
+        .catch(error => {
+            console.error("Error updating user status:", error);
+            alert(error.message || "Failed to update user status.");
         });
 }
