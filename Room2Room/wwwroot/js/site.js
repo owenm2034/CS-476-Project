@@ -3,8 +3,14 @@
 
 // Write your JavaScript code.
 // ===== Announcement banner =====
-async function openChat() {
-    const res = await fetch('/Chat/', {
+async function openChat(userId = undefined) {
+    document.getElementById("chat-modal-header").textContent = "Chat";
+    
+    var url = '/Chat'
+    if (userId != undefined && userId > 0) {
+        url += "?forUserId=" + userId;
+    }
+    const res = await fetch(url, {
         method: 'GET',
     });
 

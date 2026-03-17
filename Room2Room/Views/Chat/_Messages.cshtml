@@ -2,7 +2,7 @@
 
 @{
     var cm = Model;
-    var myId = int.Parse(User.FindFirst("AccountId")?.Value);
+    var myId = Model.ViewingId ?? int.Parse(User.FindFirst("AccountId")?.Value);
 }
 
 @foreach (var m in cm.Messages)
