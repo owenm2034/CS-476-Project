@@ -6,6 +6,7 @@ public class ChatModel
     public Item? Item { get; set; }
     public Dictionary<int, string> AccountIdToNameDictionary { get; set; }
     public List<ChatMessage> Messages { get; set; }
+    public int? ViewingId { get; set; }
 
     public string ChatName
     {

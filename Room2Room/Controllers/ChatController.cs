@@ -26,11 +26,17 @@ public class ChatController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int? forUserId)
     {
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
 
+        if (User.IsInRole("Admin") && forUserId.HasValue && forUserId > 0) {
+            userId = forUserId.Value;
+        }
+
         var chatModel = GetAllChats(userId);
+
+
 
         return PartialView("_Chats", chatModel);
     }
@@ -211,7 +217,10 @@ public class ChatController : Controller
         }
 
         chatModels = chatModels.OrderByDescending(x => x.Messages.Last().CreatedAt).ToList();
+        foreach (var c in chatModels) {
+            c.ViewingId = userId;
+        }
 
-        return new AllChatsModel() { ChatModels = chatModels, SelectedIndex = 0 };
+        return new AllChatsModel() { ChatModels = chatModels, SelectedIndex = 0, ViewingId = userId };
     }
 }
