@@ -3,7 +3,7 @@
 
 
 @{
-    var myId = int.Parse(User.FindFirst("AccountId")?.Value);
+    var myId = Model.ViewingId ?? int.Parse(User.FindFirst("AccountId")?.Value);
 }
 @if (Model.ChatModels.Count == 0) {
     <text><p>No chats<p/></text>

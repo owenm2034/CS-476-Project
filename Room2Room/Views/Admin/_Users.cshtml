@@ -78,6 +78,11 @@
                                 Edit Account
                             </a>
 
+                            <a class="btn btn-outline-secondary btn-sm"
+                               onclick="viewChat(@user.Id, '@user.Username')">
+                                View Chats
+                            </a>
+
                             @if (user.AccountStatus == "Active")
                             {
                                 <button type="button"
