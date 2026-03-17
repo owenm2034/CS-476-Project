@@ -30,6 +30,14 @@
             <input asp-for="Price" class="form-control" />
             <span asp-validation-for="Price" class="text-danger"></span>
         </div>
+        
+        <div class="mb-3">
+            <label asp-for="Status" class="form-label">Status</label>
+            <select asp-for="Status" class="form-select" asp-items="ViewBag.StatusOptions">
+                <option value="">Select Status</option>
+            </select>
+            <span asp-validation-for="Status" class="text-danger"></span>
+        </div>
 
         <div class="mb-3">
             <label asp-for="CategoryId" class="form-label">Category</label>
@@ -48,7 +56,8 @@
             <div>
                 @if (!string.IsNullOrEmpty(Model.CurrentImagePath))
                 {
-                    <img src="@Model.CurrentImagePath" alt="Current listing image" class="img-thumbnail" style="max-width: 250px;" />
+                    <img src="@Model.CurrentImagePath" alt="Current listing image" class="img-thumbnail"
+                         style="max-width: 250px;" />
                 }
                 else
                 {
