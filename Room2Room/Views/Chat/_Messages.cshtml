@@ -17,6 +17,7 @@
     </div>
 }
 <div class="chat-box-for-chat" style="position: sticky;bottom: 0; width: 100%">
-<input id="chat-box-for-chat-@(cm.Chat.ChatId)" style="width: 87%" type="text" /><button onclick="sendChat(@cm.Chat.ChatId)"
-type="button">Send</button>
+@if (myId == int.Parse(User.FindFirst("AccountId")?.Value)) {
+<text><input id="chat-box-for-chat-@(cm.Chat.ChatId)" style="width: 87%" type="text" /><button onclick="sendChat(@cm.Chat.ChatId)" type="button">Send</button></text>
+}
 </div>
