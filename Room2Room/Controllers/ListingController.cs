@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Room2Room.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Room2Room.Controllers;
 
@@ -160,6 +161,13 @@ public class ListingController : Controller
 
         ViewBag.Categories = await _listingRepository.GetCategories();
 
+        ViewBag.StatusOptions = new List<SelectListItem>
+        {
+            new SelectListItem { Value = "Available", Text = "Available" },
+            new SelectListItem { Value = "Sold", Text = "Sold" },
+            new SelectListItem { Value = "On Hold", Text = "On Hold" }
+        };
+
         var currentImage = await _listingRepository.GetFirstItemImageAsync(id);
 
         EditItem dto = new EditItem
@@ -169,6 +177,7 @@ public class ListingController : Controller
             ItemDescription = item.ItemDescription ?? "",
             Price = item.ItemPrice,
             CategoryId = item.CategoryId,
+            Status = item.Status ?? "Available",
             ReturnTo = returnTo,
             CurrentImagePath = currentImage?.ImagePath
         };
@@ -184,6 +193,12 @@ public class ListingController : Controller
         if (!ModelState.IsValid)
         {
             ViewBag.Categories = await _listingRepository.GetCategories();
+            ViewBag.StatusOptions = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Available", Text = "Available" },
+                new SelectListItem { Value = "Sold",      Text = "Sold" },
+                new SelectListItem { Value = "On Hold",   Text = "Reserved" }
+            };
             var currentImage = await _listingRepository.GetFirstItemImageAsync(dto.Id);
             dto.CurrentImagePath = currentImage?.ImagePath;
             return View(dto);
@@ -214,6 +229,7 @@ public class ListingController : Controller
         item.ItemDescription = dto.ItemDescription;
         item.ItemPrice = dto.Price;
         item.CategoryId = dto.CategoryId;
+        item.Status = dto.Status;
 
         await _listingRepository.UpdateItemAsync(item);
 
