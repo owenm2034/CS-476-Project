@@ -91,7 +91,7 @@ public class ChatController : Controller
 
         var newMessage = new ChatMessage(message);
 
-        var nextId = _context.ChatMessage.OrderByDescending(x => x.MessageId).First().MessageId + 1;
+        var nextId = (_context.ChatMessage.OrderByDescending(x => x.MessageId).FirstOrDefault()?.MessageId ?? 0) + 1;
         
         newMessage.FromAccountId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
         newMessage.CreatedAt = DateTime.Now;
@@ -105,6 +105,7 @@ public class ChatController : Controller
 
         Dictionary<int, Item> itemIdToItemDict =
             _context.Items.Where(x => x.Id == chat.ListingId)
+            .Select(x => new Item { Id = x.Id, ItemName = x.ItemName, AccountId = x.AccountId, ItemPrice = x.ItemPrice, Status = x.Status, CategoryId = x.CategoryId })
                 .ToList().Distinct().ToDictionary(x => x.Id);
 
         List<Account> accounts = _context.Accounts.Where(x => accountIdsTask.Distinct().ToList().Contains(x.Id)).ToList();
@@ -128,7 +129,10 @@ public class ChatController : Controller
             return BadRequest();
         }
 
-        var listing = _context.Items.Where(x => x.Id == message.ListingId).FirstOrDefault();
+        var listing = _context.Items.Where(x => x.Id == message.ListingId)
+        .Where(x => x.Id == message.ListingId)
+        .Select(x => new Item { Id = x.Id, ItemName = x.ItemName, AccountId = x.AccountId, ItemPrice = x.ItemPrice, Status = x.Status, CategoryId = x.CategoryId })
+        .FirstOrDefault();
 
         if (listing == null) {
             return BadRequest();
@@ -149,7 +153,7 @@ public class ChatController : Controller
         {
             chat = new Chat();
             chat.ListingId = message.ListingId;
-            chat.ChatId = _context.Chat.OrderByDescending(x => x.ChatId).First().ChatId + 1;
+            chat.ChatId = (_context.Chat.OrderByDescending(x => x.ChatId).FirstOrDefault()?.ChatId ?? 0) + 1;
             _context.Chat.Add(chat);
             _context.SaveChanges();
 
@@ -160,7 +164,7 @@ public class ChatController : Controller
             _context.SaveChanges();
         }
 
-        var nextId = _context.ChatMessage.OrderByDescending(x => x.MessageId).First().MessageId + 1;
+        var nextId = (_context.ChatMessage.OrderByDescending(x => x.MessageId).FirstOrDefault()?.MessageId ?? 0) + 1;
 
         var newMessage = new ChatMessage(message);
         newMessage.FromAccountId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
@@ -192,6 +196,7 @@ public class ChatController : Controller
 
         Dictionary<int, Item> itemIdToItemDict =
             _context.Items.Where(x => chatsTask.Select(x => x.ListingId).ToList().Contains(x.Id))
+            .Select(x => new Item { Id = x.Id, ItemName = x.ItemName, AccountId = x.AccountId, ItemPrice = x.ItemPrice, Status = x.Status, CategoryId = x.CategoryId })
                 .ToList().Distinct().ToDictionary(x => x.Id);
 
         List<Account> accounts = _context.Accounts.Where(x => accountIdsTask.Distinct().ToList().Contains(x.Id)).ToList();

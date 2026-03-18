@@ -3,16 +3,21 @@ using System.Security.Claims;
 using Room2Room.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Room2Room.Data;
+using Room2Room.Models.Accounts;
+using Microsoft.EntityFrameworkCore;
 
 namespace Room2Room.Controllers;
 
 public class ListingController : Controller
 {
     private readonly IListingRepository _listingRepository;
+    private readonly ApplicationDbContext _context;
 
-    public ListingController(IListingRepository listingRepository)
+    public ListingController(IListingRepository listingRepository, ApplicationDbContext context)
     {
         _listingRepository = listingRepository;
+        _context = context;
     }
 
     public async Task<IActionResult> Index(string sTerm = "", int? categoryId = null)
@@ -319,4 +324,35 @@ public class ListingController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    public async Task<IActionResult> Details(int id)
+{
+    var item = await _context.Items
+        .Include(i => i.ItemImage)
+        .Include(i => i.Category)
+        .Select(i => new Item
+        {
+            Id = i.Id,
+            ItemName = i.ItemName,
+            ItemDescription = i.ItemDescription,
+            ItemPrice = i.ItemPrice,
+            Status = i.Status,
+            CategoryId = i.CategoryId,
+            AccountId = i.AccountId,
+            Category = i.Category,
+            ItemImage = i.ItemImage
+        })
+        .FirstOrDefaultAsync(i => i.Id == id);
+    
+    if (item == null)
+        return NotFound();
+ 
+    var seller = await _context.Accounts.FindAsync(item.AccountId);
+ 
+    ViewBag.SellerName  = seller?.Username ?? "Unknown";
+    ViewBag.SellerEmail = seller?.Email    ?? "";
+ 
+    return View(item);
+}
+
 }
