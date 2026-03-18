@@ -1,6 +1,8 @@
 @model Room2Room.Models.DTOs.AdminUsersViewModel
 
 <div class="my-4">
+    @Html.AntiForgeryToken()
+
     <form class="row row-cols-lg-auto g-3 align-items-center" onsubmit="return false;">
         <div class="col-12">
             <label class="visually-hidden" for="adminUserSearchTerm">Search users</label>
@@ -32,6 +34,7 @@
                 <th>Email</th>
                 <th>University</th>
                 <th>Role</th>
+                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -53,9 +56,55 @@
                         }
                     </td>
                     <td>
-                        <div class="d-flex gap-2 flex-wrap">                       
-                            <a class="btn btn-outline-primary btn-sm" asp-controller="Admin" asp-action="EditUser" asp-route-id="@user.Id">Edit Account</a>
-                            <a class="btn btn-outline-secondary btn-sm" onclick="viewChat(@user.Id, '@user.Username')">View Chats</a>
+                        @if (user.AccountStatus == "Suspended")
+                        {
+                            <span class="badge bg-warning text-dark">Suspended</span>
+                        }
+                        else if (user.AccountStatus == "Deactivated")
+                        {
+                            <span class="badge bg-danger">Deactivated</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a class="btn btn-outline-primary btn-sm"
+                               asp-controller="Admin"
+                               asp-action="EditUser"
+                               asp-route-id="@user.Id">
+                                Edit Account
+                            </a>
+
+                            <a class="btn btn-outline-secondary btn-sm"
+                               onclick="viewChat(@user.Id, '@user.Username')">
+                                View Chats
+                            </a>
+
+                            @if (user.AccountStatus == "Active")
+                            {
+                                <button type="button"
+                                        class="btn btn-outline-warning btn-sm"
+                                        onclick="updateUserStatus(@user.Id, 'Suspended')">
+                                    Suspend
+                                </button>
+
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm"
+                                        onclick="updateUserStatus(@user.Id, 'Deactivated')">
+                                    Deactivate
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button"
+                                        class="btn btn-outline-success btn-sm"
+                                        onclick="updateUserStatus(@user.Id, 'Active')">
+                                    Reactivate
+                                </button>
+                            }
                         </div>
                     </td>
                 </tr>

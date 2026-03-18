@@ -140,6 +140,22 @@ END
 ELSE
     PRINT('NotificationPreferences already created :)');
 
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AccountRestrictions')
+BEGIN
+CREATE TABLE AccountRestrictions(
+    AccountId INT PRIMARY KEY,
+    Status NVARCHAR(20) NOT NULL,
+    Reason NVARCHAR(255) NULL,
+    UpdatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT FK_AccountRestrictions_Accounts_AccountId FOREIGN KEY (AccountId) REFERENCES Accounts(Id) ON DELETE CASCADE
+);
+print ('AccountRestrictions created')
+END
+ELSE
+    PRINT('AccountRestrictions already created :)');
+
+
 IF NOT EXISTS (select * from sys.tables where name = 'Chat')
 BEGIN
 CREATE TABLE [Chat] (
