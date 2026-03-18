@@ -68,6 +68,7 @@ public class ListingRepository : IListingRepository
             join account in _db.Accounts on item.AccountId equals account.Id
             join university in _db.Universities on account.UniversityId equals university.Id
             where item.AccountId == accountId
+            where !item.IsDeleted
             select new Item
             {
                 Id = item.Id,
