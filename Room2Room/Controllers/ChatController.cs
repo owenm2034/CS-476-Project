@@ -46,20 +46,24 @@ public class ChatController : Controller
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
 
         var chatIds = _context.ChatMember.Where(x => x.AccountId == userId).Select(x => x.ChatId).ToList();
-        var listingChats = _context.ListingChat.Where(x => chatIds.Contains(x.ChatId)).ToList();
+        var chats = _context.Chat.Where(x => chatIds.Contains(x.ChatId)).ToList();
         // var privateChats = _context.Chat.Where TODO
         var messagesTask = _context.ChatMessage.Where(x => chatIds.Contains(x.ChatId) && x.CreatedAt > since).ToList();
         var accountIdsTask = _context.ChatMember.Where(x => chatIds.Contains(x.ChatId)).Select(x => x.AccountId).ToList();
 
 
+
+        List<Account> accounts = _context.Accounts.Where(x => accountIdsTask.Distinct().ToList().Contains(x.Id)).ToList();
+
+        IEnumerable<ListingChat> listingChats = chats.Where(x => x is ListingChat).Select(x => x as ListingChat);
+        IEnumerable<PrivateChat> privateChats = chats.Where(x => x is PrivateChat).Select(x => x as PrivateChat);
+        
         Dictionary<int, Item> itemIdToItemDict =
             _context.Items.Where(x => listingChats.Select(x => x.ListingId).ToList().Contains(x.Id))
                 .ToList().Distinct().ToDictionary(x => x.Id);
 
-        List<Account> accounts = _context.Accounts.Where(x => accountIdsTask.Distinct().ToList().Contains(x.Id)).ToList();
-
         List<ChatModel> chatModels = [];
-        foreach (ListingChat c in listingChats) {
+        foreach (ListingChat c in chats) {
             var messages = messagesTask.Where(x => x.ChatId == c.ChatId).OrderBy(x => x.CreatedAt).ToList();
 
             if (messages.Count == 0) {
@@ -71,6 +75,26 @@ public class ChatController : Controller
             var cm = new ChatModel {
                 Chat = c,
                 ChatName = itemIdToItemDict.GetValueOrDefault(c.ListingId)?.ItemName,
+                AccountIdToNameDictionary = accountDict,
+                Messages = messages
+            };
+
+            chatModels.Add(cm);
+        }
+
+        foreach (PrivateChat pc in privateChats) {
+            var messages = messagesTask.Where(x => x.ChatId == pc.ChatId).OrderBy(x => x.CreatedAt).ToList();
+            if (messages.Count == 0) {
+                continue;
+            }
+            var accountIds = messagesTask.Where(x => x.ChatId == pc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
+            var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
+
+            pc.AccountIds = accountIds;
+
+            var cm = new ChatModel {
+                Chat = pc,
+                ChatName = string.Join(", ", accountDict.Where(kvp => kvp.Key != userId).Select(x => x.Value)),
                 AccountIdToNameDictionary = accountDict,
                 Messages = messages
             };
@@ -129,9 +153,6 @@ public class ChatController : Controller
                 _context.SaveChanges();
             }
         } else if (message.ToAccountId != null) {
-            // check if chat exists
-            // see if chat with chat member other and accountid
-            // if chat exists, do nothing other than assign private chat to
             chat = _context.PrivateChat
                 .Join(_context.ChatMember,
                     c => c.ChatId,
