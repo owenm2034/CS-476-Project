@@ -34,6 +34,8 @@ builder.Services.AddScoped<IWatchlistRepository, WatchlistRepository>();
 // Observer Pattern Services
 builder.Services.AddScoped<IItemObserver, DbPriceDropObserver>();
 builder.Services.AddScoped<IItemObserver, DbStatusChangeObserver>();
+builder.Services.AddScoped<IItemObserver, EmailPriceDropObserver>();
+builder.Services.AddScoped<IItemObserver, EmailStatusChangeObserver>();
 builder.Services.AddScoped<IItemSubject, ItemSubject>();
 
 // Email Service- ReSend
