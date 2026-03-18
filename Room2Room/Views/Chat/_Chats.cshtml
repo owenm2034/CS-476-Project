@@ -22,7 +22,7 @@
                         <text>data-listingId="@lc.ListingId"</text>
                     } else if (Model.ChatModels[i].Chat is PrivateChat pc) {
                         <text>data-toId="@string.Join(",", pc.AccountIds.Where(x => x != myId))"</text>
-                    } else {}
+                    }
                     class="list-group-item list-group-item-action @(i == Model.SelectedIndex ? "active" : "")" aria-current="true" style="min-width: 275px;">
                         <div class="d-flex w-100 justify-content-between">
                             <h5 class="mb-1">@cm.ChatName</h5>

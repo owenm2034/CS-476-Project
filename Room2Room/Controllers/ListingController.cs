@@ -45,7 +45,6 @@ public class ListingController : Controller
             STerm = sTerm,
             CategoryId = categoryId
         };
-
         return View(itemModel);
     }
 
