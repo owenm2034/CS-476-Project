@@ -1,6 +1,7 @@
 @model Room2Room.Models.DTOs.ItemDisplayModel
 @{
     ViewData["Title"] = "Home Page";
+    var myId = int.Parse(User.FindFirst("AccountId")?.Value);
 }
 @Html.AntiForgeryToken()
 
@@ -92,7 +93,10 @@
                                 </button>
                             }
                     }
-                    <button class="btn btn-info" onclick="openItemChat(@item.Id)">Chat</button>
+                    @if (item.AccountId != myId) {
+                        // only allow users to start a chat if it is not their listing
+                        <button class="btn btn-info" onclick="openItemChat(@item.Id)">Chat</button>
+                    }
                     </div>
                 </div>
             </div>

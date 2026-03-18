@@ -35,6 +35,9 @@ public class ListingController : Controller
             item.InWatchlist = watchlistedItemIds.Contains(item.Id);
         }
 
+        // exclude the listings this account made from the page
+        items = items.Where(x => x.AccountId != userId).ToList();
+
         ItemDisplayModel itemModel = new ItemDisplayModel
         {
             Items = items,
@@ -42,6 +45,7 @@ public class ListingController : Controller
             STerm = sTerm,
             CategoryId = categoryId
         };
+
         return View(itemModel);
     }
 
