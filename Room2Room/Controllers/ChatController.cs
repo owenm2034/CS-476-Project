@@ -70,7 +70,7 @@ public class ChatController : Controller
 
             var cm = new ChatModel {
                 Chat = c,
-                Item = itemIdToItemDict.GetValueOrDefault(c.ListingId),
+                ChatName = itemIdToItemDict.GetValueOrDefault(c.ListingId)?.ItemName,
                 AccountIdToNameDictionary = accountDict,
                 Messages = messages
             };
@@ -187,13 +187,14 @@ public class ChatController : Controller
 
             cm = new ChatModel {
                 Chat = lc,
-                Item = itemIdToItemDict.GetValueOrDefault(lc.ListingId),
+                ChatName = itemIdToItemDict.GetValueOrDefault(lc.ListingId)?.ItemName,
                 AccountIdToNameDictionary = accountDict,
                 Messages = messagesTask.Where(x => x.ChatId == lc.ChatId).OrderBy(x => x.CreatedAt).ToList()
             };
         } else if (chat is PrivateChat pc) {
             var accountIds = messagesTask.Where(x => x.ChatId == pc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
+            pc.AccountIds = accountIds;
 
             cm = new ChatModel {
                 Chat = pc,
@@ -233,7 +234,7 @@ public class ChatController : Controller
 
             var cm = new ChatModel {
                 Chat = c,
-                Item = itemIdToItemDict.GetValueOrDefault(c.ListingId),
+                ChatName = itemIdToItemDict.GetValueOrDefault(c.ListingId)?.ItemName,
                 AccountIdToNameDictionary = accountDict,
                 Messages = messages
             };
@@ -249,8 +250,11 @@ public class ChatController : Controller
             var accountIds = messagesTask.Where(x => x.ChatId == pc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
+            pc.AccountIds = accountIds;
+
             var cm = new ChatModel {
                 Chat = pc,
+                ChatName = string.Join(", ", accountDict.Where(kvp => kvp.Key != userId).Select(x => x.Value)),
                 AccountIdToNameDictionary = accountDict,
                 Messages = messages
             };
