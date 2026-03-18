@@ -17,7 +17,7 @@ public class ChatModel
                 return Item.ItemName;
             }
             else
-                return string.Join(", ", AccountIdToNameDictionary.Select(x => x.Value));
+                return string.Join(", ", AccountIdToNameDictionary.Where(kvp => kvp.Key != ViewingId).Select(x => x.Value));
         }
     }
 
