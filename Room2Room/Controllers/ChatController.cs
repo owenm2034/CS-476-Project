@@ -63,7 +63,7 @@ public class ChatController : Controller
                 .ToList().Distinct().ToDictionary(x => x.Id);
 
         List<ChatModel> chatModels = [];
-        foreach (ListingChat c in chats) {
+        foreach (ListingChat c in listingChats) {
             var messages = messagesTask.Where(x => x.ChatId == c.ChatId).OrderBy(x => x.CreatedAt).ToList();
 
             if (messages.Count == 0) {
@@ -142,7 +142,6 @@ public class ChatController : Controller
             if (chat == null) {
                 chat = ChatFactory.CreateChat("listing");
                 chat.SetTarget([message.ListingId.Value]);
-                chat.ChatId = _context.Chat.OrderByDescending(x => x.ChatId).First().ChatId + 1;
                 _context.Chat.Add(chat);
                 _context.SaveChanges();
 
@@ -167,7 +166,6 @@ public class ChatController : Controller
             if (chat == null) {
                 chat = ChatFactory.CreateChat("private");
                 chat.SetTarget([message.ListingId.Value]);
-                chat.ChatId = _context.Chat.OrderByDescending(x => x.ChatId).First().ChatId + 1;
                 _context.Chat.Add(chat);
                 _context.SaveChanges();
 
@@ -179,14 +177,11 @@ public class ChatController : Controller
             }
         }
 
-
-        var nextId = _context.ChatMessage.OrderByDescending(x => x.MessageId).First().MessageId + 1;
-
         var newMessage = new ChatMessage(message);
         newMessage.FromAccountId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
         newMessage.CreatedAt = DateTime.Now;
-        newMessage.MessageId = nextId;
         newMessage.ChatId = chat.ChatId;
+        
         _context.Add(newMessage);
         _context.SaveChanges();
 
