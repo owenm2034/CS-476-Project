@@ -22,7 +22,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Watchlist> Watchlists { get; set; }
 
     public DbSet<Chat> Chat { get; set; }
+    public DbSet<ListingChat> ListingChat { get; set; }
+    public DbSet<PrivateChat> PrivateChat { get; set; }
     public DbSet<ChatMessage> ChatMessage { get; set; }
     public DbSet<ChatMember> ChatMember { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Chat>()
+            .HasDiscriminator<string>("ChatType")
+            .HasValue<PrivateChat>("private")
+            .HasValue<ListingChat>("listing");
+    }
     
 }

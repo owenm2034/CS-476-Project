@@ -144,7 +144,8 @@ IF NOT EXISTS (select * from sys.tables where name = 'Chat')
 BEGIN
 CREATE TABLE [Chat] (
   [ChatId] integer PRIMARY KEY,
-  [ListingId] integer
+  [ListingId] integer,
+  [ChatType] VARCHAR(20) NOT NULL
 )
 print ('Chat created')
 END

@@ -108,14 +108,14 @@ ELSE
 IF (SELECT COUNT(*) FROM Chat) = 0
 BEGIN
     PRINT('Inserting Chat')
-    INSERT INTO Chat (ChatId, ListingId) VALUES
-       (1, 1),
-       (2, 2),
-       (3, 3),
-       (4, 3),
-       (5, 3),
-       (6, 3),
-       (7, null)
+    INSERT INTO Chat (ChatId, ListingId, ChatType) VALUES
+       (1, 1, 'listing'),
+       (2, 2, 'listing'),
+       (3, 3, 'listing'),
+       (4, 3, 'listing'),
+       (5, 3, 'listing'),
+       (6, 3, 'listing'),
+       (7, null, 'private')
     
     PRINT('Inserting ChatMembers')
     INSERT INTO ChatMember (ChatId, AccountId) VALUES
