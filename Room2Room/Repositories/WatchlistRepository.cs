@@ -21,6 +21,7 @@ public class WatchlistRepository : IWatchlistRepository
             ItemDescription = w.Item.ItemDescription,
             ItemPrice = w.Item.ItemPrice,
             Status = w.Item.Status,
+            IsDeleted = w.Item.IsDeleted,
             ImagePath = w.Item.ItemImage
                             .OrderBy(img => img.Id) // Ensure consistent ordering
                             .Select(img => img.ImagePath)

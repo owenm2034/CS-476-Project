@@ -87,6 +87,7 @@ CREATE TABLE Item(
     CategoryId INT NOT NULL,
     AccountId INT NOT NULL,
     UniversityName NVARCHAR(100),
+    IsDeleted BIT NOT NULL DEFAULT 0,
     CONSTRAINT FK_Item_Accounts_AccountId FOREIGN KEY (AccountId) REFERENCES Accounts(Id) ON DELETE CASCADE,
     CONSTRAINT FK_Item_Category_CategoryId FOREIGN KEY (CategoryId) REFERENCES Category(Id) ON DELETE CASCADE
 );
