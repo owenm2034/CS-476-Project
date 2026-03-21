@@ -23,3 +23,14 @@ Db Setup generates these 5 accounts automatically
 | 476user@usask.ca | cs476password | false | University of Saskatchewan |
 | 476admin@usask.ca | cs476password | true | University of Saskatchewan |
 | 476other@nagasaki-u.ac.jp | cs476password | false | Nagasaki University |
+
+
+## Generate Publish Zip
+Ensure you are in the root of the project
+```bash
+dotnet publish Room2Room/Room2Room.csproj -c Release -o ./site;
+cd site;
+zip -r ../Archive.zip .;
+cd ..
+rm -rf site;
+```

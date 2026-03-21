@@ -108,14 +108,17 @@ ELSE
 IF (SELECT COUNT(*) FROM Chat) = 0
 BEGIN
     PRINT('Inserting Chat')
-    INSERT INTO Chat (ChatId, ListingId) VALUES
-       (1, 1),
-       (2, 2),
-       (3, 3),
-       (4, 3),
-       (5, 3),
-       (6, 3),
-       (7, null)
+    SET IDENTITY_INSERT Chat ON;
+    INSERT INTO Chat (ChatId, ListingId, ChatType) VALUES
+       (1, 1, 'listing'),
+       (2, 2, 'listing'),
+       (3, 3, 'listing'),
+       (4, 3, 'listing'),
+       (5, 3, 'listing'),
+       (6, 3, 'listing'),
+       (7, null, 'private')
+    SET IDENTITY_INSERT Chat OFF;
+    
     
     PRINT('Inserting ChatMembers')
     INSERT INTO ChatMember (ChatId, AccountId) VALUES
@@ -135,6 +138,7 @@ BEGIN
        (7, 2)
     
     PRINT('Inserting ChatMessage')
+    SET IDENTITY_INSERT ChatMessage ON;
     INSERT INTO ChatMessage ([MessageId],[ChatId],[Message],[CreatedAt],[FromAccountId]) VALUES
        (1, 1, 'Hello there', DATEADD(minute, -10, GETDATE()), 1),
        (2, 1, 'Hi! Is the laptop still available?', DATEADD(minute, -9, GETDATE()), 2),
@@ -147,4 +151,5 @@ BEGIN
        (9, 1, 'Noon is perfect. See you then!', DATEADD(minute, -2, GETDATE()), 1),
        (10, 7, 'This is a chat without a listing', DATEADD(minute, -4, GETDATE()), 1),
        (11, 7, 'Woah, how can there be no listing???', DATEADD(minute, -1, GETDATE()), 2)
+    SET IDENTITY_INSERT ChatMessage OFF;
 END
