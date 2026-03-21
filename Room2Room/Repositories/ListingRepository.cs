@@ -28,6 +28,7 @@ public class ListingRepository : IListingRepository
             join category in _db.Categories on item.CategoryId equals category.Id
             join account in _db.Accounts on item.AccountId equals account.Id
             join university in _db.Universities on account.UniversityId equals university.Id
+            where !item.IsDeleted
             where
                 string.IsNullOrWhiteSpace(sTerm)
                 || (item.ItemName != null && item.ItemName.ToLower().Contains(sTerm.ToLower()))
@@ -67,6 +68,7 @@ public class ListingRepository : IListingRepository
             join account in _db.Accounts on item.AccountId equals account.Id
             join university in _db.Universities on account.UniversityId equals university.Id
             where item.AccountId == accountId
+            where !item.IsDeleted
             select new Item
             {
                 Id = item.Id,
@@ -109,7 +111,7 @@ public class ListingRepository : IListingRepository
 
     public async Task<Item?> GetItemById(int id)
     {
-        return await _db.Items.FirstOrDefaultAsync(item => item.Id == id);
+        return await _db.Items.FirstOrDefaultAsync(item => item.Id == id && !item.IsDeleted);
     }
 
     public async Task<ItemImage?> GetFirstItemImageAsync(int itemId)
@@ -143,7 +145,9 @@ public class ListingRepository : IListingRepository
 
     public async Task Delete(int id)
     {
-        await _db.Items.Where(x => x.Id == id).ExecuteDeleteAsync();
+        await _db.Items
+        .Where(x => x.Id == id)
+        .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsDeleted, true));
     }
 
     public async Task<List<int>> GetWatchlistedItemIdsAsync(int userId)
