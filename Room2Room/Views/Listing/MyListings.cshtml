@@ -4,11 +4,6 @@
     ViewData[index: "Title"] = "My Listings";
 }
 
-@section Scripts {
-    <script src="~/js/deleteListing.js"></script>
-
-}
-
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>My Listings</h2>
@@ -37,16 +32,21 @@
                         <td>@item.UniversityName</td>
                         <td>
                             <div style="display:flex; gap:8px;">
-                                <a asp-controller="Listing" asp-action="Edit" asp-route-id="@item.Id"
-                                       asp-route-returnTo="/Listing/MyListings" class="btn btn-warning btn-sm">
+                                <a asp-controller="Listing"
+                                   asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   asp-route-returnTo="/Listing/MyListings"
+                                   class="btn btn-warning btn-sm">
                                     Edit
                                 </a>
 
-                                <button type="button" class="btn btn-danger btn-sm btn-delete-trigger" data-listing-id="@item.Id"
-                                        data-form-action="@Url.Action("Delete", "Listing")"
-                                        data-return-to="/Listing/MyListings">
-                                    Delete
-                                </button>
+                                @using (Html.BeginForm(actionName: "Delete", controllerName: "Listing",
+                                       new { listingId = item.Id, returnTo = "/Listing/MyListings" },
+                                       FormMethod.Post))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                }
                             </div>
                         </td>
                     </tr>
@@ -58,25 +58,4 @@
     {
         <p>You have not posted any listings yet.</p>
     }
-</div>
-
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-                <div class="modal-body">
-                    Are you sure you want to delete this listing? This action cannot be undone.
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <form id="deleteForm" method="post">
-                            @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                </div>
-        </div>
-    </div>
 </div>

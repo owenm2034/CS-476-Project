@@ -81,10 +81,6 @@
         </div>
     </div>
 
-    @if (User?.Identity?.IsAuthenticated ?? false)
-    {
-        @await Component.InvokeAsync("Notification")
-    }
     
     <div class="container">
         @RenderBody()

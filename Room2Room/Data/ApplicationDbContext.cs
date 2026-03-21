@@ -5,7 +5,6 @@ using Room2Room.Models.NotificationPreferences;
 using Room2Room.Models.Announcements;
 using Room2Room.Models.Watchlist;
 using Room2Room.Models.Chats;
-using Room2Room.Models.UserNotification;
 
 namespace Room2Room.Data;
 
@@ -25,6 +24,4 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Chat> Chat { get; set; }
     public DbSet<ChatMessage> ChatMessage { get; set; }
     public DbSet<ChatMember> ChatMember { get; set; }
-
-    public DbSet<UserNotification> UserNotifications { get; set; }
 }

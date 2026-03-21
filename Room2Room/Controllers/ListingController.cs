@@ -3,7 +3,6 @@ using System.Security.Claims;
 using Room2Room.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Room2Room.Services.Observers;
 using Room2Room.Data;
 using Room2Room.Models.Accounts;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +12,13 @@ namespace Room2Room.Controllers;
 public class ListingController : Controller
 {
     private readonly IListingRepository _listingRepository;
-    private readonly IItemSubject _itemSubject;
     private readonly ApplicationDbContext _context;
 
-    public ListingController(IListingRepository listingRepository, IItemSubject itemSubject, ApplicationDbContext context)
+    public ListingController(IListingRepository listingRepository, ApplicationDbContext context)
     {
         _listingRepository = listingRepository;
-        _itemSubject = itemSubject;
         _context = context;
     }
-
 
     public async Task<IActionResult> Index(string sTerm = "", int? categoryId = null)
     {
@@ -234,13 +230,6 @@ public class ListingController : Controller
             return Forbid();
         }
 
-        // this is for observer pattern
-        var oldItem = new Item
-        {
-            ItemPrice = item.ItemPrice,
-            Status = item.Status
-        };
-
         item.ItemName = dto.ItemName;
         item.ItemDescription = dto.ItemDescription;
         item.ItemPrice = dto.Price;
@@ -248,9 +237,6 @@ public class ListingController : Controller
         item.Status = dto.Status;
 
         await _listingRepository.UpdateItemAsync(item);
-        
-        // this is what triggers the whole observer pattern by sending the old state and the new state
-        _itemSubject.UpdateItem(oldItem, item);
 
         if (dto.NewImage != null && dto.NewImage.Length > 0)
         {
