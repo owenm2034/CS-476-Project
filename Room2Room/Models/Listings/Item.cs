@@ -21,6 +21,8 @@ public class Item
     public int AccountId { get; set; }
     public string? UniversityName { get; set; }
 
+    public bool IsDeleted {get; set;} = false;
+
     public Category Category { get; set; }
     public List<ItemImage> ItemImage { get; set; } // one to many relationship with ItemImage
 
