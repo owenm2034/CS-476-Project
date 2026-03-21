@@ -23,9 +23,16 @@
 
         <div class="watch-details">
             <h3>@item.ItemName</h3>
-            <p><strong>Status:</strong> @item.Status</p>
-            <p><strong>Price:</strong> $@item.ItemPrice</p>
-            <p>@item.ItemDescription</p>
+            @if (item.IsDeleted)
+            {
+                <div class="alert alert-warning">Sorry! This item is no longer available</div>
+            }
+            else
+            {
+                <p><strong>Status:</strong> @item.Status</p>
+                <p><strong>Price:</strong> $@item.ItemPrice</p>
+                <p>@item.ItemDescription</p>
+            }
 
             <form asp-action="RemoveFromWatchlist" method="post">
                 <input type="hidden" name="itemId" value="@item.ItemId" />
