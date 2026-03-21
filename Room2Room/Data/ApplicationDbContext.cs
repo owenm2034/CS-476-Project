@@ -37,6 +37,4 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasValue<PrivateChat>("private")
             .HasValue<ListingChat>("listing");
     }
-
-    public DbSet<UserNotification> UserNotifications { get; set; }
 }
