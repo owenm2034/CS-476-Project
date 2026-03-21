@@ -3,9 +3,9 @@ using System.Security.Claims;
 using Room2Room.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Room2Room.Services.Observers;
 using Room2Room.Data;
 using Room2Room.Models.Accounts;
+//using Room2Room.Models.Listings;
 using Microsoft.EntityFrameworkCore;
 
 namespace Room2Room.Controllers;
@@ -22,7 +22,6 @@ public class ListingController : Controller
         _itemSubject = itemSubject;
         _context = context;
     }
-
 
     public async Task<IActionResult> Index(string sTerm = "", int? categoryId = null)
     {
@@ -234,13 +233,6 @@ public class ListingController : Controller
             return Forbid();
         }
 
-        // this is for observer pattern
-        var oldItem = new Item
-        {
-            ItemPrice = item.ItemPrice,
-            Status = item.Status
-        };
-
         item.ItemName = dto.ItemName;
         item.ItemDescription = dto.ItemDescription;
         item.ItemPrice = dto.Price;
@@ -248,9 +240,6 @@ public class ListingController : Controller
         item.Status = dto.Status;
 
         await _listingRepository.UpdateItemAsync(item);
-        
-        // this is what triggers the whole observer pattern by sending the old state and the new state
-        _itemSubject.UpdateItem(oldItem, item);
 
         if (dto.NewImage != null && dto.NewImage.Length > 0)
         {
@@ -363,10 +352,15 @@ public class ListingController : Controller
  
     var seller = await _context.Accounts.FindAsync(item.AccountId);
  
-    ViewBag.SellerName  = seller?.Username ?? "Unknown";
-    ViewBag.SellerEmail = seller?.Email    ?? "";
- 
-    return View(item);
+    var vm = new ListingDetail
+{
+        Listing = item,
+        SellerName = seller?.Username ?? "Unknown",
+        SellerEmail = seller?.Email ?? "",
+        AllImages = item.ItemImage ?? new List<ItemImage>()
+    };
+
+return View(vm);
 }
 
 }

@@ -1,11 +1,10 @@
-@model Room2Room.Models.Listings.Item
+@model Room2Room.Models.Listings.ListingDetail
 
 @{
-    ViewData["Title"] = Model.ItemName;
-    var sellerName = ViewBag.SellerName as string ?? "Unknown";
-    var sellerEmail = ViewBag.SellerEmail as string ?? "";
-    var allImages = Model.ItemImage ?? new List<Room2Room.Models.Listings.ItemImage>();
-    var statusColor = Model.Status switch {
+    ViewData["Title"] = Model.Listing.ItemName;
+    var sellerName  = Model.SellerName;
+    var allImages   = Model.AllImages;
+    var statusColor = Model.Listing.Status switch {
         "Available" => "#22c55e",
         "On Hold"   => "#f59e0b",
         "Sold"      => "#ef4444",
@@ -15,6 +14,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 
 <style>
     :root {
@@ -375,7 +375,7 @@
     <div class="breadcrumb-bar">
         <a href="@Url.Action("Index", "Listing")">← Browse Listings</a>
         <span>/</span>
-        <span class="current">@Model.ItemName</span>
+        <span class="current">@Model.Listing.ItemName</span>
     </div>
 
     <div class="detail-grid">
@@ -384,8 +384,8 @@
             <div class="gallery-main" id="mainImageWrap">
                 @if (allImages.Any())
                 {
-                    <img id="mainImage" src="@allImages.First().ImagePath" alt="@Model.ItemName" />
-                    @if (Model.Status == "Sold")
+                    <img id="mainImage" src="@allImages.First().ImagePath" alt="@Model.Listing.ItemName" />
+                    @if (Model.Listing.Status == "Sold")
                     {
                         <div class="sold-overlay"><div class="sold-stamp">Sold</div></div>
                     }
@@ -416,30 +416,30 @@
             }
 
             <!-- Description below image on desktop -->
-            @if (!string.IsNullOrWhiteSpace(Model.ItemDescription))
+            @if (!string.IsNullOrWhiteSpace(Model.Listing.ItemDescription))
             {
                 <div class="description-section">
                     <h2 class="section-heading">About this listing</h2>
-                    <p class="description-text">@Model.ItemDescription</p>
+                    <p class="description-text">@Model.Listing.ItemDescription</p>
                 </div>
             }
         </div>
 
         <!-- RIGHT: Info + Actions -->
         <div class="detail-right">
-            <span class="listing-category">@(Model.Category?.CategoryName ?? Model.CategoryName ?? "Item")</span>
+            <span class="listing-category">@(Model.Listing.Category?.CategoryName ?? Model.Listing.CategoryName ?? "Item")</span>
 
-            <h1 class="listing-title">@Model.ItemName</h1>
+            <h1 class="listing-title">@Model.Listing.ItemName</h1>
 
             <div class="listing-meta-row">
-                <span class="status-badge" style="background: @statusColor;">@Model.Status</span>
-                @if (!string.IsNullOrEmpty(Model.UniversityName))
+                <span class="status-badge" style="background: @statusColor;">@Model.Listing.Status</span>
+                @if (!string.IsNullOrEmpty(Model.Listing.UniversityName))
                 {
                     <span class="university-tag">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                         </svg>
-                        @Model.UniversityName
+                        @Model.Listing.UniversityName
                     </span>
                 }
             </div>
@@ -447,7 +447,7 @@
             <!-- Price -->
             <div class="price-card">
                 <div class="price-label">Asking Price</div>
-                <div class="price-amount">$@Model.ItemPrice.ToString("N2")</div>
+                <div class="price-amount">$@Model.Listing.ItemPrice.ToString("N2")</div>
                 <div class="price-note">Negotiable · Local pickup</div>
             </div>
 
@@ -462,10 +462,10 @@
                     </div>
                 </div>
 
-                @if (Model.Status != "Sold")
+                @if (Model.Listing.Status != "Sold")
                 {
                     
-                    <button class="btn btn-outline-primary w-100" onclick="openItemChat(@Model.Id)">
+                    <button class="btn btn-outline-primary w-100" onclick="openItemChat(@Model.Listing.Id)">
                     💬 Send a Message
                     
                     </button>
