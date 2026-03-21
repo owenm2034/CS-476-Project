@@ -5,6 +5,7 @@ using Room2Room.Data;
 using Resend;
 using Room2Room.Models;
 using Room2Room.Services;
+using Room2Room.Services.Observers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,13 @@ builder.Services
 
 builder.Services.AddTransient<IListingRepository, ListingRepository>();
 builder.Services.AddScoped<IWatchlistRepository, WatchlistRepository>();
+
+// Observer Pattern Services
+builder.Services.AddScoped<IItemObserver, DbPriceDropObserver>();
+builder.Services.AddScoped<IItemObserver, DbStatusChangeObserver>();
+builder.Services.AddScoped<IItemObserver, EmailPriceDropObserver>();
+builder.Services.AddScoped<IItemObserver, EmailStatusChangeObserver>();
+builder.Services.AddScoped<IItemSubject, ItemSubject>();
 
 // Email Service- ReSend
 builder.Services.Configure<EmailSettings>(
