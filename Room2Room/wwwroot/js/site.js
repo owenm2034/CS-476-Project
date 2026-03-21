@@ -129,7 +129,7 @@ async function sendFirstMessage() {
     formData.append('message.ListingId', listingId);
     formData.append('message.Message', message);
 
-    const res = await fetch('/Chat/SendFirstMessage', {
+    const res = await fetch('/Chat/SendMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
@@ -137,23 +137,10 @@ async function sendFirstMessage() {
     lastUpdated = new Date().toISOString();
 
     // open big chat window
-    const data = await res.text();
-    document.getElementById("chat-modal").innerHTML = data;
-    registerChatEvents();
-    setTimeout(pollChats, 5000);
+    openChat();
     var modalElement = document.getElementById('chatModal');
     var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
     modal.show();
-
-    // this ensures the chat container scrolls to the bottom when opening a chat
-    setTimeout(() => {
-        var nodes = Array.from(document.getElementsByClassName("chat-message-container"));
-        nodes.forEach(x => {
-            x.scrollTop = x.scrollHeight;
-        });
-    }, 500);
-    // active on the chat that was just sent -> maybe the c# endpoint can return the chat modal content?????
-
 }
 
 (function () {
