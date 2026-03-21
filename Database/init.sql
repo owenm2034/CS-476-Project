@@ -95,6 +95,23 @@ END
 ELSE
     PRINT('Item already created :)');
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ItemReport')
+BEGIN
+CREATE TABLE ItemReport(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ItemId INT NOT NULL,
+    ReportedByAccountId INT NOT NULL,
+    Reason NVARCHAR(500) NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    Resolution NVARCHAR(50) NULL,
+    ResolvedAt DATETIME2 NULL,
+    CONSTRAINT FK_ItemReport_Item_ItemId FOREIGN KEY (ItemId) REFERENCES Item(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_ItemReport_Accounts_AccountId FOREIGN KEY (ReportedByAccountId) REFERENCES Accounts(Id) ON DELETE NO ACTION
+);
+print ('ItemReport created')
+END
+ELSE
+    PRINT('ItemReport already created :)');
 
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Watchlist')
 BEGIN
@@ -154,6 +171,7 @@ print ('AccountRestrictions created')
 END
 ELSE
     PRINT('AccountRestrictions already created :)');
+
 
 
 IF NOT EXISTS (select * from sys.tables where name = 'Chat')

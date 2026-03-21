@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Room2Room.Data;
 using Room2Room.Models.Accounts;
-//using Room2Room.Models.Listings;
+using Room2Room.Models.Listings;
 using Microsoft.EntityFrameworkCore;
 
 namespace Room2Room.Controllers;
@@ -13,13 +13,19 @@ namespace Room2Room.Controllers;
 public class ListingController : Controller
 {
     private readonly IListingRepository _listingRepository;
-    private readonly IItemSubject _itemSubject;
+    //private readonly ItemSubject _itemSubject;
     private readonly ApplicationDbContext _context;
 
-    public ListingController(IListingRepository listingRepository, IItemSubject itemSubject, ApplicationDbContext context)
+    // public ListingController(IListingRepository listingRepository, ItemSubject itemSubject, ApplicationDbContext context)
+    // {
+    //     _listingRepository = listingRepository;
+    //     _itemSubject = itemSubject;
+    //     _context = context;
+    // }
+
+    public ListingController(IListingRepository listingRepository, ApplicationDbContext context)
     {
         _listingRepository = listingRepository;
-        _itemSubject = itemSubject;
         _context = context;
     }
 
@@ -361,6 +367,23 @@ public class ListingController : Controller
     };
 
 return View(vm);
+}
+
+[Authorize]
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Report(int itemId, string reason)
+{
+    int accountId = int.Parse(User.FindFirstValue("AccountId") ?? "0");
+    _context.ItemReports.Add(new ItemReport
+    {
+        ItemId = itemId,
+        ReportedByAccountId = accountId,
+        Reason = reason ?? "",
+        CreatedAt = DateTime.Now
+    });
+    await _context.SaveChangesAsync();
+    return Json(new { success = true });
 }
 
 }

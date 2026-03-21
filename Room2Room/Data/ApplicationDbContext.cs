@@ -18,6 +18,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
     public DbSet<Item> Items { get; set; } 
     public DbSet<ItemImage> ItemImages { get; set; } 
+    public DbSet<ItemReport> ItemReports { get; set; }
     public DbSet<Category> Categories { get; set; }
     public DbSet<Watchlist> Watchlists { get; set; }
 
