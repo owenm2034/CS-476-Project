@@ -8,5 +8,6 @@ public class WatchListDisplayModel
    public double ItemPrice { get; set; }
    public string Status { get; set; }
    public string ImagePath { get; set; }
+   public bool IsDeleted {get; set;}
    
 }
