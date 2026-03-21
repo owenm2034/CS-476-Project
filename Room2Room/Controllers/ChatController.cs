@@ -105,7 +105,6 @@ public class ChatController : Controller
 
         Dictionary<int, Item> itemIdToItemDict =
             _context.Items.Where(x => x.Id == chat.ListingId)
-            .Select(x => new Item { Id = x.Id, ItemName = x.ItemName, AccountId = x.AccountId, ItemPrice = x.ItemPrice, Status = x.Status, CategoryId = x.CategoryId })
                 .ToList().Distinct().ToDictionary(x => x.Id);
 
         List<Account> accounts = _context.Accounts.Where(x => accountIdsTask.Distinct().ToList().Contains(x.Id)).ToList();
@@ -129,10 +128,7 @@ public class ChatController : Controller
             return BadRequest();
         }
 
-        var listing = _context.Items.Where(x => x.Id == message.ListingId)
-        .Where(x => x.Id == message.ListingId)
-        .Select(x => new Item { Id = x.Id, ItemName = x.ItemName, AccountId = x.AccountId, ItemPrice = x.ItemPrice, Status = x.Status, CategoryId = x.CategoryId })
-        .FirstOrDefault();
+        var listing = _context.Items.Where(x => x.Id == message.ListingId).FirstOrDefault();
 
         if (listing == null) {
             return BadRequest();
@@ -196,7 +192,6 @@ public class ChatController : Controller
 
         Dictionary<int, Item> itemIdToItemDict =
             _context.Items.Where(x => chatsTask.Select(x => x.ListingId).ToList().Contains(x.Id))
-            .Select(x => new Item { Id = x.Id, ItemName = x.ItemName, AccountId = x.AccountId, ItemPrice = x.ItemPrice, Status = x.Status, CategoryId = x.CategoryId })
                 .ToList().Distinct().ToDictionary(x => x.Id);
 
         List<Account> accounts = _context.Accounts.Where(x => accountIdsTask.Distinct().ToList().Contains(x.Id)).ToList();

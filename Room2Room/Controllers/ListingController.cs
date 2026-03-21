@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Room2Room.Data;
 using Room2Room.Models.Accounts;
+//using Room2Room.Models.Listings;
 using Microsoft.EntityFrameworkCore;
 
 namespace Room2Room.Controllers;
@@ -349,10 +350,15 @@ public class ListingController : Controller
  
     var seller = await _context.Accounts.FindAsync(item.AccountId);
  
-    ViewBag.SellerName  = seller?.Username ?? "Unknown";
-    ViewBag.SellerEmail = seller?.Email    ?? "";
- 
-    return View(item);
+    var vm = new ListingDetail
+{
+        Listing = item,
+        SellerName = seller?.Username ?? "Unknown",
+        SellerEmail = seller?.Email ?? "",
+        AllImages = item.ItemImage ?? new List<ItemImage>()
+    };
+
+return View(vm);
 }
 
 }
