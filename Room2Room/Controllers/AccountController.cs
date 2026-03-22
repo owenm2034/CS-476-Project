@@ -559,6 +559,7 @@ public class AccountController : Controller
 
                 // Update account with new profile picture path
                 account.ProfilePictureUrl = "/uploads/" + uniqueFileName;
+                model.CurrentProfilePictureUrl = account.ProfilePictureUrl;
                 updatedFields.Add("profile picture");
             }
             catch (Exception ex)
@@ -566,6 +567,13 @@ public class AccountController : Controller
                 isError = true;
                 errorMessage += $"Error saving profile picture: {ex.Message} ";
             }
+        }
+        if (isError) 
+        {
+            model.ErrorMessage = errorMessage;
+            model.Password = "";
+            model.OldPassword = "";
+            return PartialView("_Manage", model); 
         }
 
 
