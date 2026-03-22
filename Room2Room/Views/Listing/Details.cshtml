@@ -1,0 +1,554 @@
+@model Room2Room.Models.Listings.ListingDetail
+
+@{
+    ViewData["Title"] = Model.Listing.ItemName;
+    var sellerName  = Model.SellerName;
+    var allImages   = Model.AllImages;
+    var statusColor = Model.Listing.Status switch {
+        "Available" => "#22c55e",
+        "On Hold"   => "#f59e0b",
+        "Sold"      => "#ef4444",
+        _           => "#6b7280"
+    };
+}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+
+<style>
+    :root {
+        --cream: #f7f4ef;
+        --ink: #1a1714;
+        --muted: #7a7470;
+        --accent: #c8502a;
+        --accent-light: #f0e8e3;
+        --border: #e2ddd8;
+        --card: #ffffff;
+        --radius: 4px;
+    }
+
+    * { box-sizing: border-box; }
+
+    .detail-page {
+        font-family: 'DM Sans', sans-serif;
+        background: var(--cream);
+        min-height: 100vh;
+        padding: 0 0 80px;
+        color: var(--ink);
+    }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb-bar {
+        padding: 18px 0 0;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .breadcrumb-bar a {
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        letter-spacing: .02em;
+        transition: color .2s;
+    }
+
+    .breadcrumb-bar a:hover { color: var(--accent); }
+    .breadcrumb-bar span { color: var(--border); margin: 0 6px; font-size: 13px; }
+    .breadcrumb-bar .current { font-size: 13px; color: var(--ink); }
+
+    /* ── Main grid ── */
+    .detail-grid {
+        max-width: 1100px;
+        margin: 28px auto 0;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 36px;
+        align-items: start;
+    }
+
+    /* ── Gallery ── */
+    .gallery { position: sticky; top: 24px; }
+
+    .gallery-main {
+        width: 100%;
+        aspect-ratio: 4/3;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--border);
+        position: relative;
+    }
+
+    .gallery-main img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity .3s;
+    }
+
+    .gallery-main .no-image {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        gap: 10px;
+    }
+
+    .gallery-thumbs {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+
+    .gallery-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: border-color .2s;
+        flex-shrink: 0;
+    }
+
+    .gallery-thumb.active { border-color: var(--accent); }
+
+    .gallery-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* ── Right column ── */
+    .detail-right {}
+
+    .listing-category {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        color: var(--accent);
+        background: var(--accent-light);
+        padding: 4px 10px;
+        border-radius: 2px;
+        margin-bottom: 14px;
+    }
+
+    .listing-title {
+        font-family: 'DM Serif Display', serif;
+        font-size: clamp(26px, 4vw, 38px);
+        line-height: 1.15;
+        margin: 0 0 16px;
+        letter-spacing: -.01em;
+    }
+
+    .listing-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .status-badge {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        padding: 4px 12px;
+        border-radius: 20px;
+        color: #fff;
+    }
+
+    .university-tag {
+        font-size: 13px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ── Price card ── */
+    .price-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 24px;
+        margin-bottom: 18px;
+    }
+
+    .price-label {
+        font-size: 12px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+
+    .price-amount {
+        font-family: 'DM Serif Display', serif;
+        font-size: 42px;
+        line-height: 1;
+        color: var(--accent);
+        margin-bottom: 2px;
+    }
+
+    .price-note {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    /* ── Contact card ── */
+    .contact-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 24px;
+        margin-bottom: 18px;
+    }
+
+    .contact-card-label {
+        font-size: 12px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 16px;
+    }
+
+    .seller-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    .seller-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: var(--accent-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'DM Serif Display', serif;
+        font-size: 20px;
+        color: var(--accent);
+        flex-shrink: 0;
+    }
+
+    .seller-name {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 2px;
+    }
+
+    .seller-sub {
+        font-size: 12px;
+        color: var(--muted);
+    }
+
+    .btn-contact {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: .04em;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background .2s, transform .15s;
+        margin-bottom: 10px;
+    }
+
+    .btn-contact:hover {
+        background: #a8401e;
+        transform: translateY(-1px);
+        color: #fff;
+        text-decoration: none;
+    }
+
+    .btn-chat {
+        display: block;
+        width: 100%;
+        padding: 13px;
+        background: transparent;
+        color: var(--ink);
+        border: 1.5px solid var(--border);
+        border-radius: 4px;
+        font-family: 'DM Sans', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+    }
+
+    .btn-chat:hover {
+        border-color: var(--ink);
+        background: var(--cream);
+        color: var(--ink);
+        text-decoration: none;
+    }
+
+    /* ── Description section ── */
+    .description-section {
+        margin-top: 32px;
+        padding-top: 28px;
+        border-top: 1px solid var(--border);
+    }
+
+    .section-heading {
+        font-family: 'DM Serif Display', serif;
+        font-size: 20px;
+        margin: 0 0 14px;
+        letter-spacing: -.01em;
+    }
+
+    .description-text {
+        font-size: 15px;
+        line-height: 1.75;
+        color: #3d3a37;
+    }
+
+    /* ── Back button top ── */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        transition: color .2s;
+        margin-bottom: 6px;
+    }
+
+    .back-link:hover { color: var(--accent); text-decoration: none; }
+
+    /* ── Sold overlay ── */
+    .sold-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+    }
+
+    .sold-stamp {
+        font-family: 'DM Serif Display', serif;
+        font-size: 48px;
+        color: #fff;
+        border: 4px solid #fff;
+        padding: 8px 24px;
+        opacity: .9;
+        transform: rotate(-12deg);
+        letter-spacing: .05em;
+    }
+
+    /* ── Responsive ── */
+    @@media (max-width: 780px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .gallery { position: static; }
+    }
+</style>
+
+<div class="detail-page">
+    <div class="breadcrumb-bar">
+        <a href="@Url.Action("Index", "Listing")">← Browse Listings</a>
+        <span>/</span>
+        <span class="current">@Model.Listing.ItemName</span>
+    </div>
+
+    <div class="detail-grid">
+        <!-- LEFT: Gallery -->
+        <div class="gallery">
+            <div class="gallery-main" id="mainImageWrap">
+                @if (allImages.Any())
+                {
+                    <img id="mainImage" src="@allImages.First().ImagePath" alt="@Model.Listing.ItemName" />
+                    @if (Model.Listing.Status == "Sold")
+                    {
+                        <div class="sold-overlay"><div class="sold-stamp">Sold</div></div>
+                    }
+                }
+                else
+                {
+                    <div class="no-image">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                        <span style="font-size:14px;">No photos yet</span>
+                    </div>
+                }
+            </div>
+
+            @if (allImages.Count > 1)
+            {
+                <div class="gallery-thumbs">
+                    @for (int i = 0; i < allImages.Count; i++)
+                    {
+                        <div class="gallery-thumb @(i == 0 ? "active" : "")"
+                             onclick="switchImage(this, '@allImages[i].ImagePath')">
+                            <img src="@allImages[i].ImagePath" alt="Image @(i+1)" />
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Description below image on desktop -->
+            @if (!string.IsNullOrWhiteSpace(Model.Listing.ItemDescription))
+            {
+                <div class="description-section">
+                    <h2 class="section-heading">About this listing</h2>
+                    <p class="description-text">@Model.Listing.ItemDescription</p>
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT: Info + Actions -->
+        <div class="detail-right">
+            <span class="listing-category">@(Model.Listing.Category?.CategoryName ?? Model.Listing.CategoryName ?? "Item")</span>
+
+            <h1 class="listing-title">@Model.Listing.ItemName</h1>
+
+            <div class="listing-meta-row">
+                <span class="status-badge" style="background: @statusColor;">@Model.Listing.Status</span>
+                @if (!string.IsNullOrEmpty(Model.Listing.UniversityName))
+                {
+                    <span class="university-tag">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                        @Model.Listing.UniversityName
+                    </span>
+                }
+            </div>
+
+            <!-- Price -->
+            <div class="price-card">
+                <div class="price-label">Asking Price</div>
+                <div class="price-amount">$@Model.Listing.ItemPrice.ToString("N2")</div>
+                <div class="price-note">Negotiable · Local pickup</div>
+            </div>
+
+            <!-- Seller + Contact -->
+            <div class="contact-card">
+                <div class="contact-card-label">Listed by</div>
+                <div class="seller-row">
+                    <div class="seller-avatar">@(sellerName.Length > 0 ? sellerName[0].ToString().ToUpper() : "?")</div>
+                    <div>
+                        <div class="seller-name">@sellerName</div>
+                        <div class="seller-sub">Member · Room2Room</div>
+                    </div>
+                </div>
+
+                @if (Model.Listing.Status != "Sold")
+                {
+                    
+                    <button class="btn btn-outline-primary w-100" onclick="openItemChat(@Model.Listing.Id)">
+                    💬 Send a Message
+                    
+                    </button>
+                }
+                else
+                {
+                    <div style="text-align:center; color:var(--muted); font-size:14px; padding:8px 0;">
+                        This item has been sold.
+                    </div>
+                }
+            </div>
+
+            @if (User.Identity?.IsAuthenticated == true && User.FindFirst("AccountId")?.Value != Model.Listing.AccountId.ToString())
+            {
+                <div class="mt-3 text-end">
+                    <button onclick="openReportModal(@Model.Listing.Id)" class="btn btn-outline-danger btn-sm">
+                        🚩 Report this listing
+                    </button>
+                </div>
+            }
+            <!-- Safety tip -->
+            <div style="font-size:12px; color:var(--muted); line-height:1.6; padding: 0 4px;">
+                🔒 <strong>Safety tip:</strong> Meet in a public place on campus and inspect the item before paying.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchImage(thumb, src) {
+        document.getElementById('mainImage').src = src;
+        document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+    }
+</script>
+
+<div class="modal fade" id="newChatModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Send a Message</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="newChatMessageInput" class="form-label">Your message:</label>
+          <textarea class="form-control" id="newChatMessageInput" rows="3">Hi, is this still available?</textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="sendFirstMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@Html.AntiForgeryToken()
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">🚩 Report Listing</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reportItemId">
+        <div class="mb-3">
+          <label class="form-label">Reason for reporting</label>
+          <textarea class="form-control" id="reportReason" rows="3"
+                    placeholder="e.g. spam, inappropriate content..."></textarea>
+        </div>
+        <div id="reportFeedback" class="d-none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="submitReport()">Submit Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/watchlist.js"></script>
+    <script src="~/js/report.js"></script>
+}

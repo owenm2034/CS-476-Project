@@ -4,6 +4,10 @@ using Room2Room.Models.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Room2Room.Services.Observers;
+using Room2Room.Data;
+using Room2Room.Models.Accounts;
+using Room2Room.Models.Listings;
+using Microsoft.EntityFrameworkCore;
 
 namespace Room2Room.Controllers;
 
@@ -11,11 +15,14 @@ public class ListingController : Controller
 {
     private readonly IListingRepository _listingRepository;
     private readonly IItemSubject _itemSubject;
+    private readonly ApplicationDbContext _context;
 
-    public ListingController(IListingRepository listingRepository, IItemSubject itemSubject)
+
+    public ListingController(IListingRepository listingRepository, IItemSubject itemSubject, ApplicationDbContext context)
     {
         _listingRepository = listingRepository;
         _itemSubject = itemSubject;
+        _context = context;
     }
 
 
@@ -336,4 +343,57 @@ public class ListingController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    public async Task<IActionResult> Details(int id)
+{
+    var item = await _context.Items
+        .Include(i => i.ItemImage)
+        .Include(i => i.Category)
+        .Select(i => new Item
+        {
+            Id = i.Id,
+            ItemName = i.ItemName,
+            ItemDescription = i.ItemDescription,
+            ItemPrice = i.ItemPrice,
+            Status = i.Status,
+            CategoryId = i.CategoryId,
+            AccountId = i.AccountId,
+            Category = i.Category,
+            ItemImage = i.ItemImage
+        })
+        .FirstOrDefaultAsync(i => i.Id == id);
+    
+    if (item == null)
+        return NotFound();
+ 
+    var seller = await _context.Accounts.FindAsync(item.AccountId);
+ 
+    var vm = new ListingDetail
+{
+        Listing = item,
+        SellerName = seller?.Username ?? "Unknown",
+        SellerEmail = seller?.Email ?? "",
+        AllImages = item.ItemImage ?? new List<ItemImage>()
+    };
+
+return View(vm);
+}
+
+[Authorize]
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Report(int itemId, string reason)
+{
+    int accountId = int.Parse(User.FindFirstValue("AccountId") ?? "0");
+    _context.ItemReports.Add(new ItemReport
+    {
+        ItemId = itemId,
+        ReportedByAccountId = accountId,
+        Reason = reason ?? "",
+        CreatedAt = DateTime.Now
+    });
+    await _context.SaveChangesAsync();
+    return Json(new { success = true });
+}
+
 }
