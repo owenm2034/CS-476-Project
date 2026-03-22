@@ -478,6 +478,14 @@
                 }
             </div>
 
+            @if (User.Identity?.IsAuthenticated == true && User.FindFirst("AccountId")?.Value != Model.Listing.AccountId.ToString())
+            {
+                <div class="mt-3 text-end">
+                    <button onclick="openReportModal(@Model.Listing.Id)" class="btn btn-outline-danger btn-sm">
+                        🚩 Report this listing
+                    </button>
+                </div>
+            }
             <!-- Safety tip -->
             <div style="font-size:12px; color:var(--muted); line-height:1.6; padding: 0 4px;">
                 🔒 <strong>Safety tip:</strong> Meet in a public place on campus and inspect the item before paying.
@@ -515,6 +523,32 @@
   </div>
 </div>
 
+@Html.AntiForgeryToken()
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">🚩 Report Listing</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reportItemId">
+        <div class="mb-3">
+          <label class="form-label">Reason for reporting</label>
+          <textarea class="form-control" id="reportReason" rows="3"
+                    placeholder="e.g. spam, inappropriate content..."></textarea>
+        </div>
+        <div id="reportFeedback" class="d-none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="submitReport()">Submit Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @section Scripts {
     <script src="~/js/watchlist.js"></script>
+    <script src="~/js/report.js"></script>
 }

@@ -15,6 +15,9 @@
   <li class="nav-item" role="presentation">
     <button class="nav-link" id="statistics-tab" data-bs-toggle="tab" data-bs-target="#statistics-tab-pane" type="button" role="tab" aria-controls="statistics-tab-pane" aria-selected="false">Statistics</button>
   </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-tab-pane" type="button" role="tab"aria-controls="reports-tab-pane" aria-selected="false">Reported Listings</button>
+  </li>
 </ul>
 <div class="tab-content" id="adminTabContent">
   <div class="tab-pane fade show active" id="announcement-tab-pane" role="tabpanel" aria-labelledby="announcement-tab" tabindex="0"><partial name="_Announcements"/></div>
@@ -22,9 +25,12 @@
   <div class="tab-pane fade" id="listing-tab-pane" role="tabpanel" aria-labelledby="listing-tab" tabindex="0"><div id="adminListingsContainer"></div></div>
   <div class="tab-pane fade" id="listing-categories-tab-pane" role="tabpanel" aria-labelledby="listing-categories-tab" tabindex="0"><div id="adminCategoryContainer"></div></div>
   <div class="tab-pane fade" id="statistics-tab-pane" role="tabpanel" aria-labelledby="statistics-tab" tabindex="0"><div id="adminStatisticsContainer"></div></div>
+  <div class="tab-pane fade" id="reports-tab-pane" role="tabpanel" aria-labelledby="reports-tab" tabindex="0"><div id="adminReportsContainer">Loading...</div>
+</div>
 </div>
 <script src="~/js/adminUsers.js"></script>
 <script src="~/js/adminListings.js"></script>
 <script src="~/js/adminCategories.js"></script>
 <script src="~/js/adminStatistics.js"></script>
 <script src="~/js/adminChats.js"></script>
+<script src="~/js/adminReports.js"></script>

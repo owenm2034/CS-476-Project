@@ -571,4 +571,44 @@ public class AdminController : Controller
 
         return Ok();
     }
+
+    [HttpGet]
+public async Task<IActionResult> ListReports()
+{
+    var reports = await _context.ItemReports
+        .OrderByDescending(r => r.CreatedAt)
+        .Select(r => new ItemReport
+        {
+            Id = r.Id,
+            ItemId = r.ItemId,
+            ReportedByAccountId = r.ReportedByAccountId,
+            Reason = r.Reason,
+            CreatedAt = r.CreatedAt,
+            Resolution = r.Resolution,
+            ResolvedAt = r.ResolvedAt,  
+            Item = _context.Items
+                .Where(i => i.Id == r.ItemId)
+                .Select(i => new Item { Id = i.Id, ItemName = i.ItemName, AccountId = i.AccountId, Status = i.Status, CategoryId = i.CategoryId, ItemPrice = i.ItemPrice })
+                .FirstOrDefault(),
+            Reporter = _context.Accounts
+                .Where(a => a.Id == r.ReportedByAccountId)
+                .Select(a => new Account(a.Email, a.PasswordHash, a.PasswordSalt, a.Username, a.ProfilePictureUrl, a.UniversityId) { Id = a.Id })
+                .FirstOrDefault()
+        })
+        .ToListAsync();
+
+    return PartialView("_ReportedListings", reports);
+}
+
+[HttpPost]
+public async Task<IActionResult> ResolveReport(int id, string resolution)
+{
+    var report = await _context.ItemReports.FirstOrDefaultAsync(r => r.Id == id);
+    if (report == null) return NotFound();
+
+    report.Resolution = resolution;
+    report.ResolvedAt = DateTime.Now;
+    await _context.SaveChangesAsync();
+    return Ok();
+}
 }
