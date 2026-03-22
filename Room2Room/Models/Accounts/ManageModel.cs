@@ -10,5 +10,7 @@ public class ManageModel
     public string? Password { get; set; }
     public string ErrorMessage { get; set; } = "";
     public string SuccessMessage { get; set; } = "";
+    public IFormFile? NewProfilePicture { get; set; }
+    public string? CurrentProfilePictureUrl { get; set; }
     public NotificationPreference NotificationPreferences { get; set; }
 }

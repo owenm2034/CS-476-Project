@@ -327,6 +327,7 @@ public class AccountController : Controller
         {
             Email = account.Email,
             Username = account.Username,
+            CurrentProfilePictureUrl = account.ProfilePictureUrl,
             NotificationPreferences = pref
         };
 
@@ -533,6 +534,48 @@ public class AccountController : Controller
             model.ErrorMessage = $"Error updating notification preferences: {ex.Message}";
             return PartialView("_Manage", model);
         }
+
+        if (model.NewProfilePicture != null && model.NewProfilePicture.Length > 0)
+        {
+            try 
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.NewProfilePicture.FileName);
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.NewProfilePicture.CopyToAsync(fileStream);
+                }
+
+                // Erase earlier profile picture file if it exists
+                if (!string.IsNullOrEmpty(account.ProfilePictureUrl))
+                {
+                    string oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", account.ProfilePictureUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+                }
+
+                // Update account with new profile picture path
+                account.ProfilePictureUrl = "/uploads/" + uniqueFileName;
+                model.CurrentProfilePictureUrl = account.ProfilePictureUrl;
+                updatedFields.Add("profile picture");
+            }
+            catch (Exception ex)
+            {
+                isError = true;
+                errorMessage += $"Error saving profile picture: {ex.Message} ";
+            }
+        }
+        if (isError) 
+        {
+            model.ErrorMessage = errorMessage;
+            model.Password = "";
+            model.OldPassword = "";
+            return PartialView("_Manage", model); 
+        }
+
 
         try
         {

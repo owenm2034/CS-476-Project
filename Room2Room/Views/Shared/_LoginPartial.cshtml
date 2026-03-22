@@ -1,5 +1,12 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿
+@using Room2Room.Data
+@inject ApplicationDbContext Context
 
+@{
+    var currentIdentifier = User.Identity?.Name;
+    var profilePicUrl = Context.Accounts
+        .FirstOrDefault(a => a.Username == currentIdentifier)?.ProfilePictureUrl; 
+}
 
 
 @if (User?.Identity?.IsAuthenticated ?? false)
@@ -23,11 +30,24 @@
             if (res.ok) {
                 // Close the modal and optionally show a success message
                 const data = await res.text();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editAccountModal'));
+                if (data.includes("successfully updated")) {
+                // ¡Boom! Recargamos toda la página. El Navbar y el Layout se actualizarán.
+                window.location.reload(); 
+            } 
+            else {
+                // Si faltó un dato o hubo error, solo actualizamos el modal para que el usuario lo vea
                 document.getElementById("edit-account-modal").innerHTML = data;
+            }
             }
         }
     </script>
+
+    <li class="nav-item d-flex align-items-center me-auto">
+        <img src="@(string.IsNullOrEmpty(profilePicUrl) ? "/images/default_pfp.png" : profilePicUrl)" 
+             class="rounded-circle ms-2" 
+             style="width: 35px; height: 35px; object-fit: cover; border: 1.5px solid #000;" 
+             alt="Profile">
+    </li>
 
     <li>
         <a id="account-logout-button" class="nav-link text-dark" asp-controller="Account" asp-action="LogOut">Logout</a>
@@ -66,3 +86,4 @@ else
             </div>
         </div>
     </div>
+</div>
