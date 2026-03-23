@@ -105,7 +105,9 @@
                                     Reactivate
                                 </button>
                             }
-                            <a class="btn btn-outline-secondary btn-sm" onclick="openUserChat(@user.Id)"> Chat</a>
+                            @if(user.Id != int.Parse(User.FindFirst("AccountId")?.Value)) {
+                                <a class="btn btn-outline-secondary btn-sm" onclick="openUserChat(@user.Id)"> Chat</a>
+                            }
                         </div>
                     </td>
                 </tr>
@@ -133,7 +135,7 @@ else
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="sendFirstMessage()">Send</button>
+        <button type="button" class="btn btn-primary" onclick="sendFirstMessage(true)">Send</button>
       </div>
     </div>
   </div>

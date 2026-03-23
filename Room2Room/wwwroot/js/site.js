@@ -115,7 +115,7 @@ async function pollChats() {
     setTimeout(pollChats, 5000);
 }
 
-async function sendFirstMessage() {
+async function sendFirstMessage(isPm) {
     // get element
     var modalElement = document.getElementById('newChatModal');
     var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
@@ -126,8 +126,12 @@ async function sendFirstMessage() {
     
     // call c# endpoint
     const formData = new URLSearchParams();
-    formData.append('message.ListingId', listingId);
     formData.append('message.Message', message);
+    if (isPm == true) {
+        formData.append('message.ToAccountId', listingId);
+    } else {
+        formData.append('message.ListingId', listingId);
+    }
 
     const res = await fetch('/Chat/SendMessage', {
         method: 'POST',

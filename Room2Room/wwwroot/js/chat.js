@@ -26,9 +26,9 @@ async function openItemChat(itemId) {
     }
 }
 
-async function openUserChat(itemId) {
+async function openUserChat(userId) {
     await openChat();
-    var el = document.querySelector('[data-listingid="' + itemId + '"]');
+    var el = document.querySelector('[data-toId="' + userId + '"]');
     if (el != null) {
         var modalElement = document.getElementById('chatModal');
         var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
@@ -47,9 +47,9 @@ async function openUserChat(itemId) {
     } else {
         var modalElement = document.getElementById('newChatModal');
         var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-        modalElement.attributes['data-itemid'] = itemId;
+        modalElement.attributes['data-itemid'] = userId;
         modal.show()
         
-        document.getElementById('newChatMessageInput').value = "Hi, is this still available?";
+        document.getElementById('newChatMessageInput').value = "";
     }
 }
