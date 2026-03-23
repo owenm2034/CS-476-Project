@@ -16,6 +16,17 @@ END
 ELSE
     PRINT('Accounts already seeded :)')
 
+IF (SELECT COUNT(*) FROM NotificationPreferences) = 0
+BEGIN
+    PRINT('Inserting NotificationPreferences...')
+    INSERT INTO NotificationPreferences (AccountId, RecieveEmailNotificationOnChatMessageRecieved, RecieveEmailNotificationOnUserReported, RecieveEmailNotificationOnListingReported)
+    SELECT Id, 1, 1, 1 FROM Accounts
+    PRINT('NotificationPreferences seeded :)')
+END
+ELSE
+    PRINT('NotificationPreferences already seeded :)')
+
+
 -- Announcement seed
 PRINT('Seeding Announcements...')
 IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Announcements')

@@ -290,6 +290,10 @@ public class AccountController : Controller
 
         await _emailService.SendWelcomeEmailAsync(email, username);
 
+        var notifPref = new NotificationPreference(account.Id);
+        context.NotificationPreferences.Add(notifPref);
+        await context.SaveChangesAsync();
+        
         return Redirect("/Account/LogIn");
     }
 
@@ -610,12 +614,14 @@ public class AccountController : Controller
         model.SuccessMessage = successMessage;
         return PartialView("_Manage", model);
     }
-    [Authorize]
+
+[Authorize]
 [HttpPost]
 [ValidateAntiForgeryToken]
 public async Task<IActionResult> Report(int accountId, string reason)
 {
     int reporterId = int.Parse(User.FindFirstValue("AccountId") ?? "0");
+
     _context.UserReports.Add(new UserReport
     {
         ReportedAccountId = accountId,
@@ -624,6 +630,31 @@ public async Task<IActionResult> Report(int accountId, string reason)
         CreatedAt = DateTime.Now
     });
     await _context.SaveChangesAsync();
+
+    // Send email to admins with notification preference enabled
+    var reportedUser = await _context.Accounts.FindAsync(accountId);
+    var reporter = await _context.Accounts.FindAsync(reporterId);
+
+    var adminIds = await _context.NotificationPreferences
+        .Where(n => n.RecieveEmailNotificationOnUserReported)
+        .Select(n => n.AccountId)
+        .ToListAsync();
+
+    var adminEmails = await _context.Accounts
+        .Where(a => adminIds.Contains(a.Id))
+        .Select(a => a.Email)
+        .ToListAsync();
+
+    foreach (var email in adminEmails)
+    {
+        await _emailService.SendUserReportEmailAsync(
+            email,
+            reportedUser?.Username ?? $"User #{accountId}",
+            reporter?.Username ?? $"User #{reporterId}",
+            reason ?? ""
+        );
+    }
+
     return Json(new { success = true });
 }
 }
