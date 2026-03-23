@@ -1,0 +1,148 @@
+@model Room2Room.Models.DTOs.ProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="profile-page">
+    <div class="profile-header card mb-4">
+        <div class="card-body d-flex align-items-center gap-3">
+            <img
+                src="@(string.IsNullOrWhiteSpace(Model.ProfilePictureUrl) ? "/images/default_pfp.png" : Model.ProfilePictureUrl)"
+                alt="Profile picture"
+                class="rounded-circle profile-avatar" />
+            <div>
+                <h2 class="mb-1">@Model.Username</h2>
+                <p class="text-muted mb-0">Manage your saved items and chats in one place.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-6">
+            <section class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Saved Listings</h4>
+                    <a class="btn btn-sm btn-outline-primary" asp-controller="Watchlist" asp-action="Index">View All</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.SavedListings.Count == 0)
+                    {
+                        <p class="text-muted mb-0">No saved listings yet.</p>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var listing in Model.SavedListings.Take(5))
+                            {
+                                <article class="profile-listing-item">
+                                    <img
+                                        src="@(string.IsNullOrWhiteSpace(listing.ImagePath) ? "/images/comingSoon.jpg" : listing.ImagePath)"
+                                        alt="@listing.ItemName"
+                                        class="profile-listing-image" />
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">@listing.ItemName</h6>
+                                        @if (listing.IsDeleted)
+                                        {
+                                            <p class="text-warning mb-1">This listing is no longer available.</p>
+                                        }
+                                        else
+                                        {
+                                            <p class="mb-1"><strong>Status:</strong> @listing.Status</p>
+                                            <p class="mb-1"><strong>Price:</strong> $@listing.ItemPrice</p>
+                                        }
+                                    </div>
+                                    @if (!listing.IsDeleted)
+                                    {
+                                        <a class="btn btn-sm btn-outline-secondary" asp-controller="Listing" asp-action="Index" asp-route-sTerm="@listing.ItemName">Browse</a>
+                                    }
+                                </article>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12 col-lg-6">
+            <section class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Active Chats</h4>
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="openChatFromProfile()">Open Chat</button>
+                </div>
+                <div class="card-body">
+                    @if (Model.ActiveChats.Count == 0)
+                    {
+                        <p class="text-muted mb-0">No active chats yet.</p>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column gap-3">
+                            @foreach (var chat in Model.ActiveChats.Take(8))
+                            {
+                                <article class="profile-chat-item">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">@chat.ChatName</h6>
+                                        <p class="mb-1 text-muted">@chat.LastMessagePreview</p>
+                                        <small class="text-muted">Last activity: @chat.LastMessageAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</small>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openChatFromProfile(@chat.ChatId)">Open</button>
+                                </article>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function openChatFromProfile(chatId) {
+            await openChat();
+            const chatModalElement = document.getElementById('chatModal');
+            const chatModal = bootstrap.Modal.getOrCreateInstance(chatModalElement);
+            chatModal.show();
+
+            if (!chatId) {
+                return;
+            }
+
+            // Wait a tick for chat list markup to render, then activate the requested chat.
+            setTimeout(() => {
+                const chatLink = document.getElementById(`chat-${chatId}`);
+                if (chatLink) {
+                    chatLink.click();
+                }
+            }, 100);
+        }
+    </script>
+}
+
+<style>
+    .profile-avatar {
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+        border: 1.5px solid #111;
+    }
+
+    .profile-listing-item,
+    .profile-chat-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #e4e4e4;
+        border-radius: 8px;
+    }
+
+    .profile-listing-image {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+    }
+</style>
