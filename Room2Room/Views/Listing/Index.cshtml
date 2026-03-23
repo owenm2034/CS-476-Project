@@ -7,6 +7,7 @@
 
 @section Scripts {
     <script src="~/js/watchlist.js"></script>
+    <script src="~/js/chat.js"></script>
     <script src="~/js/deleteListing.js"></script>
 
 }
@@ -91,7 +92,7 @@
                             </a>
 
 
-                            <button type="button" class="btn btn-danger btn-delete-trigger"
+                            <button type="button" class="btn btn-danger btn-delete-trigger btn-sm"
                                 data-listing-id="@item.Id"
                                 data-form-action="@Url.Action("Delete", "Listing")"
                                 data-return-to="/Listing/Index">
@@ -134,7 +135,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="newChatModalLabel">Modal title</h1>
+        <h1 class="modal-title fs-5" id="newChatModalLabel">New Chat</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
@@ -145,7 +146,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="sendFirstMessage()">Send</button>
+        <button type="button" class="btn btn-primary" onclick="sendFirstMessage(false)">Send</button>
       </div>
     </div>
   </div>

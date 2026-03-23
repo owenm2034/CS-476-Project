@@ -152,20 +152,24 @@ public class ChatController : Controller
                 _context.SaveChanges();
             }
         } else if (message.ToAccountId != null) {
+            var sql = @"
+                SELECT pc.* FROM Chat pc
+                INNER JOIN (
+                    SELECT cm.ChatId
+                    FROM ChatMember cm
+                    WHERE cm.AccountId IN ({0}, {1})
+                    GROUP BY cm.ChatId
+                    HAVING COUNT(DISTINCT cm.AccountId) = 2 AND COUNT(*) = 2
+                ) t ON pc.ChatId = t.ChatId
+            ";
             chat = _context.PrivateChat
-                .Join(_context.ChatMember,
-                    c => c.ChatId,
-                    cm => cm.ChatId,
-                    (c, cm) => new { Chat = c, ChatMember = cm })
-                .Where(x => x.ChatMember.AccountId == message.ToAccountId || x.ChatMember.AccountId == userId)
-                .GroupBy(x => x.Chat.ChatId)
-                .Where(g => g.Select(x => x.ChatMember.AccountId).Distinct().Count() == 2)
-                .Select(g => g.First().Chat)
-                .FirstOrDefault()!;
+                .FromSqlRaw(sql, userId, message.ToAccountId)
+                .AsEnumerable()
+                .FirstOrDefault();
 
             if (chat == null) {
                 chat = ChatFactory.CreateChat("private");
-                chat.SetTarget([message.ListingId.Value]);
+                chat.SetTarget([message.ToAccountId.Value]);
                 _context.Chat.Add(chat);
                 _context.SaveChanges();
 
@@ -197,8 +201,8 @@ public class ChatController : Controller
                     .ToList().Distinct().ToDictionary(x => x.Id);
 
 
-            var accountIds = messagesTask.Where(x => x.ChatId == lc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
-            var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
+            // var accountIds = messagesTask.Where(x => x.ChatId == lc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
+            var accountDict = accounts.Where(x => accountIdsTask.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
 
             cm = new ChatModel {
@@ -208,9 +212,9 @@ public class ChatController : Controller
                 Messages = messagesTask.Where(x => x.ChatId == lc.ChatId).OrderBy(x => x.CreatedAt).ToList()
             };
         } else if (chat is PrivateChat pc) {
-            var accountIds = messagesTask.Where(x => x.ChatId == pc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
-            var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
-            pc.AccountIds = accountIds;
+            // var accountIds = messagesTask.Where(x => x.ChatId == pc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
+            var accountDict = accounts.Where(x => accountIdsTask.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
+            pc.AccountIds = accountIdsTask;
 
             cm = new ChatModel {
                 Chat = pc,
@@ -245,7 +249,7 @@ public class ChatController : Controller
             if (messages.Count == 0) {
                 continue;
             }
-            var accountIds = messagesTask.Where(x => x.ChatId == c.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
+            var accountIds = _context.ChatMember.Where(cm => cm.ChatId == c.ChatId).Select(x => x.AccountId).ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
             var cm = new ChatModel {
@@ -263,7 +267,7 @@ public class ChatController : Controller
             if (messages.Count == 0) {
                 continue;
             }
-            var accountIds = messagesTask.Where(x => x.ChatId == pc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
+            var accountIds = _context.ChatMember.Where(cm => cm.ChatId == pc.ChatId).Select(x => x.AccountId).ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
             pc.AccountIds = accountIds;
