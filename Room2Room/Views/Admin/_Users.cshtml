@@ -105,6 +105,7 @@
                                     Reactivate
                                 </button>
                             }
+                            <a class="btn btn-outline-secondary btn-sm" onclick="openUserChat(@user.Id)"> Chat</a>
                         </div>
                     </td>
                 </tr>
@@ -116,3 +117,24 @@ else
 {
     <p>No users found.</p>
 }
+
+<div class="modal fade" id="newChatModal" tabindex="-1" aria-labelledby="newChatModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="newChatModalLabel">New Chat</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+            <label for="newChatMessageInput" class="form-label">Your message:</label>
+            <textarea class="form-control" id="newChatMessageInput"  rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" onclick="sendFirstMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
