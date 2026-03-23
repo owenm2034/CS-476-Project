@@ -114,6 +114,25 @@ END
 ELSE
     PRINT('ItemReport already created :)');
 
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UserReport')
+BEGIN
+CREATE TABLE UserReport(
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ReportedAccountId INT NOT NULL,
+    ReportedByAccountId INT NOT NULL,
+    Reason NVARCHAR(500) NOT NULL,
+    CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    Resolution NVARCHAR(500) NULL,
+    ResolvedAt DATETIME2 NULL,
+    CONSTRAINT FK_UserReport_Accounts_ReportedAccountId FOREIGN KEY (ReportedAccountId) REFERENCES Accounts(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_UserReport_Accounts_ReportedByAccountId FOREIGN KEY (ReportedByAccountId) REFERENCES Accounts(Id) ON DELETE NO ACTION
+);
+print ('UserReport created')
+END
+ELSE
+    PRINT('UserReport already created :)');
+
+
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Watchlist')
 BEGIN
 CREATE TABLE Watchlist(

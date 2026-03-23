@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Room2Room.Models.NotificationPreferences;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Room2Room.Controllers;
 
@@ -609,4 +610,20 @@ public class AccountController : Controller
         model.SuccessMessage = successMessage;
         return PartialView("_Manage", model);
     }
+    [Authorize]
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Report(int accountId, string reason)
+{
+    int reporterId = int.Parse(User.FindFirstValue("AccountId") ?? "0");
+    _context.UserReports.Add(new UserReport
+    {
+        ReportedAccountId = accountId,
+        ReportedByAccountId = reporterId,
+        Reason = reason ?? "",
+        CreatedAt = DateTime.Now
+    });
+    await _context.SaveChangesAsync();
+    return Json(new { success = true });
+}
 }

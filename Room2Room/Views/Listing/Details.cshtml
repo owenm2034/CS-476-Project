@@ -460,14 +460,21 @@
                         <div class="seller-name">@sellerName</div>
                         <div class="seller-sub">Member · Room2Room</div>
                     </div>
+                    @if (User.Identity?.IsAuthenticated == true && User.FindFirst("AccountId")?.Value != Model.Listing.AccountId.ToString())
+                        {
+                            <button onclick="openUserReportModal(@Model.Listing.AccountId)" 
+                                    style="border:none; background:none; padding:0; cursor:pointer; margin-left:auto;" 
+                                    title="Report this user">
+                                <i class="bi bi-flag"></i> Report User
+                            </button>
+                        }
                 </div>
 
                 @if (Model.Listing.Status != "Sold")
                 {
                     
                     <button class="btn btn-outline-primary w-100" onclick="openItemChat(@Model.Listing.Id)">
-                    💬 Send a Message
-                    
+                    💬 Send a Message   
                     </button>
                 }
                 else
@@ -482,7 +489,7 @@
             {
                 <div class="mt-3 text-end">
                     <button onclick="openReportModal(@Model.Listing.Id)" class="btn btn-outline-danger btn-sm">
-                        🚩 Report this listing
+                        <i class="bi bi-flag"></i> Report this listing
                     </button>
                 </div>
             }
@@ -548,7 +555,33 @@
   </div>
 </div>
 
+<div class="modal fade" id="userReportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-flag"></i> Report User</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reportAccountId">
+        <div class="mb-3">
+          <label class="form-label">Reason for reporting</label>
+          <textarea class="form-control" id="userReportReason" rows="3"
+                    placeholder="e.g. harassment, spam, inappropriate behavior..."></textarea>
+        </div>
+        <div id="userReportFeedback" class="d-none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" onclick="submitUserReport()">Submit Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @section Scripts {
     <script src="~/js/watchlist.js"></script>
     <script src="~/js/report.js"></script>
+    <script src="~/js/chat.js" asp-append-version="true"></script>
+    <script src="~/js/userReport.js"></script>
 }

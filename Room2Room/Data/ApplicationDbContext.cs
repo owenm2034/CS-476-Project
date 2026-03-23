@@ -28,7 +28,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PrivateChat> PrivateChat { get; set; }
     public DbSet<ChatMessage> ChatMessage { get; set; }
     public DbSet<ChatMember> ChatMember { get; set; }
-
+    public DbSet<UserReport> UserReports { get; set; }
     public DbSet<UserNotification> UserNotifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
