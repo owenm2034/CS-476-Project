@@ -1,0 +1,65 @@
+@model IEnumerable<Room2Room.Models.Accounts.UserReport>
+
+@if (!Model.Any())
+{
+    <p class="text-muted">No user reports yet.</p>
+}
+else
+{
+    <div class="mb-3">
+        <select class="form-select w-auto" onchange="filterUserReports(this.value)">
+            <option value="all">All Reports</option>
+            <option value="unresolved">Unresolved</option>
+            <option value="resolved">Resolved</option>
+        </select>
+    </div>
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Reported User</th>
+                <th>Reported By</th>
+                <th>Reason</th>
+                <th>Date</th>
+                <th>Resolution</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var report in Model)
+            {
+                <tr id="user-report-row-@report.Id" data-resolved="@(report.Resolution != null ? "true" : "false")">
+                    <td>@report.Id</td>
+                    <td>@(report.ReportedAccount?.Username ?? $"User #{report.ReportedAccountId}")</td>
+                    <td>@(report.Reporter?.Username ?? $"User #{report.ReportedByAccountId}")</td>
+                    <td>@report.Reason</td>
+                    <td>@report.CreatedAt.ToString("MMM d, yyyy h:mm tt")</td>
+                    <td>
+                        @if (report.Resolution == null)
+                        {
+                            <div class="d-flex gap-2 align-items-start flex-column">
+                                <div class="d-flex gap-2 w-100">
+                                    <input type="text" class="form-control form-control-sm"
+                                           id="user-note-@report.Id"
+                                           placeholder="Note required">
+                                    <button class="btn btn-success btn-sm text-nowrap"
+                                            onclick="resolveUserReport(@report.Id)">
+                                        ✓ Resolve
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback d-none" id="user-note-error-@report.Id">
+                                    Please add a note before resolving.
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success mb-1">Resolved</span>
+                            <div class="text-muted small">@report.Resolution</div>
+                            <div class="text-muted small">@report.ResolvedAt?.ToString("MMM d, yyyy h:mm tt")</div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

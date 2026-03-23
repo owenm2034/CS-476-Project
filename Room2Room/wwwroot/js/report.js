@@ -37,7 +37,7 @@ function submitReport() {
 
         setTimeout(() => {
         bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
-    }, 2000);
+    }, 1500);
     })
     .catch(() => {
         feedback.textContent = 'Something went wrong. Please try again.';

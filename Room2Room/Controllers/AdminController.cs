@@ -611,4 +611,44 @@ public async Task<IActionResult> ResolveReport(int id, string resolution)
     await _context.SaveChangesAsync();
     return Ok();
 }
+
+[HttpGet]
+public async Task<IActionResult> ListUserReports()
+{
+    var reports = await _context.UserReports
+        .OrderByDescending(r => r.CreatedAt)
+        .Select(r => new UserReport
+        {
+            Id = r.Id,
+            ReportedAccountId = r.ReportedAccountId,
+            ReportedByAccountId = r.ReportedByAccountId,
+            Reason = r.Reason,
+            CreatedAt = r.CreatedAt,
+            Resolution = r.Resolution,
+            ResolvedAt = r.ResolvedAt,
+            ReportedAccount = _context.Accounts
+                .Where(a => a.Id == r.ReportedAccountId)
+                .Select(a => new Account(a.Email, a.PasswordHash, a.PasswordSalt, a.Username, a.ProfilePictureUrl, a.UniversityId) { Id = a.Id })
+                .FirstOrDefault(),
+            Reporter = _context.Accounts
+                .Where(a => a.Id == r.ReportedByAccountId)
+                .Select(a => new Account(a.Email, a.PasswordHash, a.PasswordSalt, a.Username, a.ProfilePictureUrl, a.UniversityId) { Id = a.Id })
+                .FirstOrDefault()
+        })
+        .ToListAsync();
+
+    return PartialView("_ReportedUsers", reports);
+}
+
+[HttpPost]
+public async Task<IActionResult> ResolveUserReport(int id, string resolution)
+{
+    var report = await _context.UserReports.FirstOrDefaultAsync(r => r.Id == id);
+    if (report == null) return NotFound();
+
+    report.Resolution = resolution;
+    report.ResolvedAt = DateTime.Now;
+    await _context.SaveChangesAsync();
+    return Ok();
+}
 }
