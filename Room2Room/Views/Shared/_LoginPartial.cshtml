@@ -43,10 +43,12 @@
     </script>
 
     <li class="nav-item d-flex align-items-center">
-        <img src="@(string.IsNullOrEmpty(profilePicUrl) ? "/images/default_pfp.png" : profilePicUrl)" 
-             class="rounded-circle ms-2" 
-             style="width: 35px; height: 35px; object-fit: cover; border: 1.5px solid #000;" 
-             alt="Profile">
+        <a class="nav-link p-0 ms-2" asp-controller="Profile" asp-action="Index" title="Open profile">
+            <img src="@(string.IsNullOrEmpty(profilePicUrl) ? "/images/default_pfp.png" : profilePicUrl)" 
+                 class="rounded-circle" 
+                 style="width: 35px; height: 35px; object-fit: cover; border: 1.5px solid #000;" 
+                 alt="Profile">
+        </a>
     </li>
 
     <li>
