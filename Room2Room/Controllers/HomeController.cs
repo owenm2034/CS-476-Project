@@ -29,4 +29,9 @@ public class HomeController : Controller
             new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }
         );
     }
+
+    public IActionResult HealthCheck()
+    {
+        return Ok();
+    }
 }
