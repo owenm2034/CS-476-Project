@@ -25,7 +25,7 @@ public class AccountController : Controller
     {
         _context = context;
         _emailService = emailService;
-        ConnectionString = configuration.GetConnectionString("DefaultConnection")!;
+        ConnectionString = RdsConnectionHelper.GetConnectionString() ?? configuration.GetConnectionString("DefaultConnection")!;
     }
 
     public IActionResult Index()

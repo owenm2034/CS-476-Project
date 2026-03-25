@@ -15,7 +15,7 @@ public class AnnouncementController : Controller
     public AnnouncementController(ApplicationDbContext context, IConfiguration configuration)
     {
         _context = context;
-    ConnectionString = configuration.GetConnectionString("DefaultConnection");
+    ConnectionString = RdsConnectionHelper.GetConnectionString() ?? configuration.GetConnectionString("DefaultConnection");
     }
 
     // GET: /Announcement/Active

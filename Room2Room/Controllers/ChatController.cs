@@ -16,7 +16,7 @@ public class ChatController : Controller
 
     public ChatController(ApplicationDbContext context, IConfiguration configuration)
     {
-        ConnectionString = configuration.GetConnectionString("DefaultConnection")!;
+        ConnectionString = RdsConnectionHelper.GetConnectionString() ?? configuration.GetConnectionString("DefaultConnection");
 
         var contextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer(ConnectionString)
