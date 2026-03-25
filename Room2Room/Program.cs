@@ -65,7 +65,7 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
-
+app.UseStaticFiles();
 app.MapStaticAssets();
 
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}")
