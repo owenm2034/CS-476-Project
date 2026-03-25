@@ -73,7 +73,8 @@ public class ListingController : Controller
         int accountId = int.Parse(accountIdClaim);
 
         IEnumerable<Item> items = await _listingRepository.GetItemsByAccountId(accountId);
-
+        items = items.OrderBy(x => x.Status).ThenBy(x => x.ItemName);
+        
         return View(items);
     }
 

@@ -55,14 +55,12 @@ TODO:
             @Html.LabelFor(m => (m.NotificationPreferences).RecieveEmailNotificationOnUserReported, "Receive email notifications when a user is reported.", new { @class = "form-label" })
         </div>
     }
-    @* TODO: profile picture functionality here *@
     <div class="mb-3">
         <label class="form-label">Profile Picture</label>
         <div class="mb-2">
-            @* Display the current profile picture if it exists, otherwise a default one *@
-            <img src="@(string.IsNullOrEmpty(Model.CurrentProfilePictureUrl) ? "/images/default-avatar.png" : Model.CurrentProfilePictureUrl)" 
-                class="rounded-circle" 
-                style="width: 80px; height: 80px; object-fit: cover;" />
+            <img src="@(string.IsNullOrEmpty(Model.CurrentProfilePictureUrl) ? "/images/default_pfp.png" : Model.CurrentProfilePictureUrl)" 
+                 class="rounded-circle" 
+                 style="width: 80px; height: 80px; object-fit: cover;" />
         </div>
         <input type="file" name="NewProfilePicture" class="form-control" accept="image/*" />
         <div class="form-text">Optional: Select a new photo to change your profile picture.</div>   
