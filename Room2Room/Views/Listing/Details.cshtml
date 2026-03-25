@@ -10,6 +10,8 @@
         "Sold"      => "#ef4444",
         _           => "#6b7280"
     };
+
+    var myId = int.Parse(User.FindFirst("AccountId")?.Value);
 }
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -470,18 +472,20 @@
                         }
                 </div>
 
-                @if (Model.Listing.Status != "Sold")
-                {
-                    
-                    <button class="btn btn-outline-primary w-100" onclick="openItemChat(@Model.Listing.Id)">
-                    💬 Send a Message   
-                    </button>
-                }
-                else
-                {
-                    <div style="text-align:center; color:var(--muted); font-size:14px; padding:8px 0;">
-                        This item has been sold.
-                    </div>
+                @if (Model.Listing.AccountId != myId) {
+                    @if (Model.Listing.Status != "Sold")
+                    {
+                        
+                        <button class="btn btn-outline-primary w-100" onclick="openItemChat(@Model.Listing.Id)">
+                        💬 Send a Message   
+                        </button>
+                    }
+                    else
+                    {
+                        <div style="text-align:center; color:var(--muted); font-size:14px; padding:8px 0;">
+                            This item has been sold.
+                        </div>
+                    }
                 }
             </div>
 
