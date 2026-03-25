@@ -11,12 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection")
+    RdsConnectionHelper.GetConnectionString()
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(
     options => options.UseSqlServer(connectionString)
 );
+
+#if DEBUG
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+#endif
 
 var mvcBuilder = builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
