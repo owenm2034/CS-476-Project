@@ -28,7 +28,8 @@
             name="ProfilePicture" 
             id="ProfilePicture" 
             class="form-control" 
-            accept="image/png, image/jpeg, image/jpg" />
+            accept="image/*"
+            onchange = "validateFileSize(this)" />
         <div class="form-text">Optional: Choose a square image for best results.</div>
         @Html.ValidationMessageFor(m => m.ProfilePicture, null, new { @class = "text-danger" })
     </div>
@@ -38,4 +39,14 @@
     <span class="text-danger">
         @(Model?.ErrorMessage ?? "")
     </span>
+
+    <script>
+        function validateFileSize(input) {
+            var maxSize = 1024 * 1024; // 1mb
+            if (input.files[0].size > maxSize) {
+                alert("File must smaller than 1MB.");
+                input.value = "";
+            }
+        }
+    </script>
 }
