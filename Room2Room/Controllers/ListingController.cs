@@ -345,56 +345,62 @@ public class ListingController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    public async Task<IActionResult> Details(int id)
-{
-    var item = await _context.Items
-        .Include(i => i.ItemImage)
-        .Include(i => i.Category)
-        .Select(i => new Item
-        {
-            Id = i.Id,
-            ItemName = i.ItemName,
-            ItemDescription = i.ItemDescription,
-            ItemPrice = i.ItemPrice,
-            Status = i.Status,
-            CategoryId = i.CategoryId,
-            AccountId = i.AccountId,
-            Category = i.Category,
-            ItemImage = i.ItemImage
-        })
-        .FirstOrDefaultAsync(i => i.Id == id);
+    [Authorize]
+    public async Task<IActionResult> Details(int id) {
+        int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
+        var item = await _context.Items
+            .Include(i => i.ItemImage)
+            .Include(i => i.Category)
+            .Select(i => new Item
+            {
+                Id = i.Id,
+                ItemName = i.ItemName,
+                ItemDescription = i.ItemDescription,
+                ItemPrice = i.ItemPrice,
+                Status = i.Status,
+                CategoryId = i.CategoryId,
+                AccountId = i.AccountId,
+                Category = i.Category,
+                ItemImage = i.ItemImage
+            })
+            .FirstOrDefaultAsync(i => i.Id == id);
+        
+        if (item == null)
+            return NotFound();
+
+        
+        var watchlistedItemIds = await _listingRepository.GetWatchlistedItemIdsAsync(userId);
+        item.InWatchlist = watchlistedItemIds.Contains(item.Id);
+
     
-    if (item == null)
-        return NotFound();
- 
-    var seller = await _context.Accounts.FindAsync(item.AccountId);
- 
-    var vm = new ListingDetail
-{
-        Listing = item,
-        SellerName = seller?.Username ?? "Unknown",
-        SellerEmail = seller?.Email ?? "",
-        AllImages = item.ItemImage ?? new List<ItemImage>()
-    };
+        var seller = await _context.Accounts.FindAsync(item.AccountId);
+    
+        var vm = new ListingDetail
+        {
+            Listing = item,
+            SellerName = seller?.Username ?? "Unknown",
+            SellerEmail = seller?.Email ?? "",
+            AllImages = item.ItemImage ?? new List<ItemImage>()
+        };
 
-return View(vm);
-}
+    return View(vm);
+    }
 
-[Authorize]
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Report(int itemId, string reason)
-{
-    int accountId = int.Parse(User.FindFirstValue("AccountId") ?? "0");
-    _context.ItemReports.Add(new ItemReport
+    [Authorize]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Report(int itemId, string reason)
     {
-        ItemId = itemId,
-        ReportedByAccountId = accountId,
-        Reason = reason ?? "",
-        CreatedAt = DateTime.Now
-    });
-    await _context.SaveChangesAsync();
-    return Json(new { success = true });
-}
+        int accountId = int.Parse(User.FindFirstValue("AccountId") ?? "0");
+        _context.ItemReports.Add(new ItemReport
+        {
+            ItemId = itemId,
+            ReportedByAccountId = accountId,
+            Reason = reason ?? "",
+            CreatedAt = DateTime.Now
+        });
+        await _context.SaveChangesAsync();
+        return Json(new { success = true });
+    }
 
 }

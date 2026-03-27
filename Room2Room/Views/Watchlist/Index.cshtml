@@ -22,7 +22,7 @@
         </div>
 
         <div class="watch-details">
-            <h3>@item.ItemName</h3>
+            <a asp-controller="Listing" asp-action="Details" asp-route-id="@item.ItemId"><h3>@item.ItemName</h3></a>
             @if (item.IsDeleted)
             {
                 <div class="alert alert-warning">Sorry! This item is no longer available</div>
