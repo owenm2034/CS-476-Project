@@ -15,8 +15,10 @@ public class EmailService : IEmailService
     {
         _settings = settings.Value;
         _httpClient = httpClientFactory.CreateClient();
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", _settings.ApiKey);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Bearer",
+            _settings.ApiKey
+        );
     }
 
     public async Task SendWelcomeEmailAsync(string toEmail, string username)
@@ -43,14 +45,27 @@ public class EmailService : IEmailService
                 "
         };
 
-        var json = JsonSerializer.Serialize(payload);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
-        var responseBody = await response.Content.ReadAsStringAsync();
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
+        }
+        catch (System.Exception)
+        {
+            // swallow resend ex
+        }
     }
 
-    public async Task SendPriceDropEmailAsync(string toEmail, string username, string itemName, double oldPrice, double newPrice)
+    public async Task SendPriceDropEmailAsync(
+        string toEmail,
+        string username,
+        string itemName,
+        double oldPrice,
+        double newPrice
+    )
     {
         var payload = new
         {
@@ -109,14 +124,26 @@ public class EmailService : IEmailService
             </div>"
         };
 
-        var json = JsonSerializer.Serialize(payload);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
-        response.EnsureSuccessStatusCode();
-
+        try
+        {
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
+            response.EnsureSuccessStatusCode();
+        }
+        catch (System.Exception)
+        {
+            // swallow ex
+        }
     }
 
-    public async Task SendStatusChangeEmailAsync(string toEmail, string username, string itemName, string oldStatus, string newStatus)
+    public async Task SendStatusChangeEmailAsync(
+        string toEmail,
+        string username,
+        string itemName,
+        string oldStatus,
+        string newStatus
+    )
     {
         var payload = new
         {
@@ -175,20 +202,32 @@ public class EmailService : IEmailService
             </div>"
         };
 
-        var json = JsonSerializer.Serialize(payload);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
-        var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
-        response.EnsureSuccessStatusCode();
-
+        try
+        {
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
+            response.EnsureSuccessStatusCode();
+        }
+        catch (System.Exception)
+        {
+            // swallow ex
+        }
     }
-public async Task SendUserReportEmailAsync(string toEmail, string reportedUsername, string reporterUsername, string reason)
-{
-    var payload = new
+
+    public async Task SendUserReportEmailAsync(
+        string toEmail,
+        string reportedUsername,
+        string reporterUsername,
+        string reason
+    )
     {
-        from = $"{_settings.FromName} <{_settings.FromEmail}>",
-        to = new[] { toEmail },
-        subject = $"User Reported: {reportedUsername}",
-        html = $@"
+        var payload = new
+        {
+            from = $"{_settings.FromName} <{_settings.FromEmail}>",
+            to = new[] { toEmail },
+            subject = $"User Reported: {reportedUsername}",
+            html = $@"
         <div style=""margin:0;padding:0;background:#f4f4f4;"">
         <table width=""100%"" cellpadding=""0"" cellspacing=""0"" border=""0"">
             <tr>
@@ -245,11 +284,18 @@ public async Task SendUserReportEmailAsync(string toEmail, string reportedUserna
             </tr>
         </table>
         </div>"
-    };
+        };
 
-    var json = JsonSerializer.Serialize(payload);
-    var content = new StringContent(json, Encoding.UTF8, "application/json");
-    var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
-    response.EnsureSuccessStatusCode();
-}
+        try
+        {
+            var json = JsonSerializer.Serialize(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("https://api.resend.com/emails", content);
+            response.EnsureSuccessStatusCode();
+        }
+        catch (System.Exception)
+        {
+            // swallow ex
+        }
+    }
 }
