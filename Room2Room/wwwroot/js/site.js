@@ -75,6 +75,14 @@ async function sendChat(chatId) {
 
 async function pollChats() {
     var chatContainers = document.getElementsByClassName("chat-message-container")
+    var fixFocus = false;
+
+    const el = document.activeElement;
+
+    if (el && el.classList.contains('chat-box-for-chat-input')) {
+        // we got an active chat box
+        fixFocus = true;
+    }
 
     const res = await fetch('/Chat/GetNewMessages?since=' + lastUpdated, {
         method: 'GET',
@@ -109,6 +117,10 @@ async function pollChats() {
         const el = target.querySelector(".chat-box-for-chat");
         target.appendChild(el);
         target.scrollTop = target.scrollHeight;
+    }
+
+    if(fixFocus) {
+        el.focus();
     }
 
     lastUpdated = new Date().toISOString();
