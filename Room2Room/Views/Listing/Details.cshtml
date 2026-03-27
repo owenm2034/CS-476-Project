@@ -431,7 +431,13 @@
         <div class="detail-right">
             <span class="listing-category">@(Model.Listing.Category?.CategoryName ?? Model.Listing.CategoryName ?? "Item")</span>
 
-            <h1 class="listing-title">@Model.Listing.ItemName</h1>
+            <div style="display:flex; flex-direction: row; gap: 10px; align-items: first baseline;">
+                <h1 class="listing-title">@Model.Listing.ItemName</h1>
+                <button class="watchlist-heart" data-item-id="@Model.Listing.Id"
+                    style="border: none; background: none; padding: 0px; cursor: pointer;">
+                    <i class="bi @(Model.Listing.InWatchlist ? "bi-heart-fill" : "bi-heart")" style="font-size: 2rem;"></i>
+                </button>
+            </div>
 
             <div class="listing-meta-row">
                 <span class="status-badge" style="background: @statusColor;">@Model.Listing.Status</span>
