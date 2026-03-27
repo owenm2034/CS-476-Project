@@ -39,7 +39,7 @@ TODO:
         @Html.ValidationMessageFor(m => m.Password, null, new { @class = "text-danger" })
     </div>
 
-     <div class="mb-3">
+     <div style="display: none" class="mb-3">
         @Html.CheckBoxFor(m => m.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved)
         @Html.LabelFor(m => m.NotificationPreferences.RecieveEmailNotificationOnChatMessageRecieved, "Receive email notifications for new chat messages.", new { @class = "form-label" })
     </div>
