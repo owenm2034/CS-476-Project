@@ -12,17 +12,17 @@ namespace Room2Room.Services.Observers
         {
             foreach (var observer in observers)
             {
-                Attach(observer);
+                Register(observer);
             }
         }
 
-        public void Attach(IItemObserver observer)
+        public void Register(IItemObserver observer)
         {
             //Console.WriteLine($"Attaching observer: {observer.GetType().Name}");
             _observers.Add(observer);
         }
 
-        public void Detach(IItemObserver observer)
+        public void Unregister(IItemObserver observer)
         {
             _observers.Remove(observer);
             //Console.WriteLine($"Detaching observer: {observer.GetType().Name}");
