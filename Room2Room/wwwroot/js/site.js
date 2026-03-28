@@ -56,6 +56,8 @@ async function sendChat(chatId) {
     formData.append('message.ChatId', chatId);
     formData.append('message.Message', message);
 
+    // console.log((new Date(Date.now())).toString() + " Sending message: " + message + " to chat Id:" + chatId)
+
     const res = await fetch('/Chat/SendMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -116,6 +118,7 @@ async function pollChats() {
 
         const el = target.querySelector(".chat-box-for-chat");
         target.appendChild(el);
+        // console.log((new Date(Date.now())).toString() + " New chat added. Element HTML:" + el.outerHTML)
         target.scrollTop = target.scrollHeight;
     }
 

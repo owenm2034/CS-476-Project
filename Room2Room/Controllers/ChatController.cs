@@ -42,7 +42,6 @@ public class ChatController : Controller
     [HttpGet]
     public IActionResult GetNewMessages(DateTime since) {
         // get new chatModels since the supllied date time. Return this object, selectively update the messages ONLY. this solves all the poling issues
-        since = since.ToUniversalTime().AddHours(-6); // convert to regina time
         int userId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
 
         var chatIds = _context.ChatMember.Where(x => x.AccountId == userId).Select(x => x.ChatId).ToList();
@@ -57,7 +56,7 @@ public class ChatController : Controller
 
         IEnumerable<ListingChat> listingChats = chats.Where(x => x is ListingChat).Select(x => x as ListingChat);
         IEnumerable<PrivateChat> privateChats = chats.Where(x => x is PrivateChat).Select(x => x as PrivateChat);
-        
+
         Dictionary<int, Item> itemIdToItemDict =
             _context.Items.Where(x => listingChats.Select(x => x.ListingId).ToList().Contains(x.Id))
                 .ToList().Distinct().ToDictionary(x => x.Id);
@@ -66,9 +65,17 @@ public class ChatController : Controller
         foreach (ListingChat c in listingChats) {
             var messages = messagesTask.Where(x => x.ChatId == c.ChatId).OrderBy(x => x.CreatedAt).ToList();
 
+
+
             if (messages.Count == 0) {
                 continue;
             }
+
+            // foreach(var newMessage in messages) {
+            //     // newMessage.CreatedAt = newMessage.CreatedAt.AddHours(-6);
+            //     System.Console.WriteLine($"Sending Chat Message to User. {DateTime.Now}; ChatId {newMessage.ChatId}; Msg: {newMessage.Message}, FromId: {newMessage.FromAccountId}; RequestingId: {userId}");
+            // }
+
             var accountIds = messagesTask.Where(x => x.ChatId == c.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
@@ -87,6 +94,12 @@ public class ChatController : Controller
             if (messages.Count == 0) {
                 continue;
             }
+
+            // foreach(var newMessage in messages) {
+            //     // newMessage.CreatedAt = newMessage.CreatedAt.AddHours(-6);
+            //     System.Console.WriteLine($"Sending Chat Message to User. {DateTime.Now}; ChatId {newMessage.ChatId}; Msg: {newMessage.Message}, FromId: {newMessage.FromAccountId}; RequestingId: {userId}");
+            // }
+
             var accountIds = messagesTask.Where(x => x.ChatId == pc.ChatId).Select(x => x.FromAccountId).ToList().Distinct().ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
@@ -185,10 +198,11 @@ public class ChatController : Controller
         newMessage.FromAccountId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == "AccountId")?.Value ?? "0");
         newMessage.CreatedAt = DateTime.Now;
         newMessage.ChatId = chat.ChatId;
-        
+
         _context.Add(newMessage);
         _context.SaveChanges();
 
+        // System.Console.WriteLine($"Chat Message Recieved: {DateTime.Now}; ChatId {newMessage.ChatId}; Msg: {newMessage.Message}, FromId: {newMessage.FromAccountId}");
 
         var messagesTask = _context.ChatMessage.Where(x => x.ChatId == newMessage.ChatId).ToList();
         var accountIdsTask = _context.ChatMember.Where(x => x.ChatId == newMessage.ChatId).Select(x => x.AccountId).ToList();
@@ -252,6 +266,11 @@ public class ChatController : Controller
             var accountIds = _context.ChatMember.Where(cm => cm.ChatId == c.ChatId).Select(x => x.AccountId).ToList();
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
+            foreach(var m in messages)
+            {
+                m.CreatedAt = m.CreatedAt.AddHours(-6);
+            }
+
             var cm = new ChatModel {
                 Chat = c,
                 ChatName = itemIdToItemDict.GetValueOrDefault(c.ListingId)?.ItemName,
@@ -271,6 +290,11 @@ public class ChatController : Controller
             var accountDict = accounts.Where(x => accountIds.Contains(x.Id)).ToDictionary(x => x.Id, x => x.Username);
 
             pc.AccountIds = accountIds;
+
+            foreach(var m in messages)
+            {
+                m.CreatedAt = m.CreatedAt.AddHours(-6);
+            }
 
             var cm = new ChatModel {
                 Chat = pc,
