@@ -39,7 +39,14 @@ else
                     <td>
                         @if (report.Resolution == null)
                         {
-                            <div class="d-flex gap-2 align-items-start flex-column">
+                            <div class="d-flex gap-2 align-items-start flex-row">
+                                <a asp-controller="Listing"
+                                    asp-action="Edit"
+                                    asp-route-id="@report.ItemId"
+                                    asp-route-returnTo="/Admin"
+                                    class="btn btn-warning btn-sm">
+                                        Edit
+                                </a>
                                 <div class="d-flex gap-2 w-100">
                                     <input type="text" class="form-control form-control-sm"
                                            id="note-@report.Id"

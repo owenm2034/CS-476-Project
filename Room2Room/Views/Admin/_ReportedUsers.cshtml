@@ -36,7 +36,14 @@ else
                     <td>
                         @if (report.Resolution == null)
                         {
-                            <div class="d-flex gap-2 align-items-start flex-column">
+                            <div class="d-flex gap-2 align-items-start flex-row">
+                                <a class="btn btn-warning btn-sm"
+                                    asp-controller="Admin"
+                                    asp-action="EditUser"
+                                    asp-route-id="@report.ReportedAccountId">
+                                        Edit
+                                </a>
+
                                 <div class="d-flex gap-2 w-100">
                                     <input type="text" class="form-control form-control-sm"
                                            id="user-note-@report.Id"
