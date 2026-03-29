@@ -7,16 +7,19 @@
     <div class="mb-3">
         <label class="form-label">Title</label>
         <input asp-for="ItemName" class="form-control" />
+        <span asp-validation-for="ItemName" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Description</label>
         <textarea asp-for="ItemDescription" class="form-control"></textarea>
+        <span asp-validation-for="ItemDescription" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Price</label>
         <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
@@ -32,7 +35,7 @@
 
     <div class="mb-3">
         <label class="form-label">Images</label>
-        <input asp-for="Images" type="file" class="form-control" multiple />
+        <input asp-for="Images" type="file" accept="image/*" class="form-control" multiple />
     </div>
 
     <button type="submit" class="btn btn-success">Post</button>

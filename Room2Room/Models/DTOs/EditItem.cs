@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Room2Room.Models.DTOs
 {
     public class EditItem
@@ -5,6 +7,7 @@ namespace Room2Room.Models.DTOs
         public int Id { get; set; }
         public string ItemName { get; set; } = "";
         public string ItemDescription { get; set; } = "";
+        [Range(typeof(decimal), "0", "10000")]
         public double Price { get; set; }
         public int CategoryId { get; set; }
         public string Status { get; set; } = "Available";
