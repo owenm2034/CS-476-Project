@@ -65,7 +65,7 @@
             @foreach (var item in Model.Items)
             {
                 <tr>
-                    <td>@item.ItemName</td>
+                    <td><a asp-controller="Listing" asp-action="Details" asp-route-id="@item.Id">@item.ItemName</a></td>
                     <td>@item.CategoryName</td>
                     <td>$@item.ItemPrice</td>
                     <td>@item.UniversityName</td>
