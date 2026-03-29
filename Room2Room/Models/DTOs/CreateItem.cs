@@ -6,7 +6,7 @@ namespace Room2Room.Models.DTOs
     {
         public string ItemName { get; set; }
         public string ItemDescription { get; set; }
-        [Range(typeof(decimal), "0", "10000")]
+        [Range(typeof(double), "0", "10000")]
         public double Price { get; set; }
         public int CategoryId { get; set; }
 
