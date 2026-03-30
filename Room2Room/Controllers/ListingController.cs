@@ -48,7 +48,7 @@ public class ListingController : Controller
         }
 
         // exclude the listings this account made from the page
-        items = items.Where(x => x.AccountId != userId).ToList();
+        items = items.Where(x => x.AccountId != userId).Where(x => x.Status != "Sold").ToList();
 
         ItemDisplayModel itemModel = new ItemDisplayModel
         {
